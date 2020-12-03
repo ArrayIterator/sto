@@ -37,7 +37,7 @@ function create_auth_hash(int $userId, string $type)
     }
 
     $uuid = Uuid::generate();
-    $hash = create_security_hash($userId .'|'. $type, $uuid);
+    $hash = create_security_hash($userId . '|' . $type, $uuid);
     $default = [
         'a' => $user->getId(),
         'u' => $uuid,
@@ -81,8 +81,8 @@ function validate_json_hash(string $data)
         return false;
     }
 
-    $hash = create_security_hash($data['a'].'|'.$data['t'], $data['u']);
-    if (! RandomToken::verify($data['h'], $hash)) {
+    $hash = create_security_hash($data['a'] . '|' . $data['t'], $data['u']);
+    if (!RandomToken::verify($data['h'], $hash)) {
         return false;
     }
 

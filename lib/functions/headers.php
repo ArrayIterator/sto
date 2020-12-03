@@ -1,4 +1,92 @@
 <?php
+/**
+ * @return string[]
+ */
+function get_status_header_list(): array
+{
+    static $headers;
+    if ($headers) {
+        return $headers;
+    }
+    $headers = [
+        100 => 'Continue',
+        101 => 'Switching Protocols',
+        102 => 'Processing',
+        103 => 'Early Hints',
+
+        200 => 'OK',
+        201 => 'Created',
+        202 => 'Accepted',
+        203 => 'Non-Authoritative Information',
+        204 => 'No Content',
+        205 => 'Reset Content',
+        206 => 'Partial Content',
+        207 => 'Multi-Status',
+        226 => 'IM Used',
+
+        300 => 'Multiple Choices',
+        301 => 'Moved Permanently',
+        302 => 'Found',
+        303 => 'See Other',
+        304 => 'Not Modified',
+        305 => 'Use Proxy',
+        306 => 'Reserved',
+        307 => 'Temporary Redirect',
+        308 => 'Permanent Redirect',
+
+        400 => 'Bad Request',
+        401 => 'Unauthorized',
+        402 => 'Payment Required',
+        403 => 'Forbidden',
+        404 => 'Not Found',
+        405 => 'Method Not Allowed',
+        406 => 'Not Acceptable',
+        407 => 'Proxy Authentication Required',
+        408 => 'Request Timeout',
+        409 => 'Conflict',
+        410 => 'Gone',
+        411 => 'Length Required',
+        412 => 'Precondition Failed',
+        413 => 'Request Entity Too Large',
+        414 => 'Request-URI Too Long',
+        415 => 'Unsupported Media Type',
+        416 => 'Requested Range Not Satisfiable',
+        417 => 'Expectation Failed',
+        418 => 'I\'m a teapot',
+        421 => 'Misdirected Request',
+        422 => 'Unprocessable Entity',
+        423 => 'Locked',
+        424 => 'Failed Dependency',
+        426 => 'Upgrade Required',
+        428 => 'Precondition Required',
+        429 => 'Too Many Requests',
+        431 => 'Request Header Fields Too Large',
+        451 => 'Unavailable For Legal Reasons',
+
+        500 => 'Internal Server Error',
+        501 => 'Not Implemented',
+        502 => 'Bad Gateway',
+        503 => 'Service Unavailable',
+        504 => 'Gateway Timeout',
+        505 => 'HTTP Version Not Supported',
+        506 => 'Variant Also Negotiates',
+        507 => 'Insufficient Storage',
+        510 => 'Not Extended',
+        511 => 'Network Authentication Required',
+    ];
+
+    return $headers;
+}
+
+/**
+ * @param int $code
+ * @return string
+ */
+function get_status_header(int $code): string
+{
+    $code = abs(intval($code));
+    return get_status_header_list()[$code] ?? '';
+}
 
 function sanitize_header_name(string $headerName)
 {
@@ -17,7 +105,7 @@ function normalize_header_name(string $headerName)
 /**
  * @return array
  */
-function get_all_headers() : array
+function get_all_headers(): array
 {
     static $headers = [];
     if (!empty($headers)) {
@@ -25,9 +113,9 @@ function get_all_headers() : array
     }
     $server = server_environment();
     $copy_server = [
-        'CONTENT_TYPE'   => 'Content-Type',
+        'CONTENT_TYPE' => 'Content-Type',
         'CONTENT_LENGTH' => 'Content-Length',
-        'CONTENT_MD5'    => 'Content-Md5',
+        'CONTENT_MD5' => 'Content-Md5',
     ];
 
     foreach ($server as $key => $value) {
@@ -63,7 +151,7 @@ function get_all_headers() : array
 function get_header(string $name)
 {
     $name = sanitize_header_name($name);
-    return get_all_headers()[$name]??null;
+    return get_all_headers()[$name] ?? null;
 }
 
 /**
@@ -81,13 +169,17 @@ function set_header(string $headerName, string $headerValue, int $httpCode = nul
     $headerValue = trim($headerValue);
     $header = hook_apply(
         'set_header',
-        sprintf('%s: %s', $headerName, $headerValue),
+        trim(ltrim(sprintf('%s: %s', $headerName, $headerValue), ': ')),
         $headerName,
         $headerValue,
         $httpCode
     );
-    $replaceHeader = (bool) hook_apply('replace_header', true, $headerName, $headerValue, $httpCode);
-    header($header, $replaceHeader, $httpCode);
+    $replaceHeader = (bool)hook_apply('replace_header', true, $headerName, $headerValue, $httpCode);
+    $args = [$header, $replaceHeader];
+    if (is_int($httpCode)) {
+        $args[] = $httpCode;
+    }
+    header(...$args);
 }
 
 /**
@@ -101,9 +193,38 @@ function remove_header(string $headerName, bool $normalize = true)
 }
 
 /**
+ * @param int $code
+ * @param string|null $description
+ */
+function set_status_header(int $code, string $description = null)
+{
+    $description = !$description || trim($description) === ''
+        ? get_status_header($code)
+        : trim($description);
+
+    if ($description === '') {
+        return;
+    }
+
+    $protocol = get_server_protocol();
+    $status_header = sprintf('%s %d %s', $protocol, $code, $description);
+    $status_header = hook_apply(
+        'status_header',
+        $status_header,
+        $code,
+        $description,
+        $protocol
+    );
+
+    if (!headers_sent()) {
+        header($status_header, true, $code);
+    }
+}
+
+/**
  * @return false
  */
-function is_json_request() : bool
+function is_json_request(): bool
 {
     $header = get_header('Content-Type');
     if (!is_string($header)) {
@@ -113,7 +234,7 @@ function is_json_request() : bool
     return preg_match('~^application/json~i', trim($header)) !== false;
 }
 
-function is_ajax_request() : bool
+function is_ajax_request(): bool
 {
     $header = get_header('X-Requested-With');
     if (!is_string($header)) {
@@ -128,4 +249,12 @@ function is_ajax_request() : bool
 function get_referer()
 {
     return get_header('Referer');
+}
+
+/**
+ * @return string|null
+ */
+function get_user_agent()
+{
+    return get_header('User-Agent');
 }

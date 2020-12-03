@@ -1,10 +1,20 @@
 <?php
 /**
+ * @return array|null
+ */
+function &student_global()
+{
+    static $student = null;
+
+    return $student;
+}
+
+/**
  * @return array|false
  */
 function get_current_student_data()
 {
-    static $student = null;
+    $student =& student_global();
     if ($student !== null) {
         return $student;
     }
@@ -76,10 +86,26 @@ function is_student()
     return !!get_current_student_data();
 }
 
+/**
+ * @return bool
+ */
 function is_allow_access_admin()
 {
     $superVisor = get_current_supervisor_data();
-    return (bool) hook_apply(
+    return (bool)hook_apply(
+        'allow_access_admin',
+        $superVisor ? $superVisor['disallow_admin'] : false,
+        $superVisor
+    );
+}
+
+/**
+ * @return bool
+ */
+function is_allow_access_dashboard()
+{
+    $superVisor = get_current_student_data();
+    return (bool)hook_apply(
         'allow_access_admin',
         $superVisor ? $superVisor['disallow_admin'] : false,
         $superVisor

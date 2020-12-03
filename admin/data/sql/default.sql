@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 03, 2020 at 10:57 AM
+-- Generation Time: Dec 03, 2020 at 01:53 PM
 -- Server version: 10.4.10-MariaDB
 -- PHP Version: 7.4.1
 
@@ -261,6 +261,42 @@ CREATE TABLE `sto_sites` (
 
 INSERT INTO `sto_sites` (`id`, `name`, `host`, `additional_host`, `token`, `status`, `metadata`) VALUES
 (1, 'Default System Wide', '', NULL, NULL, 'active', NULL);
+
+--
+-- Triggers `sto_sites`
+--
+DROP TRIGGER IF EXISTS `PREVENT_DELETE_DEFAULT_SITE`;
+DELIMITER $$
+CREATE TRIGGER `PREVENT_DELETE_DEFAULT_SITE` BEFORE DELETE ON `sto_sites` FOR EACH ROW BEGIN
+    IF old.id = 1
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Could not delete default site record with id = 1';
+    END IF;
+END
+$$
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `PREVENT_UPDATE_STATUS_DEFAULT_SITE`;
+DELIMITER $$
+CREATE TRIGGER `PREVENT_UPDATE_STATUS_DEFAULT_SITE`
+    BEFORE UPDATE ON `sto_sites`
+    FOR EACH ROW BEGIN
+    IF (old.id = 1) THEN
+        IF (new.id != 1)
+        THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Could not update default site id record with id = 1';
+        END IF;
+        IF (new.status != 'active') OR (new.status IS NULL)
+        THEN
+            SET new.status = 'active';
+        END IF;
+        IF (TRIM(new.name) = '') OR (new.name IS NULL)
+        THEN
+            SET new.name = 'Default System Wide';
+        END IF;
+    END IF;
+END
+$$ DELIMITER ;
 
 -- --------------------------------------------------------
 

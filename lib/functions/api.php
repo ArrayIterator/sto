@@ -1,4 +1,9 @@
 <?php
+/**
+ * @param mixed $data
+ * @param int $options
+ * @return false|string
+ */
 function json_success($data, $options = JSON_UNESCAPED_SLASHES)
 {
     if (!is_int($options)) {
@@ -8,6 +13,12 @@ function json_success($data, $options = JSON_UNESCAPED_SLASHES)
     return json_encode(hook_apply('json_success', ['data' => $data]), $options);
 }
 
+/**
+ * @param string $message
+ * @param mixed $data
+ * @param int $options
+ * @return false|string
+ */
 function json_error(string $message, $data = null, $options = JSON_UNESCAPED_SLASHES)
 {
     if (!is_int($options)) {
@@ -28,7 +39,7 @@ function json_error(string $message, $data = null, $options = JSON_UNESCAPED_SLA
     }
 
     $response = hook_apply('json_error', $response, $message, $data);
-    $options = (int) hook_apply('json_options', $options, $response, $message, $data);
+    $options = (int)hook_apply('json_options', $options, $response, $message, $data);
     return json_encode($response, $options);
 }
 
@@ -64,25 +75,28 @@ function json(int $code, ...$data)
 /**
  * @return string
  */
-function get_route_api_path() : string
+function get_route_api_path(): string
 {
-    $route = (string) hook_apply('route_api_path', DEFAULT_API_PATH);
+    $route = (string)hook_apply('route_api_path', DEFAULT_API_PATH);
     if (strpos($route, '?')) {
         $route = preg_replace('~(\?.*)$~', '', $route);
     }
     $route = preg_replace('~[\\\\/]+~', '/', $route);
     // only valid path
-    return '/'. trim($route, '/');
+    return '/' . trim($route, '/');
 }
 
-function is_route_api() : bool
+/**
+ * @return bool
+ */
+function is_route_api(): bool
 {
     if (defined('ROUTE_API')) {
-        return (bool) hook_apply('is_route_api', ROUTE_API, null);
+        return (bool)hook_apply('is_route_api', ROUTE_API, null);
     }
 
     $path = preg_quote(get_route_api_path(), '~');
-    define('ROUTE_API', (bool) preg_match("~^{$path}(/.*)?$~", request_uri()));
+    define('ROUTE_API', (bool)preg_match("~^{$path}(/.*)?$~", request_uri()));
     return hook_apply(
         'is_route_api',
         ROUTE_API,

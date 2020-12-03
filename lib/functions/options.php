@@ -12,7 +12,7 @@ use ArrayIterator\ArrayGetter;
 function get_option(string $name, $default = null, int $siteId = null, bool $usePrevious = true)
 {
     $data = option()->value($name, $default, $siteId, $usePrevious);
-    return hook_apply('options_'.$name, $data, $name, $default, $siteId);
+    return hook_apply('options_' . $name, $data, $name, $default, $siteId);
 }
 
 /**

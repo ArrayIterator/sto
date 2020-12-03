@@ -2,6 +2,7 @@
 require_once __DIR__.'/constant.php';
 require_once __DIR__.'/functions/meta.php';
 require_once __DIR__.'/functions/environment.php';
+require_once __DIR__.'/functions/software.php';
 require_once __DIR__.'/functions/filters.php';
 require_once __DIR__.'/functions/handler.php';
 require_once __DIR__.'/functions/headers.php';
@@ -14,6 +15,7 @@ require_once __DIR__.'/functions/filters.php';
 require_once __DIR__.'/functions/translations.php';
 require_once __DIR__.'/functions/route.php';
 require_once __DIR__.'/functions/calendar.php';
+require_once __DIR__.'/functions/admin.environment.php';
 
 if (ob_get_level() < 1) {
     ob_start();
