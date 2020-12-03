@@ -32,32 +32,47 @@ function json_error(string $message, $data = null, $options = JSON_UNESCAPED_SLA
     return json_encode($response, $options);
 }
 
+/**
+ * @param string $data
+ * @param int $code
+ */
 function serve_json_data(string $data, int $code = 200)
 {
     clean_buffer();
     hook_run('before_serve_json_data', $data, $code);
     set_header(
         'Content-Type',
-        hook_apply('serve_json_header', 'application/json; charset=utf-8', $data, $code),
+        hook_apply('serve_json_data_header', 'application/json; charset=utf-8', $data, $code),
         $code
     );
-    echo $data;
+
+    render($data);
     hook_run('after_serve_json_data', $data, $code);
 }
 
+/**
+ * @param int $code
+ * @param mixed ...$data
+ */
 function json(int $code, ...$data)
 {
     $data = $code < 300 ? json_success(...$data) : json_error(...$data);
     serve_json_data($data, $code);
-    exit;
+    do_exit();
 }
 
+/**
+ * @return string
+ */
 function get_route_api_path() : string
 {
-    $route = hook_apply('route_api_path', '/api');
+    $route = (string) hook_apply('route_api_path', DEFAULT_API_PATH);
+    if (strpos($route, '?')) {
+        $route = preg_replace('~(\?.*)$~', '', $route);
+    }
+    $route = preg_replace('~[\\\\/]+~', '/', $route);
     // only valid path
-    $route = '/'.trim(preg_replace('~(\?.*)$~', '', $route), '/');
-    return $route;
+    return '/'. trim($route, '/');
 }
 
 function is_route_api() : bool
@@ -66,11 +81,11 @@ function is_route_api() : bool
         return (bool) hook_apply('is_route_api', ROUTE_API, null);
     }
 
-    $path = '/'.trim(get_route_api_path(), '/');
-    $path = preg_quote($path, '~');
+    $path = preg_quote(get_route_api_path(), '~');
+    define('ROUTE_API', (bool) preg_match("~^{$path}(/.*)?$~", request_uri()));
     return hook_apply(
         'is_route_api',
-        (bool) preg_match("~^/{$path}(/.*)?$~", request_uri()),
+        ROUTE_API,
         $path
     );
 }

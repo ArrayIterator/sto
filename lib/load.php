@@ -22,10 +22,17 @@ if (ob_get_level() < 1) {
 
 register_shutdown_function('shutdown_handler');
 
-if (file_exists(dirname(__DIR__).'/app.config.php')) {
-    require_once dirname(__DIR__).'/app.config.php';
-} elseif (file_exists(dirname(dirname(__DIR__)).'/app.config.php')) {
-    require_once dirname(dirname(__DIR__)).'/app.config.php';
+$configBaseName = CONFIG_BASE_FILENAME;
+$configBaseName = substr($configBaseName, -4) !== 'php'
+    ? DEFAULT_CONFIG_BASE_FILENAME
+    : $configBaseName;
+
+if (file_exists(ROOT_PATH. DS .$configBaseName)) {
+    /** @noinspection PhpIncludeInspection */
+    require_once ROOT_PATH . DS . $configBaseName;
+} elseif (file_exists(dirname(ROOT_PATH) . DS . $configBaseName)) {
+    /** @noinspection PhpIncludeInspection */
+    require_once dirname(ROOT_PATH) . DS . $configBaseName;
 } else {
     if (!defined('INSTALLATION_FILE')
         || (!INSTALLATION_FILE && basename($_SERVER['SCRIPT_FILENAME']) !== 'install.php')
@@ -36,13 +43,10 @@ if (file_exists(dirname(__DIR__).'/app.config.php')) {
             json(503, 'System Unavailable');
         }
 
-        if (!defined('ADMIN_PATH')) {
-            define('ADMIN_PATH', get_admin_path());
-        }
-
-        $adminPath = trim(ADMIN_PATH, '/');
+        defined('ADMIN_PATH') || define('ADMIN_PATH', get_scanned_admin_path());
+        $adminPath = get_admin_path();
         if (!file_exists(ROOT_PATH . '/' . $adminPath . '/install.php')) {
-            $adminPath = get_admin_path();
+            $adminPath = get_scanned_admin_path();
             if (!file_exists(ROOT_PATH . '/' . $adminPath . '/install.php')) {
                 $adminPath = null;
             }
@@ -62,15 +66,23 @@ if (file_exists(dirname(__DIR__).'/app.config.php')) {
     }
 }
 
-defined('DEBUG') || define('DEBUG', false);
 
+// DEBUG
+defined('DEBUG') || define('DEBUG', false);
 !DEBUG ? error_reporting(0) : error_reporting(~0);
 
+// MISC
 defined('TIMEZONE') && date_default_timezone_set(TIMEZONE);
+
+// DATABASE
 defined('DB_PORT') || define('DB_PORT', 3306);
 defined('DB_HOST') || define('DB_HOST', 'localhost');
-defined('ROUTE_API') || define('ROUTE_API', (bool) preg_match('~^/api(/.*)?$~', request_uri()));
-defined('DISABLE_MULTISITE') || define('DISABLE_MULTISITE', true);
+
+// PATH
+defined('ADMIN_PATH') || define('ADMIN_PATH', get_scanned_admin_path());
+defined('UPLOAD_PATH') || define('UPLOAD_PATH', 'uploads');
+
+defined('ENABLE_MULTISITE') || define('ENABLE_MULTISITE', false);
 defined('THEME_PATH') || define('THEME_PATH', 'theme');
 
 defined('COOKIE_STUDENT_NAME') || define('COOKIE_STUDENT_NAME', 'sto_student');
@@ -84,13 +96,3 @@ if (defined('COOKIE_MULTI_DOMAIN') && COOKIE_MULTI_DOMAIN) {
 } elseif (!defined('COOKIE_DOMAIN')) {
     define('COOKIE_DOMAIN', get_host());
 }
-
-//var_dump(disable_multisite());
-//var_dump(get_site_host_type());
-//var_dump(current_site_meta());
-//exit;
-//ob_get_clean();
-//ob_end_clean();
-//no_buffer();
-//print_r(ob_get_level());
-//exit;

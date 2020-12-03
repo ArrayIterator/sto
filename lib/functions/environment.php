@@ -104,6 +104,26 @@ function no_buffer()
  */
 function get_admin_path() : string
 {
+    static $adminPath = null;
+    if ($adminPath) {
+        return $adminPath;
+    }
+
+    $adminPath = ADMIN_PATH;
+    if (!is_string($adminPath)) {
+        $adminPath = get_scanned_admin_path();
+    }
+    $adminPath = trim(preg_replace('~[\\\\/]+~', '/', ADMIN_PATH, '/'))
+        ?:get_scanned_admin_path();
+
+    return $adminPath;
+}
+
+/**
+ * @return string
+ */
+function get_scanned_admin_path() : string
+{
     static $admin;
     if (is_string($admin)) {
         return $admin;
@@ -215,7 +235,7 @@ function get_home_url(string $pathUri = '')
  */
 function get_admin_url(string $pathUri = '')
 {
-    $path = sprintf('/%s/', get_admin_path());
+    $path = sprintf('/%s/', ADMIN_PATH);
     $originalPathUri = $pathUri;
     $pathUri = substr($pathUri, 0, 1) === '/'
         ? ltrim($pathUri, '/')

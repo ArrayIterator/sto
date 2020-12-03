@@ -51,3 +51,21 @@ function route_json_not_allowed_handler()
 {
     json(405, hook_apply('route_json_not_allowed', 'Method not allowed'));
 }
+
+/**
+ * @param int $code
+ */
+function do_exit(int $code = 0)
+{
+    exit($code);
+}
+
+/**
+ * @param string $data
+ */
+function render(string $data)
+{
+    hook_run('before_render');
+    echo $data;
+    hook_run('after_render');
+}

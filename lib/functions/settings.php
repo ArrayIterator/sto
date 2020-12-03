@@ -1,16 +1,16 @@
 <?php
 function get_current_site_id() : int
 {
-    if (disable_multisite()) {
+    if (!enable_multisite()) {
         return application()->getDefaultSiteId();
     }
 
     return hook_apply('current_site_id', application()->getSite()->getModelSiteId());
 }
 
-function disable_multisite() : bool
+function enable_multisite() : bool
 {
-    return (bool) hook_apply('disable_multisite', (bool) DISABLE_MULTISITE);
+    return (bool) hook_apply('enable_multisite', (bool) ENABLE_MULTISITE);
 }
 
 /**
@@ -28,8 +28,8 @@ function current_site_meta()
     }
 
     $data = $meta[$host];
-    $disableMultisite = disable_multisite();
-    if ($disableMultisite) {
+    $enableMultisite = enable_multisite();
+    if (!$enableMultisite) {
         $data = $meta[$host]?:[
             'id' => 1,
             'name' => 'Default System',
@@ -41,7 +41,7 @@ function current_site_meta()
         ];
     }
 
-    return hook_apply('current_site_meta', $data, $host, $disableMultisite);
+    return hook_apply('current_site_meta', $data, $host, $enableMultisite);
 }
 
 /**

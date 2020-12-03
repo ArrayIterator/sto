@@ -87,10 +87,16 @@ function hook_apply(string $tag, $valuue)
     return \hooks()->apply(...func_get_args());
 }
 
+function hook_remove_all(string $tag, int $priority = null)
+{
+    return \hooks()->removeAll($tag, $priority);
+}
+
 function hook_remove(string $tag, callable $function_to_remove, int $priority = 10)
 {
     return \hooks()->remove($tag, $function_to_remove, $priority);
 }
+
 function hook_exist(string $tag, $function_to_check = false)
 {
     return \hooks()->exist($tag, $function_to_check);
