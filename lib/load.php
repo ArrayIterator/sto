@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__.'/constant.php';
-require_once __DIR__.'/vendor/autoload.php';
 require_once __DIR__.'/functions/meta.php';
 require_once __DIR__.'/functions/environment.php';
 require_once __DIR__.'/functions/filters.php';
@@ -21,6 +20,9 @@ if (ob_get_level() < 1) {
 }
 
 register_shutdown_function('shutdown_handler');
+
+// require autoload
+require __DIR__.'/vendor/autoload.php';
 
 $configBaseName = CONFIG_BASE_FILENAME;
 $configBaseName = substr($configBaseName, -4) !== 'php'
@@ -96,3 +98,6 @@ if (defined('COOKIE_MULTI_DOMAIN') && COOKIE_MULTI_DOMAIN) {
 } elseif (!defined('COOKIE_DOMAIN')) {
     define('COOKIE_DOMAIN', get_host());
 }
+
+// no globals variable please!
+unset($configBaseName);

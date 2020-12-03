@@ -1,6 +1,8 @@
 <?php
+// # Sample
 //create_cookie(COOKIE_STUDENT_NAME, create_json_hash(1, 'student'));
 //create_cookie(COOKIE_SUPERVISOR_NAME, create_json_hash(1, 'supervisor'));
+
 $loggedAs = [];
 $data = get_current_student_data();
 if ($data) {
@@ -20,9 +22,8 @@ if ($data) {
     ];
 }
 
-$logged = !empty($loggedAs);
 json(200, [
-    'login' => $logged,
+    'login' => !empty($loggedAs),
     'as' => $loggedAs,
     'online' => [
         'student' => student_online()->count(),

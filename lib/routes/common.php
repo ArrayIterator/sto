@@ -1,2 +1,4 @@
 <?php
-
+/**
+ * Common API Configurations
+ */
