@@ -21,28 +21,39 @@ class Tables implements QueryPrepareInterface
 
     /**
      * @var string[]
+     * @todo add tables
      */
     protected $defaultTables = [
-        "sto_answer",
-        "sto_class",
-        "sto_class_teacher",
-        "sto_dictionary",
-        "sto_language_code",
+        "sto_attachments",
+        "sto_classes",
+        "sto_classes_teacher",
+        "sto_exam",
+        "sto_exam_classes_id",
+        "sto_exam_room_id",
+        "sto_exam_student_assign",
         "sto_options",
         "sto_post",
         "sto_question",
-        "sto_question_meta",
+        "sto_question_choice",
+        "sto_question_task",
         "sto_religion",
+        "sto_room",
+        "sto_sites",
         "sto_student",
+        "sto_student_answer",
+        "sto_student_exam",
         "sto_student_logs",
         "sto_student_meta",
         "sto_student_online",
+        "sto_subject",
         "sto_supervisor",
+        "sto_supervisor_logs",
         "sto_supervisor_meta",
         "sto_supervisor_online",
         "sto_supervisor_position",
-        "sto_task",
-        "sto_translations"
+        "sto_translations",
+        "sto_translations_dictionary",
+        "sto_translations_language"
     ];
 
     /**
