@@ -1,0 +1,42 @@
+{
+  "name": "arrayiterator/sto",
+  "description": "",
+  "version": "1.0.0",
+  "license": [
+    "GPL-3.0-or-later",
+    "proprietary"
+  ],
+  "homepage": "",
+  "authors": [
+    {
+      "name": "arrayiterator",
+      "email": "arrayiterator@gmail.com",
+      "role": "developer",
+      "homepage": "https://www.arrayiterator.com"
+    }
+  ],
+  "require": {
+    "php": ">= 7.0",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-pdo": "*",
+    "ext-calendar": "*",
+    "nikic/fast-route": "v1.3.0",
+    "guzzlehttp/guzzle": "^6"
+  },
+  "config": {
+    "vendor-dir": "lib/vendor",
+    "optimize-autoloader": true
+  },
+  "autoload": {
+    "psr-0": {
+      "ArrayIterator\\": "lib/classes"
+    },
+    "psr-4": {
+      "ArrayIterator\\": "lib/classes"
+    },
+    "classmap": [
+      "lib/classes"
+    ]
+  }
+}
