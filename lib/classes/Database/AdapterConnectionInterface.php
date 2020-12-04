@@ -2,14 +2,14 @@
 
 namespace ArrayIterator\Database;
 
-use ArrayIterator\Database\Adapter\AbstractAdapter;
 use Exception;
+use PDO;
 
 /**
- * Interface ConnectionInterface
+ * Interface AdapterConnectionInterface
  * @package ArrayIterator\Database
  */
-interface ConnectionInterface extends QueryPrepareInterface
+interface AdapterConnectionInterface extends QueryPrepareInterface
 {
     const DEFAULT_PORT = 3306;
     const DEFAULT_HOST = 'localhost';
@@ -54,7 +54,7 @@ interface ConnectionInterface extends QueryPrepareInterface
     public function getConnectError();
 
     /**
-     * @return AbstractAdapter|null
+     * @return PDO|null
      */
-    public function getConnection();
+    public function getConnection() : PDO;
 }

@@ -4,7 +4,7 @@ namespace ArrayIterator;
 
 use ArrayIterator\Database\Adapter\AbstractAdapter;
 use ArrayIterator\Database\Adapter\PDO;
-use ArrayIterator\Database\ConnectionInterface;
+use ArrayIterator\Database\AdapterConnectionInterface;
 use ArrayIterator\Database\Tables;
 use DateTimeZone;
 
@@ -21,9 +21,9 @@ class Database
     protected static $is_pdo_supported = null;
 
     /**
-     * @var ConnectionInterface
+     * @var AdapterConnectionInterface
      */
-    protected $connection;
+    protected $adapter;
 
     /**
      * @var Tables
@@ -59,7 +59,7 @@ class Database
             $port = abs(intval($port));
         }
 
-        $this->connection = new PDO(
+        $this->adapter = new PDO(
             $host,
             $user,
             $password,
@@ -73,7 +73,7 @@ class Database
      */
     public function getTables()
     {
-        $dbName = $this->connection->getDbname();
+        $dbName = $this->adapter->getDbName();
         if (!$dbName) {
             throw new \RuntimeException(
                 'Database configuration does not have a database name'
@@ -87,11 +87,11 @@ class Database
     }
 
     /**
-     * @return ConnectionInterface
+     * @return AdapterConnectionInterface
      */
-    public function getConnection() : ConnectionInterface
+    public function getAdapter() : AdapterConnectionInterface
     {
-        return $this->connection;
+        return $this->adapter;
     }
 
     /**
@@ -99,11 +99,7 @@ class Database
      */
     public function isConnected() : bool
     {
-        try {
-            return $this->connection->connect();
-        } catch (\Exception $e) {
-            return false;
-        }
+        return $this->adapter->hasConnection();
     }
 
     /**
@@ -129,6 +125,6 @@ class Database
      */
     public function __call(string $name, array $args)
     {
-        return call_user_func_array([$this->connection, $name], $args);
+        return call_user_func_array([$this->adapter, $name], $args);
     }
 }

@@ -2,7 +2,8 @@
 namespace ArrayIterator;
 
 use ArrayIterator\Dependency\Translation;
-use ArrayIterator\Helper\TimeZone;
+use ArrayIterator\Helper\Area\TimeZone;
+use ArrayIterator\Helper\TimeZoneConvert;
 use ArrayIterator\Model\Languages;
 use ArrayIterator\Model\Option;
 use ArrayIterator\Model\Site;
@@ -73,9 +74,14 @@ class Application
     protected $site;
 
     /**
+     * @var TimeZoneConvert
+     */
+    protected $timeZoneConvert;
+
+    /**
      * @var TimeZone
      */
-    protected $timeZone;
+    protected $timezone;
 
     /**
      * Application constructor.
@@ -118,15 +124,27 @@ class Application
     }
 
     /**
-     * @return TimeZone
+     * @return TimeZoneConvert
      */
-    public function getTimeZone(): TimeZone
+    public function getTimeZoneConvert(): TimeZoneConvert
     {
-        if (!$this->timeZone) {
-            $this->timeZone = new TimeZone(\TIMEZONE);
+        if (!$this->timeZoneConvert) {
+            $this->timeZoneConvert = new TimeZoneConvert(\TIMEZONE);
         }
 
-        return $this->timeZone;
+        return $this->timeZoneConvert;
+    }
+
+    /**
+     * @return TimeZone
+     */
+    public function getTimezone(): TimeZone
+    {
+        if (!$this->timezone) {
+            $this->timezone = new TimeZone();
+        }
+
+        return $this->timezone;
     }
 
     public function getDatabase() : Database

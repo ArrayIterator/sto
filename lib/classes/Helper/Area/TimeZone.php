@@ -1,6 +1,9 @@
 <?php
 namespace ArrayIterator\Helper\Area;
 
+use DateTimeInterface;
+use DateTimeZone;
+
 /**
  * Class TimeZone
  * @package ArrayIterator\Helper\Area
@@ -10,7 +13,7 @@ final class TimeZone
     /**
      * @var array[]
      */
-    protected $timezone = [
+    protected $timezones = [
         "Australia/Adelaide" => [
             "country_name" => "Australia",
             "country_code" => "AU",
@@ -4798,11 +4801,82 @@ final class TimeZone
     ];
 
     /**
+     * @var array
+     */
+    protected static $timezone_records = [];
+
+    /**
      * @return array[]
      */
-    public function getTimezone(): array
+    public function getTimezoneList(): array
     {
-        return $this->timezone;
+        return $this->timezones;
+    }
+
+    /**
+     * @param int|DateTimeInterface|DateTimeZone $time
+     * @return DateTimeZone[]
+     */
+    public function getTimeZones($time) : array
+    {
+        $offset = $time;
+        if ($time instanceof DateTimeInterface) {
+            $offset = $time->getOffset();
+        }
+
+        if (is_string($time)) {
+            $time = new DateTimeZone($time);
+        }
+        if ($time instanceof DateTimeZone) {
+            $offset = (new \DateTimeImmutable())->setTimezone($time)->getOffset();
+        }
+        $tz = [];
+        if (!is_int($offset)) {
+            return $tz;
+        }
+        foreach ($this->getTimezoneList() as $key => $item) {
+            if ($item['offset'] === $offset) {
+                $tz[] = new DateTimeZone($key);
+            }
+        }
+        return $tz;
+    }
+
+    /**
+     * @param mixed $time
+     * @return DateTimeZone|false
+     */
+    public function getTimeZone($time)
+    {
+        $offset = $time;
+        if ($time instanceof DateTimeInterface) {
+            $offset = $time->getOffset();
+        }
+
+        if (is_string($time)) {
+            $time = new DateTimeZone($time);
+        }
+        if ($time instanceof DateTimeZone) {
+            $offset = (new \DateTimeImmutable())->setTimezone($time)->getOffset();
+        }
+        $tz = false;
+        if (!is_int($offset)) {
+            return $tz;
+        }
+        if (isset(self::$timezone_records[$offset])) {
+            return self::$timezone_records[$offset]
+                ? new DateTimeZone(self::$timezone_records[$offset])
+                : false;
+        }
+        self::$timezone_records[$offset] = false;
+        foreach ($this->getTimezoneList() as $key => $item) {
+            if ($item['offset'] === $offset) {
+                self::$timezone_records[$offset] = $key;
+                return new DateTimeZone($key);
+            }
+        }
+
+        return $tz;
     }
 
     /**
@@ -4825,7 +4899,7 @@ final class TimeZone
             }
             $code = $code['code']['alpha2'];
         }
-        foreach ($this->getTimezone() as $key => $value) {
+        foreach ($this->getTimezoneList() as $key => $value) {
             if ($value['country_code'] === $code) {
                 $result[$key] = $value;
             }

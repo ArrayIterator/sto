@@ -35,3 +35,8 @@ function get_options(int $siteId = null, ...$args) : ArrayGetter
 {
     return option()->values($siteId, ...$args);
 }
+
+function update_options(array $value, int $siteId = null)
+{
+    $siteId = get_current_site_id()?:\application()->getSiteId();
+}

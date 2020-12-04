@@ -2,17 +2,19 @@
 namespace ArrayIterator\Database\Adapter;
 
 use ArrayIterator\Database\AbstractResult;
-use ArrayIterator\Database\ConnectionInterface;
+use ArrayIterator\Database\AdapterConnectionInterface;
 use ArrayIterator\Database\PdoResult;
 use ArrayIterator\Database\PrepareStatement;
 use ArrayIterator\Exception\DatabaseConnectionException;
+use Exception;
+use PDOException;
 use PDOStatement;
 
 /**
  * Class AbstractAdapter
  * @package ArrayIterator\Database\Adapter
  */
-abstract class AbstractAdapter implements ConnectionInterface
+abstract class AbstractAdapter implements AdapterConnectionInterface
 {
     protected $host = self::DEFAULT_HOST;
     protected $username;
@@ -95,13 +97,13 @@ abstract class AbstractAdapter implements ConnectionInterface
     /**
      * @return string|null
      */
-    public function getDbname()
+    public function getDbName()
     {
         return $this->dbname;
     }
 
     /**
-     * @return \Exception|\PDOException|null
+     * @return Exception|PDOException|null
      */
     public function getConnectError()
     {
@@ -164,10 +166,15 @@ abstract class AbstractAdapter implements ConnectionInterface
         return $this->getConnection()->query($sql);
     }
 
+    public function hasConnection()
+    {
+        return (bool) $this->connection;
+    }
+
     /**
      * @return \PDO|null
      */
-    public function getConnection()
+    public function getConnection() : \PDO
     {
         if (!$this->connection) {
             $this->connect();

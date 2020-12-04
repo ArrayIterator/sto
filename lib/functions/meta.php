@@ -3,6 +3,8 @@
 use ArrayIterator\Application;
 use ArrayIterator\Database;
 use ArrayIterator\Dependency\Translation;
+use ArrayIterator\Helper\Area\TimeZone;
+use ArrayIterator\Helper\TimeZoneConvert;
 use ArrayIterator\Hooks;
 use ArrayIterator\Model\Languages;
 use ArrayIterator\Model\Option;
@@ -19,6 +21,22 @@ use ArrayIterator\Route;
 function application(): Application
 {
     return Application::getInstance();
+}
+
+/**
+ * @return TimeZoneConvert
+ */
+function timezone_convert() : TimeZoneConvert
+{
+    return \application()->getTimeZoneConvert();
+}
+
+/**
+ * @return TimeZone
+ */
+function timezone() : TimeZone
+{
+    return \application()->getTimezone();
 }
 
 /**
