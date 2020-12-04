@@ -55,6 +55,18 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
     }
 
     /**
+     * @return string|null
+     */
+    public function getAutoIncrementColumn()
+    {
+        return $this
+            ->database
+            ->getTables()
+            ->getTableDefinition($this->getTableName())
+            ->getAutoIncrement();
+    }
+
+    /**
      * @return int|null
      */
     public function getSiteId()
@@ -320,7 +332,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         return $this->database;
     }
 
-    protected function getPrimaryKeysSelectors()
+    protected function getPrimaryKeysSelectors() : array
     {
         return $this
             ->database
@@ -329,7 +341,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
             ->getUniqueSelector();
     }
 
-    public function offsetExists($offset)
+    public function offsetExists($offset) : bool
     {
         return $this->__isset($offset);
     }
@@ -350,7 +362,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
     }
 
     /**
-     * @return $this|PrepareStatement|false|null
+     * @return static|false
      */
     public function get()
     {
@@ -365,8 +377,13 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
                 }
             }
 
-            if ($currentSelector) {
-                return $this->findBy($value, null, null, $currentSelector);
+            if ($currentSelector && $value !== null) {
+                $res = $this->findOneBy($value, $currentSelector);
+                if (!$res) {
+                    return false;
+                }
+
+                return $res->fetchClose()?:false;
             }
         }
 
@@ -374,7 +391,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
             return $this;
         }
 
-        return null;
+        return false;
     }
 
     /**
@@ -803,6 +820,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         if (empty($userColumn)) {
             return 0;
         }
+
         $definition = $this->database->getTables()->getTableDefinition($this->getTableName());
         $increment  = $definition->getAutoIncrement();
         unset($columns[$increment]);
@@ -934,5 +952,70 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         }
 
         return $this->findOneBy($value, $selector)->fetchClose();
+    }
+
+    public function delete()
+    {
+        $autoIncrement = $this->getAutoIncrementColumn();
+        $selector = null;
+        $value = null;
+        if ($autoIncrement) {
+            if (isset($this->data[$autoIncrement])
+                && is_numeric($this->data[$autoIncrement])
+            ) {
+                $selector = $autoIncrement;
+                $value = $this->data[$autoIncrement];
+            } elseif (isset($this->userData[$autoIncrement])
+                && is_numeric($this->userData[$autoIncrement])
+            ) {
+                $selector = $autoIncrement;
+                $value = $this->userData[$autoIncrement];
+            }
+            if ($selector && is_numeric($value)) {
+                $stmt = $this->prepare(
+                    sprintf(
+                        'DELETE FROM %s WHERE %s=?',
+                        $this->getTableName(),
+                        $selector
+                    )
+                );
+                $result = $stmt->execute([$value]);
+                $stmt->closeCursor();
+                return $result;
+            }
+        }
+
+        $siteId = null;
+        $values = [];
+        // $availableColumns = array_flip($this->getAvailableColumns());
+        foreach ($this->getPrimaryKeysSelectors() as $item) {
+            $val = $this->fromStatement
+                ? ($this->data[$item]??null)
+                : ($this->userData[$item]??null);
+            if (is_numeric($val) || is_string($val)) {
+                $values[$item] = $val;
+            }
+        }
+
+        if (empty($values)) {
+            return false;
+        }
+        $sql = sprintf('DELETE FROM %s', $this->getTableName());
+        $sql .= ' WHERE ';
+        $args = [];
+        $c = 0;
+        foreach ($values as $key => $item) {
+            $h = ':a_'. $key;
+            if ($c++ > 0) {
+                $sql .= ' AND ';
+            }
+            $sql .= sprintf(' %s=%s ', $key, $h);
+            $args[$h] = $item;
+        }
+
+        $stmt = $this->prepare($sql);
+        $res = $stmt->execute($args);
+        $stmt->closeCursor();
+        return $res;
     }
 }

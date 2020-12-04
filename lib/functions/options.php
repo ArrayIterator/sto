@@ -21,7 +21,7 @@ function get_option(string $name, $default = null, int $siteId = null, bool $use
  * @param int|null $siteId
  * @return bool
  */
-function update_option(string $name, $value, int $siteId = null)
+function update_option(string $name, $value, int $siteId = null) : bool
 {
     return option()->set($name, $value, $siteId);
 }
@@ -31,7 +31,7 @@ function update_option(string $name, $value, int $siteId = null)
  * @param mixed ...$args
  * @return ArrayGetter
  */
-function get_options(int $siteId = null, ...$args)
+function get_options(int $siteId = null, ...$args) : ArrayGetter
 {
     return option()->values($siteId, ...$args);
 }

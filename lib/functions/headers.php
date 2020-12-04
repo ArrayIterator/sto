@@ -222,7 +222,7 @@ function set_status_header(int $code, string $description = null)
 }
 
 /**
- * @return false
+ * @return bool
  */
 function is_json_request(): bool
 {
@@ -234,6 +234,9 @@ function is_json_request(): bool
     return preg_match('~^application/json~i', trim($header)) !== false;
 }
 
+/**
+ * @return bool
+ */
 function is_ajax_request(): bool
 {
     $header = get_header('X-Requested-With');

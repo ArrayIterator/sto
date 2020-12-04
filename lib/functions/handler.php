@@ -76,24 +76,59 @@ function set_not_allowed_handler(callable $callback)
     \route()->setNotAllowedHandler($callback);
 }
 
+
 /**
- * @param int $code
- * @param string|null $message
+ * @param int|string ...$args
  */
-function do_exit(int $code = 0, string $message = null)
+function do_exit(...$args)
 {
+    $code = null;
+    $message = null;
+    $count = count($args);
+    if ($count === 0) {
+        exit(0);
+    }
+
+    if (is_string($args[0])) {
+        $message = $args[0];
+    }
+
+    if (is_object($args[0]) && method_exists($args[0], '__tostring')) {
+        $message = (string) $args[0];
+    }
+
+    if (is_int($args[0])) {
+        $code = $args[0];
+    }
+
+    if ($count > 1) {
+        if ($message === null && (is_string($args[1]) || is_object($args[0]) && method_exists($args[0], '__tostring'))) {
+            $message = $args[1];
+        }
+
+        if ($code === null && is_int($args[1])) {
+            $code = $args[1];
+        }
+    }
+
+    $code = $code??0;
     if ($message) {
         echo $message;
     }
+
     exit($code);
 }
 
 /**
  * @param string $data
+ * @param bool|null $exit
  */
-function render(string $data)
+function render(string $data, bool $exit = false)
 {
     hook_run('before_render');
     echo $data;
     hook_run('after_render');
+    if ($exit) {
+        do_exit();
+    }
 }

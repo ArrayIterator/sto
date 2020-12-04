@@ -153,4 +153,43 @@ class Site extends Model
         $stmt->closeCursor();
         return $row;
     }
+
+    /**
+     * @param array $where
+     * @return array|Model|bool|int|mixed|object
+     */
+    public function save(array $where = [])
+    {
+        $id = $this->userData['id']??null;
+        if ($id === null) {
+            $id = $where['id']??null;
+        }
+        if ($id !== null && (!is_numeric($id) || abs($id) !== 1)) {
+            return false;
+        }
+        $id = $id !== null ? abs($id) : null;
+        if ($id === 1 || (abs($this->data['id']??-3) === 1)) {
+            if (isset($this->userData['status']) && $this->userData['status'] !== 'active') {
+                $this->userData['status'] = 'active';
+            }
+        }
+
+        return parent::save($where);
+    }
+
+    public function delete()
+    {
+        // disallow delete site id =1
+        $id = $this->userData['id']??null;
+        if ($id !== null && (!is_numeric($id) || abs($id) !== 1)) {
+            return false;
+        }
+
+        $id = $id !== null ? abs($id) : null;
+        if ($id === 1 || (abs($this->data['id']??-3) === 1)) {
+            return false;
+        }
+
+        return parent::delete();
+    }
 }

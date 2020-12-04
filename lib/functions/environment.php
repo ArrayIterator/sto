@@ -59,7 +59,7 @@ function body_stream(): Stream
 /**
  * @return string
  */
-function body()
+function body() : string
 {
     return (string)body_stream();
 }
@@ -233,7 +233,7 @@ function get_host(): string
  * @param string $pathUri
  * @return string
  */
-function get_home_url(string $pathUri = '')
+function get_home_url(string $pathUri = '') : string
 {
     static $path;
     $server = server_environment();
@@ -257,25 +257,6 @@ function get_home_url(string $pathUri = '')
         $uri,
         $pathUri,
         $originalPath
-    );
-}
-
-/**
- * @param string $pathUri
- * @return string
- */
-function get_admin_url(string $pathUri = '')
-{
-    $path = sprintf('/%s/', ADMIN_PATH);
-    $originalPathUri = $pathUri;
-    $pathUri = substr($pathUri, 0, 1) === '/'
-        ? ltrim($pathUri, '/')
-        : $pathUri;
-    return hook_apply(
-        'admin_url',
-        get_home_url(sprintf('%s%s', $path, $pathUri)),
-        $pathUri,
-        $originalPathUri
     );
 }
 
@@ -407,7 +388,6 @@ function delete_cookie(string $name)
     create_cookie($name, '', $ex);
 }
 
-
 /**
  * @param string $tag
  * @param callable $function_to_add
@@ -420,7 +400,7 @@ function hook_add(
     callable $function_to_add,
     int $priority = 10,
     int $accepted_args = 1
-) {
+) : bool {
     return \hooks()->add($tag, $function_to_add, $priority, $accepted_args);
 }
 
@@ -439,24 +419,35 @@ function hook_apply(string $tag, $value)
  * @param int|null $priority
  * @return bool
  */
-function hook_remove_all(string $tag, int $priority = null)
+function hook_remove_all(string $tag, int $priority = null) : bool
 {
     return \hooks()->removeAll($tag, $priority);
 }
 
-function hook_remove(string $tag, callable $function_to_remove, int $priority = 10)
+/**
+ * @param string $tag
+ * @param callable $function_to_remove
+ * @param int $priority
+ * @return bool
+ */
+function hook_remove(string $tag, callable $function_to_remove, int $priority = 10) : bool
 {
     return \hooks()->remove($tag, $function_to_remove, $priority);
 }
 
-function hook_exist(string $tag, $function_to_check = false)
+/**
+ * @param string $tag
+ * @param false $function_to_check
+ * @return bool
+ */
+function hook_exist(string $tag, $function_to_check = false) : bool
 {
     return \hooks()->exist($tag, $function_to_check);
 }
 
 function hook_run(string $tag, ...$arg)
 {
-    return \hooks()->run($tag, ...$arg);
+    \hooks()->run($tag, ...$arg);
 }
 
 /**
@@ -481,7 +472,7 @@ function hook_has_run(string $tag): int
  * @param string|null $filter
  * @return bool
  */
-function hook_is_in_stack(string $filter = null)
+function hook_is_in_stack(string $filter = null) : bool
 {
     return \hooks()->inStack($filter);
 }

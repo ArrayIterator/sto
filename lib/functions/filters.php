@@ -1,8 +1,8 @@
 <?php
 /**
- * @param $search
+ * @param mixed $search
  * @param string $subject
- * @return string
+ * @return string|string[]
  */
 function deep_replace($search, string $subject)
 {
@@ -21,7 +21,7 @@ function deep_replace($search, string $subject)
  * @param bool $slash_zero
  * @return string
  */
-function replace_null_string(string $string, $slash_zero = true)
+function replace_null_string(string $string, $slash_zero = true) : string
 {
     $string = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', $string);
     if ($slash_zero) {
@@ -66,7 +66,7 @@ function sanitize_redirect(string $location): string
  * @param string|null $x_redirect_by
  * @return bool
  */
-function redirect(string $location, int $status = 302, string $x_redirect_by = null)
+function redirect(string $location, int $status = 302, string $x_redirect_by = null) : bool
 {
     global $is_IIS;
 
@@ -78,7 +78,7 @@ function redirect(string $location, int $status = 302, string $x_redirect_by = n
     }
 
     if ($status < 300 || 399 < $status) {
-        do_exit(255, 'HTTP redirect status code must be a redirection code, 3xx.');
+        do_exit('HTTP redirect status code must be a redirection code, 3xx.', 255);
     }
 
     $location = sanitize_redirect($location);
