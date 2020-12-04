@@ -6,6 +6,7 @@ use ArrayIterator\Database\Adapter\AbstractAdapter;
 use ArrayIterator\Database\Adapter\PDO;
 use ArrayIterator\Database\ConnectionInterface;
 use ArrayIterator\Database\Tables;
+use DateTimeZone;
 
 /**
  * Class Database
@@ -75,7 +76,7 @@ class Database
         $dbName = $this->connection->getDbname();
         if (!$dbName) {
             throw new \RuntimeException(
-                'Database configuration does not habe database name'
+                'Database configuration does not have a database name'
             );
         }
 
@@ -103,6 +104,22 @@ class Database
         } catch (\Exception $e) {
             return false;
         }
+    }
+
+    /**
+     * @return DateTimeZone
+     */
+    public function getTimezone() : DateTimeZone
+    {
+        $res = $this->query("
+            SELECT (case WHEN
+	        UPPER(@@session.time_zone) = 'SYSTEM' THEN @@system_time_zone
+                ELSE @@session.time_zone
+            END) as tz
+        ");
+        $tz = $res->fetchAssoc()['tz']??'+00:00';
+        $res->closeCursor();
+        return new DateTimeZone($tz);
     }
 
     /**

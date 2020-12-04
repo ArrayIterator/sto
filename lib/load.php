@@ -75,8 +75,9 @@ if (file_exists(ROOT_PATH. DS .$configBaseName)) {
 defined('DEBUG') || define('DEBUG', false);
 !DEBUG ? error_reporting(0) : error_reporting(~0);
 
-// MISC
-defined('TIMEZONE') && date_default_timezone_set(TIMEZONE);
+// TIMEZONE SET TO UTC
+date_default_timezone_set('UTC');
+defined('TIMEZONE') || define('TIMEZONE', 'UTC');
 
 // DATABASE
 defined('DB_PORT') || define('DB_PORT', 3306);

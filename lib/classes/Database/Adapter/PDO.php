@@ -13,11 +13,12 @@ use PDOStatement;
 /**
  * Class PDO
  * @package ArrayIterator\Database\Adapter
- * @mixin \PDO
+ * @mixin CorePdo
  */
 class PDO extends AbstractAdapter
 {
-    protected $unbuffered = false;
+    // make sure use utf8 & utc timezone
+    const INIT_COMMAND = "SET NAMES utf8, TIME_ZONE = '+00:00';";
 
     /**
      * @return bool
@@ -50,7 +51,7 @@ class PDO extends AbstractAdapter
                     CorePdo::ATTR_DEFAULT_FETCH_MODE => CorePdo::FETCH_CLASS,
                     CorePDO::ATTR_ERRMODE => CorePDO::ERRMODE_EXCEPTION,
                     CorePDO::ATTR_EMULATE_PREPARES => true,
-                    CorePDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+                    CorePDO::MYSQL_ATTR_INIT_COMMAND => self::INIT_COMMAND,
                     CorePdo::ATTR_CURSOR => CorePdo::CURSOR_SCROLL,
                     CorePdo::ATTR_STATEMENT_CLASS => [PrepareStatement::class, ['stdClass']],
                     CorePdO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
@@ -109,6 +110,7 @@ class PDO extends AbstractAdapter
         if (!$connection) {
             return false;
         }
+
         $this->setAttribute(CorePdo::ATTR_CURSOR, CorePdo::CURSOR_SCROLL);
         $query = $connection->query($query);
         if ($query instanceof PDOStatement) {
@@ -125,9 +127,10 @@ class PDO extends AbstractAdapter
     public function unbufferedQuery(string $sql)
     {
         $connection = $this->getConnection();
-        if ($connection->getAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY)) {
-            $connection->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        if ($connection->getAttribute(CorePdo::MYSQL_ATTR_USE_BUFFERED_QUERY)) {
+            $connection->setAttribute(CorePdo::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
         }
+
         return $this->query($sql);
     }
 
@@ -153,16 +156,17 @@ class PDO extends AbstractAdapter
         }
 
         return $connection->prepare($sql, [
-            CorePdo::ATTR_CURSOR => CorePdo::CURSOR_SCROLL
+            CorePdo::ATTR_CURSOR => CorePdo::CURSOR_SCROLL,
+            CorePdo::MYSQL_ATTR_USE_BUFFERED_QUERY => true
         ]);
     }
 
     public function rollbackBuffer()
     {
         if ($this->connection
-            && !$this->connection->getAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY)
+            && !$this->connection->getAttribute(CorePdo::MYSQL_ATTR_USE_BUFFERED_QUERY)
         ) {
-            $this->connection->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+            $this->connection->setAttribute(CorePdo::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
         }
     }
 
@@ -173,9 +177,12 @@ class PDO extends AbstractAdapter
     public function unbufferedPrepare(string $sql)
     {
         $connection = $this->getConnection();
-        if ($connection->getAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY)) {
-            $connection->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
-        }
-        return $this->prepare($sql);
+        return $connection->prepare(
+            $sql,
+            [
+                CorePdo::MYSQL_ATTR_USE_BUFFERED_QUERY => false,
+                CorePdo::ATTR_CURSOR => CorePdo::CURSOR_SCROLL,
+            ]
+        );
     }
 }
