@@ -88,20 +88,6 @@ function get_status_header(int $code): string
     return get_status_header_list()[$code] ?? '';
 }
 
-function sanitize_header_name(string $headerName)
-{
-    return str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', $headerName))));
-}
-
-function normalize_header_name(string $headerName)
-{
-    return hook_apply(
-        'normalize_header_name',
-        sanitize_header_name($headerName),
-        $headerName
-    );
-}
-
 /**
  * @return array
  */

@@ -135,3 +135,23 @@ function get_web_server(): string
 
     return $software;
 }
+
+/**
+ * @return bool
+ */
+function is_windows() : bool
+{
+    static $win = null;
+    if ($win === null) {
+        $win = stripos(PHP_OS, 'WIN') === 0;
+    }
+    return $win;
+}
+
+/**
+ * @return bool
+ */
+function is_unix() : bool
+{
+    return !is_windows();
+}

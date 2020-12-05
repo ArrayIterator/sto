@@ -73,20 +73,6 @@ function json(int $code, ...$data)
 }
 
 /**
- * @return string
- */
-function get_route_api_path(): string
-{
-    $route = (string)hook_apply('route_api_path', DEFAULT_API_PATH);
-    if (strpos($route, '?')) {
-        $route = preg_replace('~(\?.*)$~', '', $route);
-    }
-    $route = preg_replace('~[\\\\/]+~', '/', $route);
-    // only valid path
-    return '/' . trim($route, '/');
-}
-
-/**
  * @return bool
  */
 function is_route_api(): bool

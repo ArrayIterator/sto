@@ -9,6 +9,10 @@ define('ROOT_PATH', dirname(__DIR__));
 define('ROOT_TEMPLATES_PATH', __DIR__.'/templates');
 
 define('DEFAULT_API_PATH', '/api');
+define('DEFAULT_LOGIN_PATH', '/login');
+define('DEFAULT_UPLOADS_PATH', '/uploads');
+define('DEFAULT_THEMES_PATH', '/themes');
+define('DEFAULT_MODULES_PATH', '/modules');
 
 // ENV
 define('MICRO_TIME_FLOAT', microtime(true));
@@ -52,3 +56,30 @@ define('WEBSERVER_LITESPEED', 'Litespeed');
 define('WEBSERVER_NGINX', 'Nginx');
 define('WEBSERVER_HIAWATHA', 'Hiawatha');
 define('WEBSERVER_IIS', 'IIS');
+
+// ROLE
+define('ROLE_STUDENT', 'student');
+define('ROLE_ADMIN', 'admin');
+define('ROLE_SUPER_ADMIN', 'superadmin');
+define('ROLE_TEACHER', 'teacher');
+define('ROLE_AUDITOR', 'auditor');
+define('ROLE_INVIGILATOR', 'invigilator');
+define('ROLE_CONTRIBUTOR', 'contributor');
+define('ROLE_EDITOR', 'editor');
+
+// STATUS
+define('STATUS_ACTIVE', 'active');
+define('STATUS_BANNED', 'banned');
+define('STATUS_PENDING', 'pending');
+define('STATUS_DELETED', 'deleted');
+define('STATUS_HIDDEN', 'hidden');
+define('STATUS_TRASH', 'trash');
+define('STATUS_PUBLISHED', 'published');
+define('STATUS_DRAFT', 'draft');
+define('STATUS_PUBLIC', 'public');
+
+// POST TYPE
+define('TYPE_POST', 'post');
+define('TYPE_PAGE', 'page');
+define('TYPE_ANNOUNCEMENT', 'announcement');
+define('TYPE_REVISION', 'revision');

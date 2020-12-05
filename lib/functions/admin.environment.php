@@ -1,24 +1,43 @@
 <?php
 
 /**
- * @param string $pathUri
- * @return string
+ * @return bool
  */
-function get_admin_url(string $pathUri = '') : string
+function is_admin_page() : bool
 {
-    $path = sprintf('/%s/', ADMIN_PATH);
-    $originalPathUri = $pathUri;
-    $pathUri = substr($pathUri, 0, 1) === '/'
-        ? ltrim($pathUri, '/')
-        : $pathUri;
-    return hook_apply(
-        'admin_url',
-        get_home_url(sprintf('%s%s', $path, $pathUri)),
-        $pathUri,
-        $originalPathUri
-    );
+    $adminPath = preg_quote(get_admin_path(), '~');
+    return ADMIN_AREA && preg_match("~^{$adminPath}(/|$)~", request_uri());
 }
 
-function get_login_url()
+/**
+ * @return false|string
+ */
+function get_admin_role()
 {
+    if (!is_supervisor() || !($spv = get_current_supervisor())) {
+        return false;
+    }
+    $role = $spv['role']??false;
+    if (!is_string($role)) {
+        return false;
+    }
+    return strtolower($role);
+}
+
+/**
+ * @return bool
+ */
+function is_admin_login() : bool
+{
+    return is_admin_page() && is_supervisor();
+}
+
+function is_super_admin() : bool
+{
+    return get_admin_role() === 'superadmin';
+}
+
+function is_admin() : bool
+{
+    return is_super_admin() || get_admin_role() === 'admin';
 }

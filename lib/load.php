@@ -2,6 +2,8 @@
 require_once __DIR__.'/constant.php';
 require_once __DIR__.'/functions/meta.php';
 require_once __DIR__.'/functions/environment.php';
+require_once __DIR__.'/functions/path.php';
+require_once __DIR__.'/functions/url.php';
 require_once __DIR__.'/functions/software.php';
 require_once __DIR__.'/functions/filters.php';
 require_once __DIR__.'/functions/handler.php';
@@ -50,15 +52,15 @@ if (file_exists(ROOT_PATH. DS .$configBaseName)) {
 
         defined('ADMIN_PATH') || define('ADMIN_PATH', get_scanned_admin_path());
         $adminPath = get_admin_path();
-        if (!file_exists(ROOT_PATH . '/' . $adminPath . '/install.php')) {
+        if (!file_exists(ROOT_PATH . $adminPath . '/install.php')) {
             $adminPath = get_scanned_admin_path();
-            if (!file_exists(ROOT_PATH . '/' . $adminPath . '/install.php')) {
+            if (!file_exists(ROOT_PATH . $adminPath . '/install.php')) {
                 $adminPath = null;
             }
         }
 
         if (!headers_sent() && $adminPath) {
-            header('Location: /' . $adminPath . '/install.php', true, 302);
+            header('Location: ' . $adminPath . '/install.php', true, 302);
             exit;
         }
 
@@ -84,12 +86,15 @@ defined('TIMEZONE') || define('TIMEZONE', 'UTC');
 defined('DB_PORT') || define('DB_PORT', 3306);
 defined('DB_HOST') || define('DB_HOST', 'localhost');
 
+get_scanned_admin_path();
 // PATH
 defined('ADMIN_PATH') || define('ADMIN_PATH', get_scanned_admin_path());
-defined('UPLOAD_PATH') || define('UPLOAD_PATH', 'uploads');
+defined('LOGIN_PATH') || define('LOGIN_PATH', DEFAULT_LOGIN_PATH);
+defined('UPLOADS_PATH') || define('UPLOADS_PATH', DEFAULT_UPLOADS_PATH);
+defined('THEMES_PATH') || define('THEMES_PATH', DEFAULT_THEMES_PATH);
+defined('MODULES_PATH') || define('MODULES_PATH', DEFAULT_MODULES_PATH);
 
 defined('ENABLE_MULTISITE') || define('ENABLE_MULTISITE', false);
-defined('THEME_PATH') || define('THEME_PATH', 'theme');
 
 defined('COOKIE_STUDENT_NAME') || define('COOKIE_STUDENT_NAME', 'sto_student');
 defined('COOKIE_SUPERVISOR_NAME') || define('COOKIE_SUPERVISOR_NAME', 'sto_supervisor');

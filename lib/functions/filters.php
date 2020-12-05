@@ -1,5 +1,28 @@
 <?php
 /**
+ * @param string $headerName
+ * @return string|string[]
+ */
+function sanitize_header_name(string $headerName)
+{
+    $headerName = preg_replace('~[_\-\s]+~', '-', $headerName);
+    return ucwords(strtolower($headerName), '-');
+}
+
+/**
+ * @param string $headerName
+ * @return mixed
+ */
+function normalize_header_name(string $headerName)
+{
+    return hook_apply(
+        'normalize_header_name',
+        sanitize_header_name($headerName),
+        $headerName
+    );
+}
+
+/**
  * @param mixed $search
  * @param string $subject
  * @return string|string[]
@@ -51,7 +74,9 @@ function sanitize_redirect(string $location): string
 			|   \xF4[\x80-\x8F][\x80-\xBF]{2}
 		){1,40}                              # ...one or more times
 		)/x';
-    $location = preg_replace_callback($regex, '_wp_sanitize_utf8_in_redirect', $location);
+    $location = preg_replace_callback($regex, function ($match) {
+        return urlencode($matches[0]);
+    }, $location);
     $location = preg_replace('|[^a-z0-9-~+_.?#=&;,/:%!*\[\]()@]|i', '', $location);
     $location = replace_null_string($location);
 
@@ -66,8 +91,11 @@ function sanitize_redirect(string $location): string
  * @param string|null $x_redirect_by
  * @return bool
  */
-function redirect(string $location, int $status = 302, string $x_redirect_by = null) : bool
-{
+function redirect(
+    string $location,
+    int $status = 302,
+    string $x_redirect_by = 'Sto'
+) : bool {
     global $is_IIS;
 
     $location = hook_apply('redirect', $location, $status);
@@ -96,4 +124,13 @@ function redirect(string $location, int $status = 302, string $x_redirect_by = n
     set_header('Location', $location, $status);
 
     return true;
+}
+
+/**
+ * @param string $path
+ * @return string
+ */
+function normalize_directory_separator(string $path) : string
+{
+    return preg_replace('~[\\\/]+~', DIRECTORY_SEPARATOR, $path);
 }

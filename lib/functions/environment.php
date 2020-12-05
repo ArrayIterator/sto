@@ -66,7 +66,7 @@ function body() : string
 
 /**
  * @param string|null $key
- * @return array|mixed|null
+ * @return array|string|mixed|null
  */
 function cookie($key = null)
 {
@@ -131,64 +131,6 @@ function no_buffer()
 }
 
 /**
- * @return string
- */
-function get_admin_path(): string
-{
-    static $adminPath = null;
-    if ($adminPath) {
-        return $adminPath;
-    }
-
-    $adminPath = ADMIN_PATH;
-    if (!is_string($adminPath)) {
-        $adminPath = get_scanned_admin_path();
-    }
-    $adminPath = trim(preg_replace('~[\\\\/]+~', '/', ADMIN_PATH, '/'))
-        ?: get_scanned_admin_path();
-
-    return $adminPath;
-}
-
-/**
- * @return string
- */
-function get_scanned_admin_path(): string
-{
-    static $admin;
-    if (is_string($admin)) {
-        return $admin;
-    }
-    $filesToCheck = [
-        'index.php',
-        'install.php',
-        'modules.php',
-        'profile.php',
-        'students.php',
-        'supervisors.php',
-    ];
-
-    $admin = 'admin';
-    $found = false;
-    if (is_dir(ROOT_PATH . '/' . $admin)) {
-        $glob = array_map('basename', glob(ROOT_PATH . '/' . $admin . '/*.php'));
-        $glob = array_diff($filesToCheck, $glob);
-        $found = empty($glob);
-    }
-    if (!$found) {
-        foreach (glob(ROOT_PATH . '/*', GLOB_ONLYDIR) as $dir) {
-            $admin = basename($dir);
-            $glob = array_map('basename', glob($dir . '/*.php'));
-            $glob = array_diff($filesToCheck, $glob);
-            $found = empty($glob);
-        }
-    }
-
-    $admin = $found ? $admin : 'admin';
-    return hook_apply('admin_path', $admin);
-}
-
-/**
  * @return string https or http
  */
 function get_http_scheme(): string
@@ -230,37 +172,6 @@ function get_host(): string
 }
 
 /**
- * @param string $pathUri
- * @return string
- */
-function get_home_url(string $pathUri = '') : string
-{
-    static $path;
-    $server = server_environment();
-    $scheme = get_http_scheme();
-    $host = get_host();
-    if (!$path) {
-        $documentRoot = rtrim(preg_replace('~[\\\/]+~', '/', $server['DOCUMENT_ROOT']), '/');
-        $rootPath = rtrim(preg_replace('~[\\\/]+~', '/', realpath(ROOT_PATH) ?: ROOT_PATH), '/');
-        $path = trim(substr($rootPath, strlen($documentRoot)), '/') . '/';
-    }
-    $uri = sprintf('%s://%s%s', $scheme, $host, $path);
-    $originalPath = $pathUri;
-    $pathUri = (string)$pathUri;
-    $pathUri = substr($pathUri, 0, 1) === '/'
-        ? ltrim($pathUri, '/')
-        : $pathUri;
-
-    return hook_apply(
-        'home_url',
-        sprintf('%s%s', $uri, $pathUri),
-        $uri,
-        $pathUri,
-        $originalPath
-    );
-}
-
-/**
  * @return string
  */
 function request_uri(): string
@@ -274,25 +185,9 @@ function request_uri(): string
 /**
  * @return string
  */
-function http_method()
+function http_method() : string
 {
     return hook_apply('http_method', server_environment()['REQUEST_METHOD']);
-}
-
-/**
- * @return string
- */
-function get_current_url(): string
-{
-    $scheme = get_http_scheme();
-    $host = get_host();
-    return hook_apply(
-        'current_url',
-        sprintf('%s://%s%s', $scheme, $host, request_uri()),
-        $scheme,
-        $host,
-        request_uri()
-    );
 }
 
 /**
@@ -484,4 +379,49 @@ function hook_is_in_stack(string $filter = null) : bool
 function hook_run_ref_array(string $tag, array $args)
 {
     \hooks()->runRefArray($tag, $args);
+}
+
+/**
+ * @return array
+ */
+function get_visibilities() : array
+{
+    $visibilities = [
+        STATUS_PUBLIC,
+        ROLE_STUDENT,
+        ROLE_ADMIN,
+        ROLE_TEACHER,
+        ROLE_AUDITOR,
+        ROLE_INVIGILATOR,
+        ROLE_CONTRIBUTOR,
+        ROLE_EDITOR,
+    ];
+    return hook_apply('visibilities', $visibilities);
+}
+
+/**
+ * @return array
+ */
+function get_post_statuses() : array
+{
+    return [
+        STATUS_DRAFT,
+        STATUS_PUBLISHED,
+        STATUS_TRASH,
+        STATUS_PENDING
+    ];
+}
+
+/**
+ * @return array
+ */
+function get_question_statuses() : array
+{
+    return [
+        STATUS_PUBLISHED,
+        STATUS_DRAFT,
+        STATUS_PENDING,
+        STATUS_DELETED,
+        STATUS_HIDDEN
+    ];
 }

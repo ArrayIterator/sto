@@ -52,17 +52,21 @@ define('COOKIE_STUDENT_NAME', 'sto_student');
  *  please make sure declare this correctly
  *  & admin only could be placed on root directory
  *  fill without slashed cause slashed will be trimmed
+ *  and add single slash on first path
  *
  * @const THEME_PATH theme
  * -------------------------------
  */
-define('ADMIN_PATH', 'admin');
-define('THEME_PATH', 'theme');
-define('UPLOAD_PATH', 'uploads');
+define('ADMIN_PATH' , '/admin');
+define('LOGIN_PATH' , '/login');
+define('THEMES_PATH' , '/themes');
+define('UPLOADS_PATH', '/uploads');
+define('MODULES_PATH', '/modules');
 
 // MISC
 define('TIMEZONE', 'Asia/Jakarta');
 define('COOKIE_MULTI_DOMAIN', true);
 
 define('ENABLE_MULTISITE', false);
-define('DEBUG', true);
+// DEBUG MODE
+define('DEBUG', false);
