@@ -15,8 +15,10 @@ define('DEFAULT_THEMES_PATH', '/themes');
 define('DEFAULT_MODULES_PATH', '/modules');
 
 // ENV
+define('ROBOTS_ALL_NOINDEX', 'noindex, nofollow, noarchive, noodp, noydir');
 define('MICRO_TIME_FLOAT', microtime(true));
 define('REQUEST_URI', $_SERVER['REQUEST_URI']);
+
 // define('CLEAN_BUFFER_ERROR', true);
 
 // TIME

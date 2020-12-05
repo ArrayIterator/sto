@@ -1,4 +1,4 @@
 <?php
 define('INSTALLATION_FILE', true);
 
-require dirname(__DIR__) . '/lib/load.php';
+require_once dirname(__DIR__) . '/lib/load.php';
