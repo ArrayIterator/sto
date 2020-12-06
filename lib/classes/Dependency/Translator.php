@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Dependency;
 
 /**
@@ -63,7 +64,7 @@ class Translator
     /**
      * @return array
      */
-    public function getInfo() : array
+    public function getInfo(): array
     {
         return $this->info;
     }
@@ -71,7 +72,7 @@ class Translator
     /**
      * @return string
      */
-    public function getIso3() : string
+    public function getIso3(): string
     {
         return $this->info['iso_3'];
     }
@@ -167,10 +168,10 @@ class Translator
         $stmt = $this
             ->translation
             ->prepare(
-            'INSERT INTO languages_translation (language_code, iso_3, translation)
+                'INSERT INTO languages_translation (language_code, iso_3, translation)
                 values(:c, :i, :t) ON DUPLICATE KEY UPDATE translation=:t
             '
-        );
+            );
 
         $this->records[$hash] = [
             'code' => $selector,
@@ -199,7 +200,7 @@ class Translator
             return $fallback === null ? $message : $fallback;
         }
 
-        return $record['translation']??($fallback === null ? $message : $fallback);
+        return $record['translation'] ?? ($fallback === null ? $message : $fallback);
     }
 
     public function transOrSet($message, $translation = null)

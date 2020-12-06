@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Helper;
 
 /**
@@ -12,7 +13,7 @@ class Uuid
      *
      * @return string
      */
-    public static function generate() : string
+    public static function generate(): string
     {
         return sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
@@ -39,13 +40,13 @@ class Uuid
      * @param string|null $uuid
      * @return bool
      */
-    public static function validate(string $uuid) : bool
+    public static function validate(string $uuid): bool
     {
         if (!$uuid) {
             return false;
         }
         // 1070fd92-61ad-47bc-b749-613d6fd0b30d
-        return (bool) preg_match(
+        return (bool)preg_match(
             '~^[a-f0-9]{8}[\-]([a-f0-9]{4}[\-]){3}[a-f0-9]{12}$~',
             $uuid
         );
@@ -54,7 +55,7 @@ class Uuid
     /**
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return self::generate();
     }

@@ -62,11 +62,12 @@ define('LOGIN_PATH' , '/login');
 define('THEMES_PATH' , '/themes');
 define('UPLOADS_PATH', '/uploads');
 define('MODULES_PATH', '/modules');
+define('CACHE_DIR', __DIR__ . '/cache');
 
 // MISC
 define('TIMEZONE', 'Asia/Jakarta');
 define('COOKIE_MULTI_DOMAIN', true);
-
+define('DEFAULT_LANGUAGE', 'en');
 define('ENABLE_MULTISITE', false);
 // DEBUG MODE
 define('DEBUG', false);

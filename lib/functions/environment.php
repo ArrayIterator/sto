@@ -59,7 +59,7 @@ function body_stream(): Stream
 /**
  * @return string
  */
-function body() : string
+function body(): string
 {
     return (string)body_stream();
 }
@@ -185,7 +185,7 @@ function request_uri(): string
 /**
  * @return string
  */
-function http_method() : string
+function http_method(): string
 {
     return hook_apply('http_method', server_environment()['REQUEST_METHOD']);
 }
@@ -295,7 +295,7 @@ function hook_add(
     callable $function_to_add,
     int $priority = 10,
     int $accepted_args = 1
-) : bool {
+): bool {
     return \hooks()->add($tag, $function_to_add, $priority, $accepted_args);
 }
 
@@ -314,7 +314,7 @@ function hook_apply(string $tag, $value)
  * @param int|null $priority
  * @return bool
  */
-function hook_remove_all(string $tag, int $priority = null) : bool
+function hook_remove_all(string $tag, int $priority = null): bool
 {
     return \hooks()->removeAll($tag, $priority);
 }
@@ -325,7 +325,7 @@ function hook_remove_all(string $tag, int $priority = null) : bool
  * @param int $priority
  * @return bool
  */
-function hook_remove(string $tag, callable $function_to_remove, int $priority = 10) : bool
+function hook_remove(string $tag, callable $function_to_remove, int $priority = 10): bool
 {
     return \hooks()->remove($tag, $function_to_remove, $priority);
 }
@@ -335,7 +335,7 @@ function hook_remove(string $tag, callable $function_to_remove, int $priority = 
  * @param false $function_to_check
  * @return bool
  */
-function hook_exist(string $tag, $function_to_check = false) : bool
+function hook_exist(string $tag, $function_to_check = false): bool
 {
     return \hooks()->exist($tag, $function_to_check);
 }
@@ -367,7 +367,7 @@ function hook_has_run(string $tag): int
  * @param string|null $filter
  * @return bool
  */
-function hook_is_in_stack(string $filter = null) : bool
+function hook_is_in_stack(string $filter = null): bool
 {
     return \hooks()->inStack($filter);
 }
@@ -384,7 +384,7 @@ function hook_run_ref_array(string $tag, array $args)
 /**
  * @return array
  */
-function get_visibilities() : array
+function get_visibilities(): array
 {
     $visibilities = [
         STATUS_PUBLIC,
@@ -402,7 +402,7 @@ function get_visibilities() : array
 /**
  * @return array
  */
-function get_post_statuses() : array
+function get_post_statuses(): array
 {
     return [
         STATUS_DRAFT,
@@ -415,7 +415,7 @@ function get_post_statuses() : array
 /**
  * @return array
  */
-function get_question_statuses() : array
+function get_question_statuses(): array
 {
     return [
         STATUS_PUBLISHED,

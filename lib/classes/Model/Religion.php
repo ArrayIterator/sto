@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Model;
 
 use ArrayIterator\Database\PrepareStatement;
@@ -27,7 +28,7 @@ class Religion extends Model
         if ($res = $stmt->fetch()) {
             $stmt->closeCursor();
         }
-        return $res?:false;
+        return $res ?: false;
     }
 
     /**
@@ -51,6 +52,6 @@ class Religion extends Model
         if ($res = $stmt->fetch()) {
             $stmt->closeCursor();
         }
-        return $res?:false;
+        return $res ?: false;
     }
 }

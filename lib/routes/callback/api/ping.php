@@ -29,7 +29,7 @@ json(200, [
         'student' => student_online()->count(),
         'supervisor' => supervisor_online()->count(),
     ],
-    'response_time' => microtime(true)-MICRO_TIME_FLOAT,
+    'response_time' => microtime(true) - MICRO_TIME_FLOAT,
     'time' => time(),
     'timezone' => date_default_timezone_get(),
 ]);

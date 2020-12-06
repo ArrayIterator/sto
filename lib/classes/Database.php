@@ -89,7 +89,7 @@ class Database
     /**
      * @return AdapterConnectionInterface
      */
-    public function getAdapter() : AdapterConnectionInterface
+    public function getAdapter(): AdapterConnectionInterface
     {
         return $this->adapter;
     }
@@ -97,7 +97,7 @@ class Database
     /**
      * @return bool
      */
-    public function isConnected() : bool
+    public function isConnected(): bool
     {
         return $this->adapter->hasConnection();
     }
@@ -105,7 +105,7 @@ class Database
     /**
      * @return DateTimeZone
      */
-    public function getTimezone() : DateTimeZone
+    public function getTimezone(): DateTimeZone
     {
         $res = $this->query("
             SELECT (case WHEN
@@ -113,7 +113,7 @@ class Database
                 ELSE @@session.time_zone
             END) as tz
         ");
-        $tz = $res->fetchAssoc()['tz']??'+00:00';
+        $tz = $res->fetchAssoc()['tz'] ?? '+00:00';
         $res->closeCursor();
         return new DateTimeZone($tz);
     }

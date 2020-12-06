@@ -16,6 +16,7 @@ class PrepareStatement extends PDOStatement
     protected $fetchClass;
     protected $ctorArgs = [];
     protected $closed = false;
+
     protected function __construct($fetch_class = 'stdClass')
     {
         $this->fetchClass = $fetch_class;
@@ -40,7 +41,7 @@ class PrepareStatement extends PDOStatement
     public function fetch($fetch_style = null, $cursor_orientation = PDO::FETCH_ORI_NEXT, $cursor_offset = 0)
     {
         if ($fetch_style === PDO::FETCH_CLASS || $fetch_style === null) {
-            $this->setFetchMode( PDO::FETCH_CLASS, $this->fetchClass, $this->ctorArgs );
+            $this->setFetchMode(PDO::FETCH_CLASS, $this->fetchClass, $this->ctorArgs);
         }
 
         return parent::fetch($fetch_style, $cursor_orientation, $cursor_offset);
@@ -100,7 +101,7 @@ class PrepareStatement extends PDOStatement
         return $this->fetch();
     }
 
-    public function numRows() : int
+    public function numRows(): int
     {
         return $this->rowCount();
     }
@@ -132,7 +133,7 @@ class PrepareStatement extends PDOStatement
     public function execute($input_parameters = null)
     {
         if (func_num_args() > 0 && !is_array($input_parameters)) {
-            $input_parameters = (array) $input_parameters;
+            $input_parameters = (array)$input_parameters;
         }
         return parent::execute($input_parameters);
     }

@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator;
 
 use ArrayAccess;
@@ -13,6 +14,7 @@ final class Hooks implements ArrayAccess
      * @var Hook[]
      */
     public $filters = [];
+
     /**
      * @var int[]
      */

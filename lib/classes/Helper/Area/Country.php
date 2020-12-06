@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Helper\Area;
 
 /**
@@ -4785,7 +4786,7 @@ final class Country
             return null;
         }
         if (strlen($code) === 3) {
-            $realCode = $_3_letter_code[$code]??false;
+            $realCode = $_3_letter_code[$code] ?? false;
             if ($realCode === null) {
                 foreach ($this->countries as $c => $country) {
                     if ($country['code']['alpha3'] === $code) {

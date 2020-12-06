@@ -1,4 +1,7 @@
 <?php
+
+use ArrayIterator\Helper\Path;
+
 /**
  * @param string $headerName
  * @return string|string[]
@@ -44,7 +47,7 @@ function deep_replace($search, string $subject)
  * @param bool $slash_zero
  * @return string
  */
-function replace_null_string(string $string, $slash_zero = true) : string
+function replace_null_string(string $string, $slash_zero = true): string
 {
     $string = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', $string);
     if ($slash_zero) {
@@ -74,7 +77,7 @@ function sanitize_redirect(string $location): string
 			|   \xF4[\x80-\x8F][\x80-\xBF]{2}
 		){1,40}                              # ...one or more times
 		)/x';
-    $location = preg_replace_callback($regex, function ($match) {
+    $location = preg_replace_callback($regex, function ($matches) {
         return urlencode($matches[0]);
     }, $location);
     $location = preg_replace('|[^a-z0-9-~+_.?#=&;,/:%!*\[\]()@]|i', '', $location);
@@ -95,7 +98,7 @@ function redirect(
     string $location,
     int $status = 302,
     string $x_redirect_by = 'Sto'
-) : bool {
+): bool {
     global $is_IIS;
 
     $location = hook_apply('redirect', $location, $status);
@@ -130,7 +133,34 @@ function redirect(
  * @param string $path
  * @return string
  */
-function normalize_directory_separator(string $path) : string
+function normalize_path(string $path): string
 {
-    return preg_replace('~[\\\/]+~', DIRECTORY_SEPARATOR, $path);
+    return Path::normalize($path);
+}
+
+/**
+ * @param string $dir
+ * @return string
+ */
+function normalize_directory(string $dir): string
+{
+    return Path::normalizeDirectory($dir);
+}
+
+/**
+ * @param string $path
+ * @return string
+ */
+function slash_it(string $path): string
+{
+    return Path::slashIt($path);
+}
+
+/**
+ * @param string $path
+ * @return string
+ */
+function un_slash_it(string $path): string
+{
+    return Path::unSlashIt($path);
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Database;
 
 /**
@@ -27,6 +28,7 @@ class Table
      * @var string|null
      */
     protected $autoIncrement;
+
     /**
      * Table constructor.
      * @param string $tableName
@@ -55,7 +57,7 @@ class Table
 
             $columnName = $column->getColumnName();
             $columnsSort[$columnName] = $column->getOrdinalPosition();
-            $columnData[$columnName]  = $column;
+            $columnData[$columnName] = $column;
         }
 
         asort($columnsSort);
@@ -77,7 +79,7 @@ class Table
     /**
      * @return array
      */
-    public function getUniqueSelector() : array
+    public function getUniqueSelector(): array
     {
         return array_unique(array_merge($this->primaryKey, $this->unique));
     }
@@ -117,7 +119,7 @@ class Table
     /**
      * @return array
      */
-    public function getListColumn() : array
+    public function getListColumn(): array
     {
         return array_keys($this->columns);
     }
@@ -129,6 +131,6 @@ class Table
     public function getColumn(string $columnName)
     {
         return $this->columns[$columnName]
-            ??($this->columns[strtolower($columnName)] ?? null);
+            ?? ($this->columns[strtolower($columnName)] ?? null);
     }
 }

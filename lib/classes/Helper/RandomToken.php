@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Helper;
 
 /**
@@ -23,7 +24,7 @@ class RandomToken
     /**
      * @return int
      */
-    public static function getUTCTime() : int
+    public static function getUTCTime(): int
     {
         return strtotime(gmdate('Y-m-d H:i:s'));
     }
@@ -33,7 +34,7 @@ class RandomToken
      * @param string $secretKey
      * @return array|null
      */
-    public static function parse(string $hash, string $secretKey) : ?array
+    public static function parse(string $hash, string $secretKey): ?array
     {
         if (preg_match('~[^a-f0-9]~', $hash)) {
             return null;
@@ -43,34 +44,34 @@ class RandomToken
         foreach ($hash as &$value) {
             if (strlen($allTime) < 60) {
                 $allTime .= $value[1];
-                $value    = $value[0];
+                $value = $value[0];
             }
         }
         if (strlen($allTime) !== 60 || !is_numeric($allTime)) {
             return null;
         }
 
-        $expireRandom   = '';
-        $startRandom    = '';
+        $expireRandom = '';
+        $startRandom = '';
         $startEndTime = str_split($allTime, 3);
         foreach ($startEndTime as &$start) {
             if (strlen($start) !== 3) {
                 break;
             }
-            $startRandom   .= $start[0];
+            $startRandom .= $start[0];
             $expireRandom .= $start[2];
-            $start       = $start[1];
+            $start = $start[1];
         }
         $expireRandom = str_split($expireRandom, 10);
-        $startRandom  = str_split($startRandom, 10);
-        $startEndTime  = str_split(implode('', $startEndTime), 10);
+        $startRandom = str_split($startRandom, 10);
+        $startEndTime = str_split(implode('', $startEndTime), 10);
         if ($expireRandom[0] !== $startRandom[1]
             || $expireRandom[1] !== $startRandom[0]
         ) {
             return null;
         }
 
-        $hash  = implode($hash);
+        $hash = implode($hash);
         $iv = '';
         $hash = str_split($hash, 4);
         foreach ($hash as $key => &$item) {
@@ -84,14 +85,14 @@ class RandomToken
             return null;
         }
         $hash = implode($hash);
-        $hash = str_split($hash, (int) (round(strlen($hash)/6)+1));
+        $hash = str_split($hash, (int)(round(strlen($hash) / 6) + 1));
         $yPos = '';
         foreach ($hash as $key => &$v) {
             if ($key > 2) {
                 break;
             }
             $yPos .= substr($v, -2);
-            $v    = substr($v, 0, -2);
+            $v = substr($v, 0, -2);
         }
 
         $hash = implode('', $hash);
@@ -112,7 +113,7 @@ class RandomToken
             }
             $round .= $v;
         }
-        $ordinal = chr((int) $ordinal);
+        $ordinal = chr((int)$ordinal);
         if (preg_match('~[^a-z]~i', $ordinal)) {
             return null;
         }
@@ -122,20 +123,20 @@ class RandomToken
         }
 
         $secretKey = static::hashKey($secretKey);
-        $secretHex = hex2bin(static::hashKey($secretKey.$iv));
+        $secretHex = hex2bin(static::hashKey($secretKey . $iv));
         $hashed = $iv
             . $secretHex;
         $hashed .= hex2bin($startRandom[0] . $startRandom[1] . $startEndTime[1] . $startEndTime[0]);
         return [
-            'hash'     => $hash,
-            'iv'       => $iv,
-            'hex'      => $secretHex,
+            'hash' => $hash,
+            'iv' => $iv,
+            'hex' => $secretHex,
             'password' => $hashed,
-            'time'   => [
+            'time' => [
                 'time_creation' => $startEndTime[0],
                 'expired_after' => $startEndTime[1],
-                'random_start'  => $startRandom[0],
-                'random_end'    => $startRandom[1],
+                'random_start' => $startRandom[0],
+                'random_end' => $startRandom[1],
             ],
         ];
     }
@@ -176,20 +177,20 @@ class RandomToken
     {
         $secretKey = static::hashKey($privateKey);
         $iv = Random::bytes(static::BYTES_LENGTH);
-        $secretHex = hex2bin(static::hashKey($secretKey.$iv));
+        $secretHex = hex2bin(static::hashKey($secretKey . $iv));
         $currentTime = self::getUTCTime();
-        $randomStart = (string) mt_rand(1000000000, 9999999999);
-        $randomEnd = (string) mt_rand(1000000000, 9999999999);
+        $randomStart = (string)mt_rand(1000000000, 9999999999);
+        $randomEnd = (string)mt_rand(1000000000, 9999999999);
         $expiredAfter = $expiredAfter < 1
             ? $currentTime
-            : ($currentTime > $expiredAfter ? $currentTime+$expiredAfter : $currentTime);
+            : ($currentTime > $expiredAfter ? $currentTime + $expiredAfter : $currentTime);
         $timesStart = '';
         $timesEnd = '';
-        for ($i = 0; strlen((string) $randomStart) > $i; $i++) {
-            $timesStart .= $randomStart[$i].substr((string)$currentTime, $i, 1).$randomEnd[$i];
+        for ($i = 0; strlen((string)$randomStart) > $i; $i++) {
+            $timesStart .= $randomStart[$i] . substr((string)$currentTime, $i, 1) . $randomEnd[$i];
         }
-        for ($i = 0; strlen((string) $randomEnd) > $i; $i++) {
-            $timesEnd .= $randomEnd[$i].substr((string)$expiredAfter, $i, 1).$randomStart[$i];
+        for ($i = 0; strlen((string)$randomEnd) > $i; $i++) {
+            $timesEnd .= $randomEnd[$i] . substr((string)$expiredAfter, $i, 1) . $randomStart[$i];
         }
         $hashed = $iv . $secretHex;
         $hashed .= hex2bin($randomStart . $randomEnd . $expiredAfter . $currentTime);
@@ -199,14 +200,14 @@ class RandomToken
         );
         preg_match('~^\$([0-9]+)([^0-9\$]+)\$([0-9]+)\$([^$]+)$~', $hash, $match);
         $data = $match[4];
-        $saltCombine   = $match[1] . ord($match[2]) . $match[3];
-        $data = str_split($data, (int) round(strlen($data)/6));
-        $saltCombine   = str_split($saltCombine, strlen($saltCombine)/ 3);
+        $saltCombine = $match[1] . ord($match[2]) . $match[3];
+        $data = str_split($data, (int)round(strlen($data) / 6));
+        $saltCombine = str_split($saltCombine, strlen($saltCombine) / 3);
         foreach ($data as $key => &$datum) {
             if (!isset($saltCombine[$key])) {
                 break;
             }
-            $datum.= $saltCombine[$key];
+            $datum .= $saltCombine[$key];
         }
         $data = implode($data);
         $data = str_split($data, 3);
@@ -235,7 +236,7 @@ class RandomToken
      * @param string $key
      * @return string
      */
-    public static function hashKey(string $key) : string
+    public static function hashKey(string $key): string
     {
         // use double key
         return hash_hmac('sha256', $key, $key, false);
@@ -247,8 +248,8 @@ class RandomToken
      * @param int $expired
      * @return string
      */
-    public static function lastOrCreate(string $key, int $expired = self::A_DAY_IN_SECOND) : string
+    public static function lastOrCreate(string $key, int $expired = self::A_DAY_IN_SECOND): string
     {
-        return static::$token[$key]??static::create(...func_get_args());
+        return static::$token[$key] ?? static::create(...func_get_args());
     }
 }

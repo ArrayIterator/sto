@@ -1,24 +1,24 @@
 <?php
-require_once __DIR__.'/constant.php';
-require_once __DIR__.'/functions/meta.php';
-require_once __DIR__.'/functions/environment.php';
-require_once __DIR__.'/functions/path.php';
-require_once __DIR__.'/functions/url.php';
-require_once __DIR__.'/functions/software.php';
-require_once __DIR__.'/functions/filters.php';
-require_once __DIR__.'/functions/handler.php';
-require_once __DIR__.'/functions/headers.php';
-require_once __DIR__.'/functions/settings.php';
-require_once __DIR__.'/functions/api.php';
-require_once __DIR__.'/functions/database.php';
-require_once __DIR__.'/functions/options.php';
-require_once __DIR__.'/functions/user.php';
-require_once __DIR__.'/functions/auth.php';
-require_once __DIR__.'/functions/filters.php';
-require_once __DIR__.'/functions/translations.php';
-require_once __DIR__.'/functions/route.php';
-require_once __DIR__.'/functions/calendar.php';
-require_once __DIR__.'/functions/admin.environment.php';
+require_once __DIR__ . '/constant.php';
+require_once __DIR__ . '/functions/meta.php';
+require_once __DIR__ . '/functions/environment.php';
+require_once __DIR__ . '/functions/path.php';
+require_once __DIR__ . '/functions/url.php';
+require_once __DIR__ . '/functions/software.php';
+require_once __DIR__ . '/functions/filters.php';
+require_once __DIR__ . '/functions/handler.php';
+require_once __DIR__ . '/functions/headers.php';
+require_once __DIR__ . '/functions/settings.php';
+require_once __DIR__ . '/functions/api.php';
+require_once __DIR__ . '/functions/database.php';
+require_once __DIR__ . '/functions/options.php';
+require_once __DIR__ . '/functions/user.php';
+require_once __DIR__ . '/functions/auth.php';
+require_once __DIR__ . '/functions/filters.php';
+require_once __DIR__ . '/functions/translations.php';
+require_once __DIR__ . '/functions/route.php';
+require_once __DIR__ . '/functions/calendar.php';
+require_once __DIR__ . '/functions/admin.environment.php';
 
 if (ob_get_level() < 1) {
     ob_start();
@@ -27,19 +27,19 @@ if (ob_get_level() < 1) {
 register_shutdown_function('shutdown_handler');
 
 // require autoload
-require __DIR__.'/vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 
 $configBaseName = CONFIG_BASE_FILENAME;
 $configBaseName = substr($configBaseName, -4) !== 'php'
     ? DEFAULT_CONFIG_BASE_FILENAME
     : $configBaseName;
 
-if (file_exists(ROOT_PATH. DS .$configBaseName)) {
+if (file_exists(ROOT_DIR . DS . $configBaseName)) {
     /** @noinspection PhpIncludeInspection */
-    require_once ROOT_PATH . DS . $configBaseName;
-} elseif (file_exists(dirname(ROOT_PATH) . DS . $configBaseName)) {
+    require_once ROOT_DIR . DS . $configBaseName;
+} elseif (file_exists(dirname(ROOT_DIR) . DS . $configBaseName)) {
     /** @noinspection PhpIncludeInspection */
-    require_once dirname(ROOT_PATH) . DS . $configBaseName;
+    require_once dirname(ROOT_DIR) . DS . $configBaseName;
 } else {
     if (!defined('INSTALLATION_FILE')
         || (!INSTALLATION_FILE && basename($_SERVER['SCRIPT_FILENAME']) !== 'install.php')
@@ -52,9 +52,9 @@ if (file_exists(ROOT_PATH. DS .$configBaseName)) {
 
         defined('ADMIN_PATH') || define('ADMIN_PATH', get_scanned_admin_path());
         $adminPath = get_admin_path();
-        if (!file_exists(ROOT_PATH . $adminPath . '/install.php')) {
+        if (!file_exists(ROOT_DIR . $adminPath . '/install.php')) {
             $adminPath = get_scanned_admin_path();
-            if (!file_exists(ROOT_PATH . $adminPath . '/install.php')) {
+            if (!file_exists(ROOT_DIR . $adminPath . '/install.php')) {
                 $adminPath = null;
             }
         }
@@ -68,7 +68,7 @@ if (file_exists(ROOT_PATH. DS .$configBaseName)) {
             header('Content-Type: text/html', true, 500);
         }
 
-        include ROOT_TEMPLATES_PATH . '/error/install.php';
+        include ROOT_TEMPLATES_DIR . '/error/install.php';
         return;
     }
 }
@@ -93,6 +93,12 @@ defined('LOGIN_PATH') || define('LOGIN_PATH', DEFAULT_LOGIN_PATH);
 defined('UPLOADS_PATH') || define('UPLOADS_PATH', DEFAULT_UPLOADS_PATH);
 defined('THEMES_PATH') || define('THEMES_PATH', DEFAULT_THEMES_PATH);
 defined('MODULES_PATH') || define('MODULES_PATH', DEFAULT_MODULES_PATH);
+defined('CACHE_DIR') || define('CACHE_DIR', DEFAULT_CACHE_DIR);
+
+define('UPLOADS_DIR', get_uploads_dir());
+define('THEMES_DIR', get_themes_dir());
+define('MODULES_DIR', get_themes_dir());
+
 
 defined('ENABLE_MULTISITE') || define('ENABLE_MULTISITE', false);
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Helper;
 
 /**
@@ -8,17 +9,70 @@ namespace ArrayIterator\Helper;
 final class Normalizer
 {
     protected static $conversionTables = [
-        'À' => 'A',  'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A',
-        'Æ' => 'AE', 'Ç' => 'C', 'È' => 'E', 'É' => 'E', 'Ê' => 'E', 'Ë' => 'E',
-        'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I', 'Ð' => 'D', 'Ñ' => 'N',
-        'Ò' => 'O', 'Ó' => 'O', 'Ô' => 'O', 'Õ' => 'O', 'Ö' => 'O', '×' => 'x',
-        'Ø' => '0', 'Ù' => 'U', 'Ú' => 'U', 'Û' => 'U', 'Ü' => 'U', 'Ý' => 'Y',
-        'Þ' => 'b', 'ß' => 'B', 'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a',
-        'ä' => 'a', 'å' => 'a', 'æ' => 'ae', 'ç' => 'c', 'è' => 'e', 'é' => 'e',
-        'ê' => 'e', 'ë' => 'e', 'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i',
-        'ð' => 'o', 'ñ' => 'n', 'ò' => 'o', 'ó' => 'o', 'ô' => 'o', 'õ' => 'o',
-        'ö' => 'o', '÷' => '+', 'ø' => 'o', 'ù' => 'i', 'ú' => 'u', 'û' => 'u',
-        'ü' => 'u', 'ý' => 'y', 'þ' => 'B', 'ÿ' => 'y',
+        'À' => 'A',
+        'Á' => 'A',
+        'Â' => 'A',
+        'Ã' => 'A',
+        'Ä' => 'A',
+        'Å' => 'A',
+        'Æ' => 'AE',
+        'Ç' => 'C',
+        'È' => 'E',
+        'É' => 'E',
+        'Ê' => 'E',
+        'Ë' => 'E',
+        'Ì' => 'I',
+        'Í' => 'I',
+        'Î' => 'I',
+        'Ï' => 'I',
+        'Ð' => 'D',
+        'Ñ' => 'N',
+        'Ò' => 'O',
+        'Ó' => 'O',
+        'Ô' => 'O',
+        'Õ' => 'O',
+        'Ö' => 'O',
+        '×' => 'x',
+        'Ø' => '0',
+        'Ù' => 'U',
+        'Ú' => 'U',
+        'Û' => 'U',
+        'Ü' => 'U',
+        'Ý' => 'Y',
+        'Þ' => 'b',
+        'ß' => 'B',
+        'à' => 'a',
+        'á' => 'a',
+        'â' => 'a',
+        'ã' => 'a',
+        'ä' => 'a',
+        'å' => 'a',
+        'æ' => 'ae',
+        'ç' => 'c',
+        'è' => 'e',
+        'é' => 'e',
+        'ê' => 'e',
+        'ë' => 'e',
+        'ì' => 'i',
+        'í' => 'i',
+        'î' => 'i',
+        'ï' => 'i',
+        'ð' => 'o',
+        'ñ' => 'n',
+        'ò' => 'o',
+        'ó' => 'o',
+        'ô' => 'o',
+        'õ' => 'o',
+        'ö' => 'o',
+        '÷' => '+',
+        'ø' => 'o',
+        'ù' => 'i',
+        'ú' => 'u',
+        'û' => 'u',
+        'ü' => 'u',
+        'ý' => 'y',
+        'þ' => 'B',
+        'ÿ' => 'y',
     ];
 
     /**
@@ -35,7 +89,7 @@ final class Normalizer
      */
     public static function normalizeFileName(
         string $string
-    ) : string {
+    ): string {
         $contains = false;
         $string = preg_replace_callback('~[\xc0-\xff]+~', function ($match) use (&$contains) {
             $contains = true;
@@ -87,7 +141,7 @@ final class Normalizer
      * @param string $data
      * @return null|string|string[]
      */
-    public static function removeJSContent(string $data) : string
+    public static function removeJSContent(string $data): string
     {
         return preg_replace(
             '/<(script)[^>]+?>.*?<\/\\1>/smi',
@@ -100,7 +154,7 @@ final class Normalizer
      * @param string $path
      * @return string
      */
-    public static function normalizeSeparator(string $path) : string
+    public static function normalizeSeparator(string $path): string
     {
         return preg_replace('~[\\\|/]+~', DIRECTORY_SEPARATOR, $path);
     }
@@ -108,8 +162,10 @@ final class Normalizer
     /**
      * Balances tags of string using a modified stack.
      *
-     * @author Leonard Lin <leonard@acm.org>
-     * @license GPL
+     * @param string $text Text to be balanced.
+     * @return string Balanced text.
+     *
+     * Custom mods to be fixed to handle by system result output
      * @copyright November 4, 2001
      * @version 1.1
      *
@@ -118,10 +174,8 @@ final class Normalizer
      *           Added Cleaning Hooks
      *      1.0  First Version
      *
-     * @param string $text Text to be balanced.
-     * @return string Balanced text.
-     *
-     * Custom mods to be fixed to handle by system result output
+     * @author Leonard Lin <leonard@acm.org>
+     * @license GPL
      */
     public static function forceBalanceTags(string $text)
     {
@@ -131,12 +185,28 @@ final class Normalizer
         $newText = '';
         // Known single-entity/self-closing tags
         $single_tags = [
-            'area', 'base', 'basefont', 'br', 'col',
-            'command', 'embed', 'frame', 'hr', 'img',
-            'input', 'isindex', 'link', 'meta', 'param', 'source'
+            'area',
+            'base',
+            'basefont',
+            'br',
+            'col',
+            'command',
+            'embed',
+            'frame',
+            'hr',
+            'img',
+            'input',
+            'isindex',
+            'link',
+            'meta',
+            'param',
+            'source'
         ];
         $single_tags_2 = [
-            'img', 'meta', 'link', 'input'
+            'img',
+            'meta',
+            'link',
+            'input'
         ];
         // Tags that can be immediately nested within themselves
         $nestable_tags = ['blockquote', 'div', 'object', 'q', 'span'];
@@ -145,7 +215,7 @@ final class Normalizer
         $text = preg_replace('/<(\s+)?!(\s+)?(DOCTYPE)/i', '<!$3', $text);
         $rand = sprintf('%1$s_%2$s_%1$s', '%', mt_rand(10000, 50000));
         $randQuote = preg_quote($rand, '~');
-        $text = str_replace('<!', '< '.$rand, $text);
+        $text = str_replace('<!', '< ' . $rand, $text);
         // bug fix for comments - in case you REALLY meant to type '< !--'
         $text = str_replace('< !--', '<    !--', $text);
         // bug fix for LOVE <3 (and other situations with '<' before a number)
@@ -175,10 +245,10 @@ final class Normalizer
                     array_pop($tagStack);
                     $stackSize--;
                 } else { // closing tag not at top, search for it
-                    for ($j = $stackSize-1; $j >= 0; $j--) {
+                    for ($j = $stackSize - 1; $j >= 0; $j--) {
                         if ($tagStack[$j] == $tag) {
                             // add tag to tag queue
-                            for ($k = $stackSize-1; $k >= $j; $k--) {
+                            for ($k = $stackSize - 1; $k >= $j; $k--) {
                                 $tagQueue .= '</' . array_pop($tagStack) . '>';
                                 $stackSize--;
                             }
@@ -204,7 +274,7 @@ final class Normalizer
                     // ...but it isn't a known single-entity self-closing tag,
                     // then don't let it be treated as such and
                     // immediately close it with a closing tag (the tag will encapsulate no text as a result)
-                    if (! in_array($tag, $single_tags)) {
+                    if (!in_array($tag, $single_tags)) {
                         $regex[2] = trim(substr($regex[2], 0, -1)) . "></$tag";
                     }
                 } elseif (in_array($tag, $single_tags)) {
@@ -225,12 +295,12 @@ final class Normalizer
                 }
                 // Attributes
                 $attributes = $regex[2];
-                if (! empty($attributes) && $attributes[0] != '>') {
+                if (!empty($attributes) && $attributes[0] != '>') {
                     $attributes = ' ' . $attributes;
                 }
                 $tag = '<' . $tag . $attributes . '>';
                 //If already queuing a close tag, then put this tag on, too
-                if (! empty($tagQueue)) {
+                if (!empty($tagQueue)) {
                     $tagQueue .= $tag;
                     $tag = '';
                 }
@@ -257,7 +327,7 @@ final class Normalizer
     /**
      * Set cookie domain with .domain.ext for multi sub domain
      *
-     * @param  string  $domain
+     * @param string $domain
      * @return string|null|false $return domain ( .domain.com )
      */
     public static function splitCrossDomain(string $domain)
@@ -271,7 +341,7 @@ final class Normalizer
             $is_ip = filter_var($domain, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
         }
         if (!$is_ip) {
-            $parse  = parse_url('http://'.$domain.'/');
+            $parse = parse_url('http://' . $domain . '/');
             $domain = isset($parse['host']) ? $parse['host'] : null;
             if ($domain === null) {
                 return null;
@@ -287,9 +357,9 @@ final class Normalizer
         $domain = preg_replace('~[\~!@#$%^&*()+`{}\]\[/\';<>,\"?=|\\\]~', '', $domain);
         if (strpos($domain, '.') !== false) {
             if (preg_match('~(.*\.)+(.*\.)+(.*)~', $domain)) {
-                $return     = '.'.preg_replace('~(.*\.)+(.*\.)+(.*)~', '$2$3', $domain);
+                $return = '.' . preg_replace('~(.*\.)+(.*\.)+(.*)~', '$2$3', $domain);
             } else {
-                $return = '.'.$domain;
+                $return = '.' . $domain;
             }
         } else {
             $return = $domain;
@@ -301,7 +371,7 @@ final class Normalizer
      * @param string $slug
      * @return string
      */
-    public static function normalizeSlug(string $slug) : string
+    public static function normalizeSlug(string $slug): string
     {
         $slug = preg_replace('~[^a-z0-9\-_]~i', '-', trim($slug));
         $slug = preg_replace('~([\-_])+~', '$1', $slug);

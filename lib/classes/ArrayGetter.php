@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator;
 
 /**
@@ -18,7 +19,7 @@ class ArrayGetter implements \ArrayAccess, \Countable
 
     public function __get($name)
     {
-        return $this->data[$name]??null;
+        return $this->data[$name] ?? null;
     }
 
     public function __isset($name)

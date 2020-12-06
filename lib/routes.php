@@ -17,6 +17,6 @@ route_group(get_route_api_path(), function (RouteCollector $routeCollector) {
     is_route_api() && require __DIR__ . '/routes/api.php';
 });
 
-route_group('{path: (?!'.get_route_api_path().'/)}', function (RouteCollector $routeCollector) {
-    ! is_route_api() && require __DIR__ . '/routes/common.php';
+route_group('{path: (?!' . get_route_api_path() . '/)}', function (RouteCollector $routeCollector) {
+    !is_route_api() && require __DIR__ . '/routes/common.php';
 });

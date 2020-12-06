@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Database;
 
 /**
@@ -187,7 +188,7 @@ class Column
     /**
      * @return array
      */
-    public function toArray() : array
+    public function toArray(): array
     {
         return [
             'table_name' => $this->tableName,

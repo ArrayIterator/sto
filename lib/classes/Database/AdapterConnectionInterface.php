@@ -56,5 +56,5 @@ interface AdapterConnectionInterface extends QueryPrepareInterface
     /**
      * @return PDO|null
      */
-    public function getConnection() : PDO;
+    public function getConnection(): PDO;
 }

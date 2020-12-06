@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Database;
 
 use ArrayIterator\Database;
@@ -135,7 +136,7 @@ class Tables implements QueryPrepareInterface
     /**
      * @return string
      */
-    public function getDatabaseName() : string
+    public function getDatabaseName(): string
     {
         if (!$this->databaseName) {
             $q = $this->query('SELECT DATABASE() AS DB');
@@ -212,15 +213,15 @@ class Tables implements QueryPrepareInterface
     /**
      * @return string[]
      */
-    public function getListTable() : array
+    public function getListTable(): array
     {
         return array_keys($this->getTableList());
     }
 
     public function getTableDefinition(string $tableName)
     {
-        return $this->getTableList()[$tableName]??(
-                $this->getTableList()[strtolower($tableName)]??null
+        return $this->getTableList()[$tableName] ?? (
+                $this->getTableList()[strtolower($tableName)] ?? null
             );
     }
 

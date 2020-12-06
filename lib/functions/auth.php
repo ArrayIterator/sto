@@ -8,7 +8,7 @@ use ArrayIterator\Helper\Uuid;
  * @param string $additional
  * @return string
  */
-function create_security_hash(string $data, string $additional = '') : string
+function create_security_hash(string $data, string $additional = ''): string
 {
     return sha1(SECURITY_KEY . $data . SECURITY_SALT . $additional);
 }
@@ -53,7 +53,7 @@ function create_auth_hash(int $userId, string $type)
  * @param string $type
  * @return string
  */
-function create_json_hash(int $userId, string $type) : string
+function create_json_hash(int $userId, string $type): string
 {
     $hash = create_auth_hash($userId, $type);
     return sprintf(

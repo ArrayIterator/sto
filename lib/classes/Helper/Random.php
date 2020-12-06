@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Helper;
 
 use Throwable;
@@ -11,15 +12,15 @@ class Random
      * @return string
      * @noinspection PhpUnused
      */
-    public static function char(int $length = 64, ?string $char = null) : string
+    public static function char(int $length = 64, ?string $char = null): string
     {
         if ($length < 1) {
             return '';
         }
 
-        $chars  = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $chars .='~`! @#$%^&*()_-+={[}]|\:;"\'<,>.?/';
-        $chars = $char?:$chars;
+        $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $chars .= '~`! @#$%^&*()_-+={[}]|\:;"\'<,>.?/';
+        $chars = $char ?: $chars;
         $charactersLength = strlen($chars);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
@@ -32,7 +33,7 @@ class Random
      * @param int $bytes
      * @return string
      */
-    public static function bytes(int $bytes) : string
+    public static function bytes(int $bytes): string
     {
         static $pseudo = null;
 

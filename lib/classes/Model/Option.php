@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Model;
 
 use ArrayIterator\ArrayGetter;
@@ -31,7 +32,7 @@ class Option extends Model
      */
     public function getOptionName()
     {
-        return $this->data['option_name']??null;
+        return $this->data['option_name'] ?? null;
     }
 
     /**
@@ -85,10 +86,10 @@ class Option extends Model
         }
         if ($res) {
             $optionName = $res['option_name'];
-            $siteId = $res['site_id']??$res->getModelSiteId();
+            $siteId = $res['site_id'] ?? $res->getModelSiteId();
             static::$optionsRecord[$optionName][$siteId] = $res['option_value'];
         }
-        return $res?:false;
+        return $res ?: false;
     }
 
     /**
@@ -107,7 +108,7 @@ class Option extends Model
      */
     public function getName()
     {
-        return $this->data['option_name']??null;
+        return $this->data['option_name'] ?? null;
     }
 
     public function setOptionValue($value)
@@ -162,7 +163,7 @@ class Option extends Model
         int $siteId = null,
         bool $usePrevious = true
     ) {
-        $siteId = $siteId??$this->getModelSiteId();
+        $siteId = $siteId ?? $this->getModelSiteId();
         if ($usePrevious && isset(static::$optionsRecord[$optionName])
             && is_array(static::$optionsRecord[$optionName])
             && array_key_exists($siteId, static::$optionsRecord[$optionName])
@@ -183,7 +184,7 @@ class Option extends Model
 
     public function values(int $siteId = null, ...$optionNames)
     {
-        $siteId = $siteId??$this->getModelSiteId();
+        $siteId = $siteId ?? $this->getModelSiteId();
         $optionName = [];
         $c = 0;
         foreach ($optionNames as $item) {
@@ -224,7 +225,7 @@ class Option extends Model
 
     public function set($optionName, $optionValue, int $siteId = null)
     {
-        $siteId = $siteId??$this->getModelSiteId();
+        $siteId = $siteId ?? $this->getModelSiteId();
         try {
             $res = $this
                 ->prepare(
@@ -243,7 +244,7 @@ class Option extends Model
             if ($ex && !$this->isDisableArrayStorage()) {
                 static::$optionsRecord[$optionName][$siteId] = $optionValue;
             }
-            return (bool) $ex;
+            return (bool)$ex;
         } catch (Exception $e) {
             return false;
         } finally {

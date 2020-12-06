@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Helper\Area;
 
 use DateTimeInterface;
@@ -4817,7 +4818,7 @@ final class TimeZone
      * @param int|DateTimeInterface|DateTimeZone $time
      * @return DateTimeZone[]
      */
-    public function getTimeZones($time) : array
+    public function getTimeZones($time): array
     {
         $offset = $time;
         if ($time instanceof DateTimeInterface) {
@@ -4883,7 +4884,7 @@ final class TimeZone
      * @param string $code
      * @return array
      */
-    public function getTimeZonesByCountryCode(string $code) : array
+    public function getTimeZonesByCountryCode(string $code): array
     {
         $result = [];
         $code = strtoupper($code);

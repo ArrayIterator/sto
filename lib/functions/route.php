@@ -5,7 +5,7 @@ use FastRoute\RouteCollector;
 /**
  * @return RouteCollector
  */
-function route_collector() : RouteCollector
+function route_collector(): RouteCollector
 {
     return application()->getRoute()->getRouteCollector();
 }
@@ -89,7 +89,7 @@ function route_any(string $pattern, callable $callable)
  */
 function route_dispatch(string $httpMethod, string $uri = null)
 {
-    $uri = $uri??request_uri();
+    $uri = $uri ?? request_uri();
     $dispatched = route()->isDispatched();
     if (!$dispatched) {
         hook_run('before_dispatch');

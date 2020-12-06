@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Model;
 
 use ArrayIterator\Database\PrepareStatement;
@@ -16,12 +17,12 @@ abstract class AbstractOnlineModel extends Model
     /**
      * @return AbstractUserModel
      */
-    abstract public function getUserObject() : AbstractUserModel;
+    abstract public function getUserObject(): AbstractUserModel;
 
     /**
      * @return int
      */
-    public function getIntervalOnlineSecond() : int
+    public function getIntervalOnlineSecond(): int
     {
         return static::ONLINE_SECOND;
     }
@@ -32,7 +33,7 @@ abstract class AbstractOnlineModel extends Model
     public function replaceOffline()
     {
         $time = time();
-        if ($this->lastExecute && $this->lastExecute+4 > $time) {
+        if ($this->lastExecute && $this->lastExecute + 4 > $time) {
             return true;
         }
         try {
@@ -52,10 +53,11 @@ abstract class AbstractOnlineModel extends Model
 
         return false;
     }
+
     /**
      * @return int
      */
-    public function count() : int
+    public function count(): int
     {
         // fix offline
         $this->replaceOffline();
@@ -68,7 +70,7 @@ abstract class AbstractOnlineModel extends Model
         );
         $stmt = $this->prepare($sql);
         $stmt->execute();
-        return abs($stmt->fetchAssoc()['o']??0);
+        return abs($stmt->fetchAssoc()['o'] ?? 0);
     }
 
     /**

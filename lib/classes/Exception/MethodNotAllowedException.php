@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Exception;
 
 use Throwable;

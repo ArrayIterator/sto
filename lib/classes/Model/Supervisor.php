@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Model;
 
 /**
@@ -14,7 +15,7 @@ class Supervisor extends AbstractUserModel
     {
         switch ($column) {
             case 'disallow_admin':
-                return (bool) $value;
+                return (bool)$value;
         }
         return parent::sanitizeDatabaseValue($column, $value);
     }
@@ -23,7 +24,7 @@ class Supervisor extends AbstractUserModel
     {
         switch ($column) {
             case 'disallow_admin':
-                return (bool) $value;
+                return (bool)$value;
         }
         return parent::sanitizeDatabaseValue($column, $value);
     }

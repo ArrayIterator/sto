@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Model;
 
 use ArrayIterator\Database\PrepareStatement;
@@ -43,7 +44,7 @@ class Site extends Model
         $stmt = $this->findOneById($id);
         $res = $stmt->fetch();
         $stmt && $stmt->closeCursor();
-        return $res?:false;
+        return $res ?: false;
     }
 
     public function findById(int $id)
@@ -79,7 +80,7 @@ class Site extends Model
         $stmt = $this->findOneByHost($host);
         $res = $stmt->fetch();
         $stmt && $stmt->closeCursor();
-        return $res?:false;
+        return $res ?: false;
     }
 
     /**
@@ -110,7 +111,7 @@ class Site extends Model
         $stmt = $this->findOneByHost($host);
         $res = $stmt->fetch();
         $stmt && $stmt->closeCursor();
-        return $res?:false;
+        return $res ?: false;
     }
 
     /**
@@ -160,15 +161,15 @@ class Site extends Model
      */
     public function save(array $where = [])
     {
-        $id = $this->userData['id']??null;
+        $id = $this->userData['id'] ?? null;
         if ($id === null) {
-            $id = $where['id']??null;
+            $id = $where['id'] ?? null;
         }
         if ($id !== null && (!is_numeric($id) || abs($id) !== 1)) {
             return false;
         }
         $id = $id !== null ? abs($id) : null;
-        if ($id === 1 || (abs($this->data['id']??-3) === 1)) {
+        if ($id === 1 || (abs($this->data['id'] ?? -3) === 1)) {
             if (isset($this->userData['status']) && $this->userData['status'] !== 'active') {
                 $this->userData['status'] = 'active';
             }
@@ -180,13 +181,13 @@ class Site extends Model
     public function delete()
     {
         // disallow delete site id =1
-        $id = $this->userData['id']??null;
+        $id = $this->userData['id'] ?? null;
         if ($id !== null && (!is_numeric($id) || abs($id) !== 1)) {
             return false;
         }
 
         $id = $id !== null ? abs($id) : null;
-        if ($id === 1 || (abs($this->data['id']??-3) === 1)) {
+        if ($id === 1 || (abs($this->data['id'] ?? -3) === 1)) {
             return false;
         }
 

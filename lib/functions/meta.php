@@ -26,7 +26,7 @@ function application(): Application
 /**
  * @return TimeZoneConvert
  */
-function timezone_convert() : TimeZoneConvert
+function timezone_convert(): TimeZoneConvert
 {
     return \application()->getTimeZoneConvert();
 }
@@ -34,7 +34,7 @@ function timezone_convert() : TimeZoneConvert
 /**
  * @return TimeZone
  */
-function timezone() : TimeZone
+function timezone(): TimeZone
 {
     return \application()->getTimezone();
 }

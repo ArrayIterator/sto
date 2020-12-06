@@ -1,5 +1,5 @@
 <?php
-$error = $error??error_get_last();
+$error = $error ?? error_get_last();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -7,6 +7,6 @@ $error = $error??error_get_last();
     <title>Internal Error</title>
 </head>
 <body>
-<?php print_r($error);?>
+<?php print_r($error); ?>
 </body>
 </html>

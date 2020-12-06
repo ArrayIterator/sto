@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Database;
 
 /**
@@ -12,6 +13,7 @@ interface QueryPrepareInterface
      * @return AbstractResult|PdoResult|false
      */
     public function query(string $sql);
+
     /**
      * @param string $sql
      * @return AbstractResult|PdoResult|false

@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Model;
 
 
@@ -35,7 +36,7 @@ abstract class AbstractUserModel extends Model
      * @param string $pass
      * @return bool
      */
-    public function isPasswordMatch(string $pass) : bool
+    public function isPasswordMatch(string $pass): bool
     {
         $password = $this->getPassword();
         if (!is_string($password)) {
@@ -57,7 +58,7 @@ abstract class AbstractUserModel extends Model
      */
     private function getPassword()
     {
-        return $this->data['password']??null;
+        return $this->data['password'] ?? null;
     }
 
     public function setUsername(string $username)
@@ -109,7 +110,7 @@ abstract class AbstractUserModel extends Model
     public function __destruct()
     {
         if ($this->fromStatement && $this->database) {
-            $password = $this->data['password']??null;
+            $password = $this->data['password'] ?? null;
             $id = $this->getId();
             if (!$id
                 || $id < 1
@@ -149,7 +150,7 @@ abstract class AbstractUserModel extends Model
         if ($res = $stmt->fetch()) {
             $stmt->closeCursor();
         }
-        return $res?:false;
+        return $res ?: false;
     }
 
     public function findById(int $id)

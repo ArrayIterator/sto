@@ -144,11 +144,16 @@ function get_header(string $name)
  * @param string $headerName
  * @param string $headerValue
  * @param int|null $httpCode
+ * @param bool $removeHeader
  */
-function set_header(string $headerName, string $headerValue, int $httpCode = null)
-{
+function set_header(
+    string $headerName,
+    string $headerValue,
+    int $httpCode = null,
+    bool $removeHeader = true
+) {
     $headerName = normalize_header_name($headerName);
-    if (hook_apply('remove_header', $headerName) === true) {
+    if (hook_apply('remove_header', $removeHeader, $headerName) === true) {
         remove_header($headerName, false);
     }
 
@@ -246,4 +251,22 @@ function get_referer()
 function get_user_agent()
 {
     return get_header('User-Agent');
+}
+
+/**
+ * Set Nocache Header
+ */
+function set_no_cache_header()
+{
+    set_header('Cache-Control', 'no-cache, no-store, must-revalidate');
+    set_header('Pragma', 'no-cache');
+    set_header('Expires', '0');
+}
+
+/**
+ * Set Headers To Robots Index
+ */
+function set_no_index_header()
+{
+    set_header('X-Robots-Tag', 'noindex, nofollow, noarchive, noodp, noydir');
 }

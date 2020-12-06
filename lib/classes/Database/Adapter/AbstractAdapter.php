@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Database\Adapter;
 
 use ArrayIterator\Database\AbstractResult;
@@ -168,13 +169,13 @@ abstract class AbstractAdapter implements AdapterConnectionInterface
 
     public function hasConnection()
     {
-        return (bool) $this->connection;
+        return (bool)$this->connection;
     }
 
     /**
      * @return \PDO|null
      */
-    public function getConnection() : \PDO
+    public function getConnection(): \PDO
     {
         if (!$this->connection) {
             $this->connect();

@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Database\Adapter;
 
 use ArrayIterator\Database\AbstractResult;

@@ -27,7 +27,7 @@ function shutdown_handler()
         set_header('Content-Type', 'text/html; charset=utf-8', 500);
     }
 
-    include ROOT_TEMPLATES_PATH . '/error/error.php';
+    include ROOT_TEMPLATES_DIR . '/error/error.php';
 }
 
 /**
@@ -36,7 +36,7 @@ function shutdown_handler()
 function route_not_found_handler(Route $route)
 {
     set_header('Content-Type', 'text/html; charset=utf-8', 404);
-    include ROOT_TEMPLATES_PATH . '/error/not-found.php';
+    include ROOT_TEMPLATES_DIR . '/error/not-found.php';
 }
 
 /**
@@ -46,7 +46,7 @@ function route_not_found_handler(Route $route)
 function route_not_allowed_handler(Route $route, $allowedMethods = [])
 {
     set_header('Content-Type', 'text/html; charset=utf-8', 404);
-    include ROOT_TEMPLATES_PATH . '/error/not-allowed-method.php';
+    include ROOT_TEMPLATES_DIR . '/error/not-allowed-method.php';
 }
 
 function route_json_not_found_handler()
@@ -94,7 +94,7 @@ function do_exit(...$args)
     }
 
     if (is_object($args[0]) && method_exists($args[0], '__tostring')) {
-        $message = (string) $args[0];
+        $message = (string)$args[0];
     }
 
     if (is_int($args[0])) {
@@ -102,7 +102,8 @@ function do_exit(...$args)
     }
 
     if ($count > 1) {
-        if ($message === null && (is_string($args[1]) || is_object($args[0]) && method_exists($args[0], '__tostring'))) {
+        if ($message === null && (is_string($args[1]) || is_object($args[0]) && method_exists($args[0],
+                    '__tostring'))) {
             $message = $args[1];
         }
 
@@ -111,7 +112,7 @@ function do_exit(...$args)
         }
     }
 
-    $code = $code??0;
+    $code = $code ?? 0;
     if ($message) {
         echo $message;
     }

@@ -109,7 +109,7 @@ function get_current_supervisor_data()
 function get_current_supervisor()
 {
     $supervisor = get_current_supervisor_data();
-    return $supervisor ? ($supervisor['user']??false) : false;
+    return $supervisor ? ($supervisor['user'] ?? false) : false;
 }
 
 /**
@@ -124,7 +124,7 @@ function get_current_student()
 /**
  * @return bool
  */
-function is_supervisor() : bool
+function is_supervisor(): bool
 {
     return !!get_current_supervisor_data();
 }
@@ -132,7 +132,7 @@ function is_supervisor() : bool
 /**
  * @return bool
  */
-function is_student() : bool
+function is_student(): bool
 {
     return !!get_current_student_data();
 }
@@ -140,7 +140,7 @@ function is_student() : bool
 /**
  * @return bool
  */
-function is_allow_access_admin() : bool
+function is_allow_access_admin(): bool
 {
     $superVisor = get_current_supervisor();
     return (bool)hook_apply(
@@ -153,7 +153,7 @@ function is_allow_access_admin() : bool
 /**
  * @return bool
  */
-function is_allow_access_dashboard() : bool
+function is_allow_access_dashboard(): bool
 {
     $superVisor = get_current_student();
     return (bool)hook_apply(
@@ -166,7 +166,7 @@ function is_allow_access_dashboard() : bool
 /**
  * @return bool
  */
-function is_login() : bool
+function is_login(): bool
 {
     if (is_admin_page()) {
         return is_supervisor();

@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Model;
 
 use ArrayIterator\Application;
@@ -71,7 +72,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
      */
     public function getSiteId()
     {
-        $id = $this->data['site_id']??null;
+        $id = $this->data['site_id'] ?? null;
         return is_numeric($id) ? abs(intval($id)) : null;
     }
 
@@ -80,7 +81,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
      */
     public function getId()
     {
-        $id = $this->data['id']??null;
+        $id = $this->data['id'] ?? null;
         return is_numeric($id) ? abs(intval($id)) : null;
     }
 
@@ -102,7 +103,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
 
     public function setModelSiteId($siteId)
     {
-        $siteId = is_int($siteId) || is_numeric($siteId) ? (int) $siteId : $siteId;
+        $siteId = is_int($siteId) || is_numeric($siteId) ? (int)$siteId : $siteId;
         $this->siteId = $siteId;
     }
 
@@ -112,9 +113,9 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
      * @param Database|null $database
      * @return Model
      */
-    public static function create(array $data, Database $database = null) : Model
+    public static function create(array $data, Database $database = null): Model
     {
-        $database = $database?:Application::getInstance()->getDatabase();
+        $database = $database ?: Application::getInstance()->getDatabase();
         $model = new static($database);
         $columns = $model->getAvailableColumns();
         foreach ($data as $key => $item) {
@@ -196,7 +197,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         if (!$this->tableName) {
             $tableList = $this->database->getTables()->getListTable();
             if (isset(self::$tablesModelRecord[$classNameOri])) {
-                $this->tableName = self::$tablesModelRecord[$classNameOri]?:null;
+                $this->tableName = self::$tablesModelRecord[$classNameOri] ?: null;
             } else {
                 self::$tablesModelRecord[$classNameOri] = false;
                 $className = preg_replace('#^(?:.+[\\\])?(?:Model)?([^\\\]+)$#i', '$1', $classNameOri);
@@ -259,7 +260,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         if (!$this->primaryKey) {
             if (isset(self::$tablesModelRecordPrimary[$classNameOri])) {
                 $this->primaryKey = self::$tablesModelRecordPrimary[$classNameOri];
-                $this->primaryKey = $this->primaryKey?:null;
+                $this->primaryKey = $this->primaryKey ?: null;
             } else {
                 $table = $this->database->getTables()->getTableDefinition($this->tableName);
                 $this->primaryKey = $table->getUniqueSelector();
@@ -271,7 +272,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
     /**
      * @return string
      */
-    public function getTableName() : string
+    public function getTableName(): string
     {
         return $this->tableName;
     }
@@ -303,12 +304,12 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
     /**
      * @return array
      */
-    public function getAvailableColumns() : array
+    public function getAvailableColumns(): array
     {
         if ($this->availableColumns === null) {
             $this->availableColumns = $this->database
                     ->getTables()
-                    ->getTableDefinition($this->getTableName())??null;
+                    ->getTableDefinition($this->getTableName()) ?? null;
             $this->availableColumns = $this->availableColumns
                 ? $this->availableColumns->getListColumn()
                 : [];
@@ -319,7 +320,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
     /**
      *
      */
-    public function hasColumnSiteId() : bool
+    public function hasColumnSiteId(): bool
     {
         return in_array('site_id', $this->getAvailableColumns());
     }
@@ -332,7 +333,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         return $this->database;
     }
 
-    protected function getPrimaryKeysSelectors() : array
+    protected function getPrimaryKeysSelectors(): array
     {
         return $this
             ->database
@@ -341,7 +342,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
             ->getUniqueSelector();
     }
 
-    public function offsetExists($offset) : bool
+    public function offsetExists($offset): bool
     {
         return $this->__isset($offset);
     }
@@ -383,7 +384,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
                     return false;
                 }
 
-                return $res->fetchClose()?:false;
+                return $res->fetchClose() ?: false;
             }
         }
 
@@ -407,8 +408,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         $siteId = $siteId === null ? $this->getModelSiteId() : $siteId;
         if (is_int($siteId) && $this->hasColumnSiteId()) {
             $sql .= sprintf(' AND site_id=%d', $siteId);
-        }
-;
+        };
         $stmt = $this->prepare($sql);
         if ($stmt->execute([$value])) {
             return $stmt;
@@ -440,14 +440,14 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
                 ->getTables()
                 ->getTableDefinition($tableName);
             if (empty($primaryKeys)) {
-                $primaryKeys  = $tableDefinition->getPrimaryKey();
+                $primaryKeys = $tableDefinition->getPrimaryKey();
                 foreach ($tableDefinition->getUnique() as $item) {
                     $primaryKeys[] = $item;
                 }
             }
 
             if (!is_array($primaryKeys)) {
-                $primaryKeys = (array) $primaryKeys;
+                $primaryKeys = (array)$primaryKeys;
             }
 
             // * "boolean"
@@ -520,8 +520,8 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
             $sql .= sprintf(
                 "%s OFFSET %d",
                 (
-                    !is_int($limit)
-                        ? ' LIMIT -1' : sprintf('LIMIT %d', $limit)
+                !is_int($limit)
+                    ? ' LIMIT -1' : sprintf('LIMIT %d', $limit)
                 ),
                 $offset
             );
@@ -552,7 +552,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         int $siteId = null,
         Database $database = null
     ) {
-        $current = new static($database?:Application::getInstance()->getDatabase());
+        $current = new static($database ?: Application::getInstance()->getDatabase());
         return $current->find($value, $limit, $offset, $selector, $siteId);
     }
 
@@ -654,26 +654,26 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         }
 
         preg_match('~get[_]*(.+)$~i', $name, $match);
-        $method = $match[1]??null;
+        $method = $match[1] ?? null;
         $mode = 'GET';
         if (empty($method)) {
             preg_match('~set[_]*(.+)$~i', $name, $match);
             $mode = 'SET';
-            $method = $match[1]??null;
+            $method = $match[1] ?? null;
         }
         if (!$method) {
             throw new \BadMethodCallException(
-                sprintf('Call to undefined method %s:%s',get_class($this), $name)
+                sprintf('Call to undefined method %s:%s', get_class($this), $name)
             );
         }
 
         $availableColumns = $this->getAvailableColumns();
         if ($mode === 'SET') {
-            $method_2 = "set".str_replace('_', '', $method);
+            $method_2 = "set" . str_replace('_', '', $method);
             if (method_exists($this, $method_2)) {
                 return $this->$method_2(...$value);
             }
-            $method_3 = "set_".str_replace('_', '', $method);
+            $method_3 = "set_" . str_replace('_', '', $method);
             if (method_exists($this, $method_3)) {
                 return $this->$method_3(...$value);
             }
@@ -698,11 +698,11 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
                 }
             }
         } else {
-            $method_2 = "get".str_replace('_', '', $method);
+            $method_2 = "get" . str_replace('_', '', $method);
             if (method_exists($this, $method_2)) {
                 return $this->$method_2(...$value);
             }
-            $method_3 = "get_".str_replace('_', '', $method);
+            $method_3 = "get_" . str_replace('_', '', $method);
             if (method_exists($this, $method_3)) {
                 return $this->$method_3(...$value);
             }
@@ -729,7 +729,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         }
 
         throw new \BadMethodCallException(
-            sprintf('Call to undefined method %s:%s',get_class($this), $name)
+            sprintf('Call to undefined method %s:%s', get_class($this), $name)
         );
     }
 
@@ -753,7 +753,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         foreach ($this->data as $key => $datum) {
             if (!is_numeric($datum)
                 || !($column = $definition->getColumn($key))
-                || !($column= $column->getType())
+                || !($column = $column->getType())
             ) {
                 continue;
             }
@@ -774,7 +774,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
                 continue;
             }
             if (strpos($column, 'FLOAT') !== false && is_numeric($datum)) {
-                $this->data[$key] = (float) ($datum);
+                $this->data[$key] = (float)($datum);
                 continue;
             }
         }
@@ -814,15 +814,15 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
 
     public function save(array $where = [])
     {
-        $columns   = array_flip($this->getAvailableColumns());
-        $primary   = array_flip($this->getPrimaryKeysSelectors());
+        $columns = array_flip($this->getAvailableColumns());
+        $primary = array_flip($this->getPrimaryKeysSelectors());
         $userColumn = array_keys($this->userData);
         if (empty($userColumn)) {
             return 0;
         }
 
         $definition = $this->database->getTables()->getTableDefinition($this->getTableName());
-        $increment  = $definition->getAutoIncrement();
+        $increment = $definition->getAutoIncrement();
         unset($columns[$increment]);
 
         $status = 'insert';
@@ -914,8 +914,8 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
             return true;
         }
 
-        $value = $data->data[$selector]??($userData[$selector]??null);
-        $siteId = $this->database['site_id']??($userData['site_id']??null);
+        $value = $data->data[$selector] ?? ($userData[$selector] ?? null);
+        $siteId = $this->database['site_id'] ?? ($userData['site_id'] ?? null);
         if ($siteId === null) {
             $id = $this->getModelSiteId();
             if (is_int($id)) {
@@ -933,7 +933,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
             $args[] = $this->sanitizeDatabaseValue($key, $item);
         }
 
-        $sql  = rtrim($sql, ', ');
+        $sql = rtrim($sql, ', ');
         $sql .= sprintf(' WHERE %s=?', $selector);
         $args[] = $value;
         if (!$increment && $siteId) {
@@ -990,8 +990,8 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         // $availableColumns = array_flip($this->getAvailableColumns());
         foreach ($this->getPrimaryKeysSelectors() as $item) {
             $val = $this->fromStatement
-                ? ($this->data[$item]??null)
-                : ($this->userData[$item]??null);
+                ? ($this->data[$item] ?? null)
+                : ($this->userData[$item] ?? null);
             if (is_numeric($val) || is_string($val)) {
                 $values[$item] = $val;
             }
@@ -1005,7 +1005,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         $args = [];
         $c = 0;
         foreach ($values as $key => $item) {
-            $h = ':a_'. $key;
+            $h = ':a_' . $key;
             if ($c++ > 0) {
                 $sql .= ' AND ';
             }

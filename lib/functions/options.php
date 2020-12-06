@@ -21,7 +21,7 @@ function get_option(string $name, $default = null, int $siteId = null, bool $use
  * @param int|null $siteId
  * @return bool
  */
-function update_option(string $name, $value, int $siteId = null) : bool
+function update_option(string $name, $value, int $siteId = null): bool
 {
     return option()->set($name, $value, $siteId);
 }
@@ -31,7 +31,7 @@ function update_option(string $name, $value, int $siteId = null) : bool
  * @param mixed ...$args
  * @return ArrayGetter
  */
-function get_options(int $siteId = null, ...$args) : ArrayGetter
+function get_options(int $siteId = null, ...$args): ArrayGetter
 {
     return option()->values($siteId, ...$args);
 }
@@ -41,7 +41,7 @@ function get_options(int $siteId = null, ...$args) : ArrayGetter
  * @param int|null $siteId
  * @return bool
  */
-function update_options(array $value, int $siteId = null) : bool
+function update_options(array $value, int $siteId = null): bool
 {
     if (empty($value)) {
         return false;
@@ -59,7 +59,7 @@ function update_options(array $value, int $siteId = null) : bool
         return false;
     }
 
-    $siteId = $siteId ?? get_current_site_id()?:$options->getSiteId();
+    $siteId = $siteId ?? get_current_site_id() ?: $options->getSiteId();
     $optionTable = $options->getTableName();
     $sql = sprintf(
         'INSERT INTO %s (site_id, option_name, option_value) VALUES ',
@@ -77,7 +77,7 @@ function update_options(array $value, int $siteId = null) : bool
         $sql .= sprintf('(%s, %s, %s), ', $siteId, $h, $r);
     }
     $sql = rtrim($sql, ', ');
-    $sql.= ' ON DUPLICATE KEY UPDATE option_name=VALUE(option_name), option_value=VALUE(option_value)';
+    $sql .= ' ON DUPLICATE KEY UPDATE option_name=VALUE(option_name), option_value=VALUE(option_value)';
 
     $stmt = database_prepare(
         $sql
@@ -94,11 +94,11 @@ function update_options(array $value, int $siteId = null) : bool
  * @param int|null $siteId
  * @return bool
  */
-function delete_option(string $name, int $siteId = null) : bool
+function delete_option(string $name, int $siteId = null): bool
 {
     $options = option();
     $siteId = func_num_args() === 1
-        ? (get_current_site_id()?:$options->getSiteId())
+        ? (get_current_site_id() ?: $options->getSiteId())
         : $siteId;
     $sql = sprintf(
         'DELETE FROM %s WHERE `site_id`%s AND option_name=?',
@@ -108,7 +108,7 @@ function delete_option(string $name, int $siteId = null) : bool
     $stmt = database_prepare($sql);
     $res = $stmt->execute([$name]);
     $stmt->closeCursor();
-    return (bool) $res;
+    return (bool)$res;
 }
 
 /**
@@ -116,7 +116,7 @@ function delete_option(string $name, int $siteId = null) : bool
  * @param int|null $siteId
  * @return bool
  */
-function delete_options(array $name, int $siteId = null) : bool
+function delete_options(array $name, int $siteId = null): bool
 {
     if (empty($name)) {
         return false;
@@ -134,7 +134,7 @@ function delete_options(array $name, int $siteId = null) : bool
 
     $options = option();
     $siteId = func_num_args() === 1
-        ? (get_current_site_id()?:$options->getSiteId())
+        ? (get_current_site_id() ?: $options->getSiteId())
         : $siteId;
     $sql = sprintf(
         'DELETE FROM %s WHERE `site_id`%s',
@@ -149,5 +149,5 @@ function delete_options(array $name, int $siteId = null) : bool
     $stmt = database_prepare($sql);
     $res = $stmt->execute(array_keys($name));
     $stmt->closeCursor();
-    return (bool) $res;
+    return (bool)$res;
 }

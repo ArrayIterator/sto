@@ -86,7 +86,7 @@ function get_device_browser()
         return $currentBrowser = BROWSER_NETSCAPE_4;
     }
 
-    return $currentBrowser?:null;
+    return $currentBrowser ?: null;
 }
 
 /**
@@ -139,7 +139,7 @@ function get_web_server(): string
 /**
  * @return bool
  */
-function is_windows() : bool
+function is_windows(): bool
 {
     static $win = null;
     if ($win === null) {
@@ -151,7 +151,7 @@ function is_windows() : bool
 /**
  * @return bool
  */
-function is_unix() : bool
+function is_unix(): bool
 {
     return !is_windows();
 }

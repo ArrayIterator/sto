@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator;
 
 use FastRoute\DataGenerator\GroupCountBased;
@@ -128,6 +129,7 @@ class Route
     {
         $this->add('PUT', $pattern, $handler);
     }
+
     public function post(string $pattern, callable $handler)
     {
         $this->add('POST', $pattern, $handler);
@@ -155,7 +157,7 @@ class Route
         $this->dispatched = true;
         if (!$this->routeInfo) {
             $httpMethod = strtoupper($httpMethod);
-            $uri = $uri??$_SERVER['REQUEST_URI'];
+            $uri = $uri ?? $_SERVER['REQUEST_URI'];
             // Strip query string (?foo=bar) and decode URI
             if (false !== $pos = strpos($uri, '?')) {
                 $uri = substr($uri, 0, $pos);
@@ -167,12 +169,12 @@ class Route
             if (!is_array($route)
                 || !isset($route[0])
                 || !in_array($route[0], [
-                        Dispatcher::FOUND,
-                        Dispatcher::NOT_FOUND,
-                        Dispatcher::METHOD_NOT_ALLOWED,
-                    ], true)
+                    Dispatcher::FOUND,
+                    Dispatcher::NOT_FOUND,
+                    Dispatcher::METHOD_NOT_ALLOWED,
+                ], true)
                 || $route[0] === Dispatcher::FOUND
-                    && (!isset($route[1]) || !is_callable($route[1]))
+                && (!isset($route[1]) || !is_callable($route[1]))
             ) {
                 $route = $routeInfo;
             }

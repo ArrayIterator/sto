@@ -20,6 +20,9 @@
     "ext-curl": "*",
     "ext-json": "*",
     "ext-pdo": "*",
+    "ext-date": "*",
+    "ext-redis": "*",
+    "ext-mbstring": "*",
     "ext-calendar": "*",
     "nikic/fast-route": "v1.3.0",
     "guzzlehttp/guzzle": "^6"
