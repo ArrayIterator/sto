@@ -89,47 +89,6 @@ function sanitize_redirect(string $location): string
 }
 
 /**
- * @param string $location
- * @param int $status
- * @param string|null $x_redirect_by
- * @return bool
- */
-function redirect(
-    string $location,
-    int $status = 302,
-    string $x_redirect_by = 'Sto'
-): bool {
-    global $is_IIS;
-
-    $location = hook_apply('redirect', $location, $status);
-    $status = hook_apply('redirect_status', $status, $location);
-
-    if (!is_string($location)) {
-        return false;
-    }
-
-    if ($status < 300 || 399 < $status) {
-        do_exit('HTTP redirect status code must be a redirection code, 3xx.', 255);
-    }
-
-    $location = sanitize_redirect($location);
-
-    if (!$is_IIS && PHP_SAPI != 'cgi-fcgi') {
-        // This causes problems on IIS and some FastCGI setups.
-        set_status_header($status);
-    }
-
-    $x_redirect_by = hook_apply('x_redirect_by', $x_redirect_by, $status, $location);
-    if (is_string($x_redirect_by) && trim($x_redirect_by)) {
-        set_header("X-Redirect-By", trim($x_redirect_by));
-    }
-
-    set_header('Location', $location, $status);
-
-    return true;
-}
-
-/**
  * @param string $path
  * @return string
  */
