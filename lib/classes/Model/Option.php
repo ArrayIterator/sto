@@ -13,16 +13,6 @@ use Exception;
 class Option extends Model
 {
     /**
-     * @var array
-     */
-    protected static $optionsRecord = [];
-
-    /**
-     * @var bool
-     */
-    protected $disableArrayStorage = false;
-
-    /**
      * @var string
      */
     protected $tableName = 'sto_options';
@@ -36,44 +26,6 @@ class Option extends Model
     }
 
     /**
-     * @return bool
-     */
-    public function isDisableArrayStorage(): bool
-    {
-        return $this->disableArrayStorage;
-    }
-
-    /**
-     * @param bool $disableArrayStorage
-     */
-    public function setDisableArrayStorage(bool $disableArrayStorage)
-    {
-        $this->disableArrayStorage = $disableArrayStorage;
-    }
-
-    /**
-     * @return array
-     */
-    public function getOptionsRecord(): array
-    {
-        return static::$optionsRecord;
-    }
-
-    public function setRecord(string $optionName, $optionValue, int $siteId)
-    {
-        static::$optionsRecord[$optionName][$siteId] = $optionValue;
-    }
-
-    public function clearRecords(int $siteId = null)
-    {
-        if ($siteId === null) {
-            static::$optionsRecord = [];
-            return;
-        }
-        unset(static::$optionsRecord[$siteId]);
-    }
-
-    /**
      * @param string $name
      * @param int|null $siteId
      * @return Option|false
@@ -84,11 +36,7 @@ class Option extends Model
         if ($res = $stmt->fetch()) {
             $stmt->closeCursor();
         }
-        if ($res) {
-            $optionName = $res['option_name'];
-            $siteId = $res['site_id'] ?? $res->getModelSiteId();
-            static::$optionsRecord[$optionName][$siteId] = $res['option_value'];
-        }
+
         return $res ?: false;
     }
 
@@ -117,6 +65,7 @@ class Option extends Model
             $this->data['option_value'] = StringFilter::unSerialize($value);
             return;
         }
+
         $this->data['option_value'] = $value;
     }
 
@@ -151,32 +100,24 @@ class Option extends Model
     }
 
     /**
-     * @param string|null $optionName
+     * @param string $optionName
      * @param null $default
      * @param int|null $siteId
-     * @param bool $usePrevious
-     * @return mixed|string|null
+     * @param $found
+     * @return mixed|null
      */
     public function value(
         string $optionName,
         $default = null,
         int $siteId = null,
-        bool $usePrevious = true
+        &$found = null
     ) {
         $siteId = $siteId ?? $this->getModelSiteId();
-        if ($usePrevious && isset(static::$optionsRecord[$optionName])
-            && is_array(static::$optionsRecord[$optionName])
-            && array_key_exists($siteId, static::$optionsRecord[$optionName])
-        ) {
-            return static::$optionsRecord[$optionName];
-        }
-
+        $found = false;
         $res = $this->getByName($optionName, $siteId);
         if ($res) {
-            if ($this->isDisableArrayStorage()) {
-                return $res['option_value'];
-            }
-            return static::$optionsRecord[$optionName][$siteId] = $res['option_value'];
+            $found = true;
+            return $res['option_value'];
         }
 
         return $default;
@@ -213,9 +154,6 @@ class Option extends Model
 
         while ($row = $stmt->fetch()) {
             $optionName = $row['option_name'];
-            if (!$this->isDisableArrayStorage()) {
-                static::$optionsRecord[$optionName][$siteId] = $row['option_value'];
-            }
             $result->set($optionName, $row['option_value']);
         }
         $stmt->closeCursor();
@@ -223,7 +161,13 @@ class Option extends Model
         return $result;
     }
 
-    public function set($optionName, $optionValue, int $siteId = null)
+    /**
+     * @param $optionName
+     * @param $optionValue
+     * @param int|null $siteId
+     * @return bool
+     */
+    public function set($optionName, $optionValue, int $siteId = null): bool
     {
         $siteId = $siteId ?? $this->getModelSiteId();
         try {
@@ -241,9 +185,6 @@ class Option extends Model
                 ':v' => StringFilter::serialize($optionValue),
                 ':i' => $siteId
             ]);
-            if ($ex && !$this->isDisableArrayStorage()) {
-                static::$optionsRecord[$optionName][$siteId] = $optionValue;
-            }
             return (bool)$ex;
         } catch (Exception $e) {
             return false;

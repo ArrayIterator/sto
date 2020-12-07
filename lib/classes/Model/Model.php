@@ -15,7 +15,6 @@ use ArrayIterator\Database\QueryPrepareInterface;
  */
 abstract class Model implements QueryPrepareInterface, \ArrayAccess
 {
-
     /**
      * @var int
      */
@@ -669,6 +668,15 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
 
         $availableColumns = $this->getAvailableColumns();
         if ($mode === 'SET') {
+            $method_2 = "set" . $method;
+            if (method_exists($this, $method_2)) {
+                return $this->$method_2(...$value);
+            }
+            $method_2 = "set_" . $method;
+            if (method_exists($this, $method_2)) {
+                return $this->$method_2(...$value);
+            }
+
             $method_2 = "set" . str_replace('_', '', $method);
             if (method_exists($this, $method_2)) {
                 return $this->$method_2(...$value);
@@ -698,6 +706,15 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
                 }
             }
         } else {
+            $method_2 = "get" . $method;
+            if (method_exists($this, $method_2)) {
+                return $this->$method_2(...$value);
+            }
+            $method_2 = "get_" . $method;
+            if (method_exists($this, $method_2)) {
+                return $this->$method_2(...$value);
+            }
+
             $method_2 = "get" . str_replace('_', '', $method);
             if (method_exists($this, $method_2)) {
                 return $this->$method_2(...$value);
