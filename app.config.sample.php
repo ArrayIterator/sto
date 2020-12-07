@@ -3,7 +3,7 @@
  * Example File Configuration
  */
 // if access Direct, do the redirection
-if (($_SERVER['SCRIPT_FILENAME']??null) === __FILE__) {
+if (($_SERVER['SCRIPT_FILENAME'] ?? null) === __FILE__) {
     !headers_sent() && header('Location: ./', true, 302);
 }
 
@@ -57,9 +57,9 @@ define('COOKIE_STUDENT_NAME', 'sto_student');
  * @const THEME_PATH theme
  * -------------------------------
  */
-define('ADMIN_PATH' , '/admin');
-define('LOGIN_PATH' , '/login');
-define('THEMES_PATH' , '/themes');
+define('ADMIN_PATH', '/admin');
+define('LOGIN_PATH', '/login');
+define('THEMES_PATH', '/themes');
 define('UPLOADS_PATH', '/uploads');
 define('MODULES_PATH', '/modules');
 define('CACHE_DIR', __DIR__ . '/cache');
