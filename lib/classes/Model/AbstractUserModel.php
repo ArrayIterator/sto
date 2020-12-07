@@ -150,6 +150,7 @@ abstract class AbstractUserModel extends Model
         if ($res = $stmt->fetch()) {
             $stmt->closeCursor();
         }
+
         return $res ?: false;
     }
 

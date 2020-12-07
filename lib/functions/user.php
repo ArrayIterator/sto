@@ -1,5 +1,6 @@
 <?php
 
+use ArrayIterator\Helper\StringFilter;
 use ArrayIterator\Model\Supervisor;
 
 /**
@@ -19,13 +20,12 @@ function get_cookie_student_data()
 {
     $cookie = cookie(COOKIE_STUDENT_NAME);
     if ($cookie === null) {
-        return null;
-    }
-    if (!is_string($cookie)) {
-        return false;
+        $cookie = null;
+    } elseif (!is_string($cookie)) {
+        $cookie = false;
     }
 
-    return $cookie;
+    return hook_apply('cookie_student_data', $cookie);
 }
 
 /**
@@ -35,13 +35,12 @@ function get_cookie_supervisor_data()
 {
     $cookie = cookie(COOKIE_SUPERVISOR_NAME);
     if ($cookie === null) {
-        return null;
-    }
-    if (!is_string($cookie)) {
-        return false;
+        $cookie = null;
+    } elseif (!is_string($cookie)) {
+        $cookie = false;
     }
 
-    return $cookie;
+    return hook_apply('cookie_supervisor_data', $cookie);
 }
 
 /**
@@ -57,18 +56,41 @@ function get_current_student_data()
     $student = false;
     $cookies = get_cookie_student_data();
     if ($cookies && is_string($cookies)) {
-        if (($cookies = validate_json_hash($cookies))
-            && is_int($cookies['a'])
-            && ($data = student()->findOneById($cookies['a'])->fetchClose())
-        ) {
-            student_online()->setOnline($data);
-            $student = [
-                'id' => $cookies['a'],
-                'uuid' => $cookies['u'],
-                'sid' => $cookies['s'],
-                'user' => $data,
-            ];
+        $cookies = base64_decode($cookies);
+        if (StringFilter::isBinary($cookies)) {
+            return false;
         }
+        $cookies = $cookies ? validate_json_hash($cookies) : false;
+        if (!is_array($cookies)
+            || !isset(
+                $cookies['user_id'],
+                $cookies['site_id'],
+                $cookies['type'],
+                $cookies['hash'],
+                $cookies['hash_type']
+            )
+            || $cookies['type'] !== STUDENT
+            || !is_int($cookies['user_id'])
+            || !is_int($cookies['site_id'])
+            || !($data = \student()->findOneById($cookies['user_id'])->fetchClose())
+            || ($data->getSiteId() ?? $cookies['site_id']) !== $cookies['site_id']
+        ) {
+            return false;
+        }
+
+        if (hook_apply('set_student_online', true) === true) {
+            student_online()->setOnline($data);
+        }
+
+        $student = [
+            'user_id' => $cookies['user_id'],
+            'site_id' => $cookies['site_id'],
+            'uuid' => $cookies['uuid'],
+            'type' => $cookies['type'],
+            'hash' => $cookies['hash'],
+            'hash_type' => $cookies['hash_type'],
+            'user' => $data,
+        ];
     }
 
     return $student;
@@ -80,24 +102,46 @@ function get_current_student_data()
 function get_current_supervisor_data()
 {
     static $supervisor = null;
+
     if ($supervisor !== null) {
         return $supervisor;
     }
+
     $supervisor = false;
     $cookies = get_cookie_supervisor_data();
-    if ($cookies && is_string($cookies)) {
-        if (($cookies = validate_json_hash($cookies))
-            && is_int($cookies['a'])
-            && ($data = \supervisor()->findOneById($cookies['a'])->fetchClose())
-        ) {
-            supervisor_online()->setOnline($data);
-            $supervisor = [
-                'id' => $cookies['a'],
-                'uuid' => $cookies['u'],
-                'sid' => $cookies['s'],
-                'user' => $data
-            ];
+    if (is_string($cookies)) {
+        $cookies = base64_decode($cookies);
+        if (StringFilter::isBinary($cookies)) {
+            return false;
         }
+        if (!is_array(($cookies = $cookies ? validate_json_hash($cookies) : false))
+            || !isset(
+                $cookies['user_id'],
+                $cookies['site_id'],
+                $cookies['type'],
+                $cookies['hash'],
+                $cookies['hash_type']
+            )
+            || $cookies['type'] !== SUPERVISOR
+            || !is_int($cookies['user_id'])
+            || !is_int($cookies['site_id'])
+            || !($data = \supervisor()->findOneById($cookies['user_id'])->fetchClose())
+            || $data->getSiteId() !== $cookies['site_id']
+        ) {
+            return false;
+        }
+        if (hook_apply('set_supervisor_online', true) === true) {
+            supervisor_online()->setOnline($data);
+        }
+        $supervisor = [
+            'user_id' => $cookies['user_id'],
+            'site_id' => $cookies['site_id'],
+            'uuid' => $cookies['uuid'],
+            'type' => $cookies['type'],
+            'hash' => $cookies['hash'],
+            'hash_type' => $cookies['hash_type'],
+            'user' => $data,
+        ];
     }
 
     return $supervisor;

@@ -17,6 +17,8 @@ define('DEFAULT_THEMES_PATH', '/themes');
 define('DEFAULT_MODULES_PATH', '/modules');
 
 // ENV
+define('SUPERVISOR', 'supervisor');
+define('STUDENT', 'student');
 define('MICRO_TIME_FLOAT', microtime(true));
 define('REQUEST_URI', $_SERVER['REQUEST_URI']);
 

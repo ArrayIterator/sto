@@ -13,6 +13,7 @@ function json_success($data, $options = JSON_UNESCAPED_SLASHES)
         $options = JSON_UNESCAPED_SLASHES;
     }
 
+    $options = (int)hook_apply('json_success_options', $options, $data);
     return json_encode(hook_apply('json_success', ['data' => $data]), $options);
 }
 
@@ -42,7 +43,7 @@ function json_error(string $message, $data = null, $options = JSON_UNESCAPED_SLA
     }
 
     $response = hook_apply('json_error', $response, $message, $data);
-    $options = (int)hook_apply('json_options', $options, $response, $message, $data);
+    $options = (int)hook_apply('json_error_options', $options, $response, $message, $data);
     return json_encode($response, $options);
 }
 

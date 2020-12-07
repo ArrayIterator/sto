@@ -123,7 +123,7 @@ function do_exit(...$args)
 /**
  * @return true
  */
-function return_true() : bool
+function return_true(): bool
 {
     return true;
 }
@@ -131,7 +131,7 @@ function return_true() : bool
 /**
  * @return false
  */
-function return_false() : bool
+function return_false(): bool
 {
     return false;
 }

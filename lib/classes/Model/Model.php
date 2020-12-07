@@ -405,9 +405,13 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         $tableName = $this->getTableName();
         $sql = sprintf('SELECT * FROM %s WHERE %s=?', $tableName, $selector);
         $siteId = $siteId === null ? $this->getModelSiteId() : $siteId;
-        if (is_int($siteId) && $this->hasColumnSiteId()) {
+        if (is_int($siteId)
+            && $this->hasColumnSiteId()
+            && $this->getAutoIncrementColumn() !== $selector
+        ) {
             $sql .= sprintf(' AND site_id=%d', $siteId);
         };
+
         $stmt = $this->prepare($sql);
         if ($stmt->execute([$value])) {
             return $stmt;
@@ -511,7 +515,9 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         );
 
         $siteId = $siteId === null ? $this->getModelSiteId() : $siteId;
-        if (is_numeric($siteId) && is_int(abs($siteId)) && $this->hasColumnSiteId()) {
+        if (is_numeric($siteId) && is_int(abs($siteId)) && $this->hasColumnSiteId()
+            && $this->getAutoIncrementColumn() !== $selector
+        ) {
             $sql = sprintf(' AND site_id=%d', abs($siteId));
         }
 

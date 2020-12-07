@@ -7,7 +7,7 @@ $loggedAs = [];
 $data = get_current_student_data();
 if ($data) {
     $loggedAs['student'] = [
-        'id' => $data['id'],
+        'id' => $data['user_id'],
         'uuid' => $data['uuid'],
         'username' => $data['user']->username,
     ];
@@ -16,7 +16,7 @@ if ($data) {
 $data = get_current_supervisor_data();
 if ($data) {
     $loggedAs['supervisor'] = [
-        'id' => $data['id'],
+        'id' => $data['user_id'],
         'uuid' => $data['uuid'],
         'username' => $data['user']->username,
     ];

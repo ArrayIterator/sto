@@ -6,16 +6,17 @@ namespace ArrayIterator\Helper;
  * Class Uuid
  * @package ArrayIterator\Helper
  */
-class Uuid
+class UuidV4
 {
     /**
      * Generate UUID
      *
+     * @param int $case use CASE_LOWER|CASE_UPPER
      * @return string
      */
-    public static function generate(): string
+    public static function generate(int $case = CASE_LOWER): string
     {
-        return sprintf(
+        $uuid = sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
             // 32 bits for "time_low"
             mt_rand(0, 0xffff),
@@ -34,20 +35,30 @@ class Uuid
             mt_rand(0, 0xffff),
             mt_rand(0, 0xffff)
         );
+        return $case === CASE_UPPER ? strtoupper($uuid) : $uuid;
     }
 
     /**
-     * @param string|null $uuid
+     * @param string $uuid
+     * @param int|null $case CASE_LOWER|CASE_UPPER
      * @return bool
      */
-    public static function validate(string $uuid): bool
-    {
+    public static function validate(
+        string $uuid,
+        int $case = null
+    ): bool {
         if (!$uuid) {
             return false;
         }
+        $regex = '~^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$~';
+        $case === null && $regex .= 'i';
+        if ($case === CASE_LOWER) {
+            $regex = strtolower($regex);
+        }
+
         // 1070fd92-61ad-47bc-b749-613d6fd0b30d
         return (bool)preg_match(
-            '~^[a-f0-9]{8}[\-]([a-f0-9]{4}[\-]){3}[a-f0-9]{12}$~',
+            $regex,
             $uuid
         );
     }

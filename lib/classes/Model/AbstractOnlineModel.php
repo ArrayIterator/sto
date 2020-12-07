@@ -154,7 +154,11 @@ abstract class AbstractOnlineModel extends Model
         return $stmt->execute([$id]);
     }
 
-    public function delete(AbstractUserModel $student)
+    /**
+     * @param AbstractUserModel $student
+     * @return bool
+     */
+    public function remove(AbstractUserModel $student) : bool
     {
         $id = $student->getId();
         if (!$student->isFromStatement()) {

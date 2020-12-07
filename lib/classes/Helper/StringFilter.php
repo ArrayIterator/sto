@@ -407,4 +407,14 @@ final class StringFilter
 
         return $regexP;
     }
+
+    public static function sha256(string $string) : string
+    {
+        return hash('sha256', $string);
+    }
+
+    public static function sha512(string $string) : string
+    {
+        return hash('sha512', $string);
+    }
 }
