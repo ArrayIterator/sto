@@ -32,6 +32,11 @@ define('SECOND_IN_YEAR', SECOND_IN_DAY * 365);
 define('CURRENT_YEAR', (int)date('Y'));
 define('CURRENT_MONTH', (int)date('m'));
 
+define('KB_IN_BYTES', 1024);
+define('MB_IN_BYTES', 1024 * KB_IN_BYTES);
+define('GB_IN_BYTES', 1024 * MB_IN_BYTES);
+define('TB_IN_BYTES', 1024 * GB_IN_BYTES);
+
 // BASE
 define('DEFAULT_CONFIG_BASE_FILENAME', 'app.config.php');
 defined('CONFIG_BASE_FILENAME') || define('CONFIG_BASE_FILENAME', DEFAULT_CONFIG_BASE_FILENAME);
