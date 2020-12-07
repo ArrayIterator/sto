@@ -121,6 +121,30 @@ function do_exit(...$args)
 }
 
 /**
+ * @return true
+ */
+function return_true() : bool
+{
+    return true;
+}
+
+/**
+ * @return false
+ */
+function return_false() : bool
+{
+    return false;
+}
+
+/**
+ * @return null
+ */
+function return_null()
+{
+    return null;
+}
+
+/**
  * @param string $data
  * @param bool|null $exit
  */
@@ -150,4 +174,14 @@ function module_get(string $name)
 function module_exist(string $name): bool
 {
     return (bool)module_get($name);
+}
+
+/**
+ * @param string $name
+ * @return Module|false only return valid modulex
+ */
+function get_module(string $name)
+{
+    $mod = module_get($name);
+    return $mod && $mod->isValid() ? $mod : false;
 }

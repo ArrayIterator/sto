@@ -130,7 +130,7 @@ if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
         if (!is_string($moduleName)) {
             continue;
         }
-        if (!($module = module_get($moduleName)) || !$module->isValid() || !$module->isSiteWide()) {
+        if (!($module = get_module($moduleName)) || !$module->isSiteWide()) {
             continue;
         }
 
@@ -152,7 +152,7 @@ if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
             continue;
         }
 
-        if (!($module = module_get($moduleName)) || ! $module->isValid() || !$module->isSiteWide()) {
+        if (!($module = get_module($moduleName)) || !$module->isSiteWide()) {
             continue;
         }
 
