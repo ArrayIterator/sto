@@ -3,6 +3,7 @@
 namespace ArrayIterator\Cache;
 
 use ArrayIterator\Cache\Adapter\CacheAdapterInterface;
+use ArrayIterator\Cache\Adapter\ObjectCache;
 
 /**
  * Class Cache

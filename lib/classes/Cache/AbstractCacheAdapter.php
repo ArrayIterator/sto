@@ -2,7 +2,7 @@
 
 namespace ArrayIterator\Cache;
 
-use ArrayIterator\Cache\Adapter\CacheAdapterInterface;
+use ArrayIterator\Cache\CacheAdapterInterface;
 
 /**
  * Class AbstractCacheAdapter
@@ -59,7 +59,7 @@ class AbstractCacheAdapter implements CacheAdapterInterface
         $this->cachePrefix = $this->siteId ? $this->siteId . ':' : '';
     }
 
-    public function connect() : bool
+    public function connect(): bool
     {
         return true;
     }
@@ -171,6 +171,29 @@ class AbstractCacheAdapter implements CacheAdapterInterface
         return true;
     }
 
+    /**
+     * @param float|int|string $key
+     * @param string $group
+     * @return bool
+     */
+    public function delete($key, string $group = self::DEFAULT_GROUP): bool
+    {
+        if (empty($group)) {
+            $group = self::DEFAULT_GROUP;
+        }
+
+        if (!isset($this->global_groups[$group])) {
+            $key = $this->cachePrefix . $key;
+        }
+
+        if (!$this->exist($key, $group)) {
+            return false;
+        }
+
+        unset($this->cache[$group][$key]);
+        return true;
+    }
+
     public function replace($key, $data, string $group = self::DEFAULT_GROUP, int $expire = 0): bool
     {
         if (empty($group)) {
@@ -189,6 +212,12 @@ class AbstractCacheAdapter implements CacheAdapterInterface
         return $this->set($key, $data, $group, (int)$expire);
     }
 
+    /**
+     * @param float|int|string $key
+     * @param string $group
+     * @param $found
+     * @return mixed
+     */
     public function get($key, string $group = self::DEFAULT_GROUP, &$found = null)
     {
         if (empty($group)) {
@@ -232,6 +261,48 @@ class AbstractCacheAdapter implements CacheAdapterInterface
                 || array_key_exists($key, $this->caches[$group]));
     }
 
+    public function addGlobalGroups($groups)
+    {
+        $groups = (array)$groups;
+        $groups = array_fill_keys($groups, true);
+        $this->global_groups = array_merge($this->global_groups, $groups);
+    }
+
+    /**
+     * @param string|int|float $key
+     * @param int $offset
+     * @param string $group
+     * @return int|false
+     */
+    public function decrement($key, int $offset = 1, string $group = self::DEFAULT_GROUP)
+    {
+        if (empty($group)) {
+            $group = static::DEFAULT_GROUP;
+        }
+
+        if (isset($this->global_groups[$group])) {
+            $key = $this->cachePrefix . $key;
+        }
+
+        if (!$this->exist($key, $group)) {
+            return false;
+        }
+
+        if (!is_numeric($this->cache[$group][$key])) {
+            $this->cache[$group][$key] = 0;
+        }
+
+        $offset = (int)$offset;
+
+        $this->cache[$group][$key] -= $offset;
+
+        if ($this->cache[$group][$key] < 0) {
+            $this->cache[$group][$key] = 0;
+        }
+
+        return $this->cache[$group][$key];
+    }
+
     /**
      * @param $key
      * @param int $offset
@@ -266,7 +337,7 @@ class AbstractCacheAdapter implements CacheAdapterInterface
         return $this->caches[$group][$key];
     }
 
-    public function flush() : bool
+    public function flush(): bool
     {
         $this->reset();
         return true;

@@ -27,6 +27,10 @@ class RedisCache extends AbstractCacheAdapter
      * @var string
      */
     protected $databaseName;
+
+    /**
+     * @var array|int[]
+     */
     protected $options;
 
     /**
@@ -59,7 +63,7 @@ class RedisCache extends AbstractCacheAdapter
      * @param string $name
      * @return bool
      */
-    public function selectDatabase(string $name) : bool
+    public function selectDatabase(string $name): bool
     {
         $this->databaseName = $name;
         if ($this->redis) {
@@ -102,8 +106,8 @@ class RedisCache extends AbstractCacheAdapter
     public function getStats(): array
     {
         return [
-            'hits' => (int) $this->cache_hits,
-            'miss' => (int) $this->cache_misses,
+            'hits' => (int)$this->cache_hits,
+            'miss' => (int)$this->cache_misses,
             'groups' => []
         ];
     }
@@ -114,7 +118,7 @@ class RedisCache extends AbstractCacheAdapter
             return parent::getCacheHits();
         }
 
-        return (int) $this->redis->info('keyspace_hits');
+        return (int)$this->redis->info('keyspace_hits');
     }
 
     public function getCacheMisses(): int
@@ -123,7 +127,7 @@ class RedisCache extends AbstractCacheAdapter
             return parent::getCacheMisses();
         }
 
-        return (int) $this->redis->info('keyspace_misses');
+        return (int)$this->redis->info('keyspace_misses');
     }
 
     public function add($key, $data, string $group = self::DEFAULT_GROUP, int $expire = 0): bool
@@ -205,6 +209,28 @@ class RedisCache extends AbstractCacheAdapter
     /**
      * @param float|int|string $key
      * @param string $group
+     * @return bool
+     */
+    public function delete($key, string $group = self::DEFAULT_GROUP): bool
+    {
+        if (!$this->connect()) {
+            return parent::delete($key, $group);
+        }
+
+        if (empty($group)) {
+            $group = self::DEFAULT_GROUP;
+        }
+
+        if (!isset($this->global_groups[$group])) {
+            $key = $this->cachePrefix . $key;
+        }
+
+        return $this->redis->del($this->createKey($key, $group)) > 0;
+    }
+
+    /**
+     * @param float|int|string $key
+     * @param string $group
      * @param $found
      * @return false|mixed|string
      */
@@ -233,7 +259,7 @@ class RedisCache extends AbstractCacheAdapter
         return false;
     }
 
-    protected function createKey(string $key, string $group) : string
+    protected function createKey(string $key, string $group): string
     {
         return sprintf('%s:%s', $group, sha1($key));
     }
@@ -247,7 +273,7 @@ class RedisCache extends AbstractCacheAdapter
         return $this->redis->exists($this->createKey($key, $group));
     }
 
-    public function flush() : bool
+    public function flush(): bool
     {
         return $this->redis->flushDB();
     }

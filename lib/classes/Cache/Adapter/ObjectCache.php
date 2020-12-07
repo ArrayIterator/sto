@@ -1,6 +1,8 @@
 <?php
 
-namespace ArrayIterator\Cache;
+namespace ArrayIterator\Cache\Adapter;
+
+use ArrayIterator\Cache\AbstractCacheAdapter;
 
 /**
  * Class ObjectCache

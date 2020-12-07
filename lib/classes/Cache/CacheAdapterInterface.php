@@ -1,12 +1,10 @@
 <?php
 
-namespace ArrayIterator\Cache\Adapter;
-
-use ArrayIterator\Cache\Cache;
+namespace ArrayIterator\Cache;
 
 /**
  * Interface CacheAdapterInterface
- * @package ArrayIterator\Cache\Adapter
+ * @package ArrayIterator\Cache
  */
 interface CacheAdapterInterface
 {
@@ -17,7 +15,7 @@ interface CacheAdapterInterface
     /**
      * @return bool
      */
-    public function connect() : bool;
+    public function connect(): bool;
 
     /**
      * @return int
@@ -58,6 +56,13 @@ interface CacheAdapterInterface
      * @return bool
      */
     public function set($key, $data, string $group = self::DEFAULT_GROUP, int $expire = 0): bool;
+
+    /**
+     * @param string|int|float $key
+     * @param string $group
+     * @return bool
+     */
+    public function delete($key, string $group = self::DEFAULT_GROUP): bool;
 
     /**
      * @param string|int|float $key
