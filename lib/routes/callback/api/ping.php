@@ -23,6 +23,7 @@ if ($data) {
 }
 
 json(200, [
+    'site_id' => get_current_site_id(),
     'login' => !empty($loggedAs),
     'as' => $loggedAs,
     'online' => [
