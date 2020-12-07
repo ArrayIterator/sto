@@ -3,6 +3,10 @@
 use ArrayIterator\Helper\RandomToken;
 use ArrayIterator\Helper\Uuid;
 
+/* -------------------------------------------------
+ *                 AUTH & VALIDATION
+ * ------------------------------------------------*/
+
 /**
  * @param string $data
  * @param string $additional
@@ -16,7 +20,7 @@ function create_security_hash(string $data, string $additional = ''): string
 /**
  * @param int $userId
  * @param string $type
- * @return array|null
+ * @return array|false
  */
 function create_auth_hash(int $userId, string $type)
 {
@@ -29,11 +33,11 @@ function create_auth_hash(int $userId, string $type)
             $user = supervisor()->getById($userId);
             break;
         default:
-            return null;
+            return false;
     }
 
     if (!$user) {
-        return null;
+        return false;
     }
 
     $uuid = Uuid::generate();
