@@ -156,7 +156,7 @@ final class Modules
         unset($this->invalidList[$name]);
         $path = $this->modulesDir . DIRECTORY_SEPARATOR . $name . DIRECTORY_SEPARATOR . $data['plugin'];
         if (!is_array($data['info'])) {
-            $data['info'] = $this->readPluginInfo($path);
+            $data['info'] = $this->readModuleInfo($path);
             self::$fileLists[$this->modulesDir][$name]['info'] = $data['info'];
         }
 
@@ -199,7 +199,7 @@ final class Modules
         return $modules;
     }
 
-    protected function readPluginInfo(string $fileName): array
+    protected function readModuleInfo(string $fileName): array
     {
         $info = $this->readData($fileName, $this->headers);
         if (in_array(strtolower($info['site_wide']), ['yes', 'true'])) {
