@@ -27,7 +27,7 @@ function enable_multisite(): bool
 /**
  * @return array|false
  */
-function current_site_meta()
+function get_current_site_meta()
 {
     static $meta = [];
     $host = get_host();
@@ -56,19 +56,19 @@ function current_site_meta()
 }
 
 /**
- * @return int|null
+ * @return int|false
  */
 function determine_site_id()
 {
-    $meta = current_site_meta();
-    return $meta ? ($meta['id'] ?? null) : null;
+    $meta = get_current_site_meta();
+    return $meta ? ($meta['id'] ?? false) : false;
 }
 
 /**
- * @return string|null
+ * @return string|false
  */
 function get_site_host_type()
 {
-    $meta = current_site_meta();
-    return $meta ? ($meta['type'] ?? null) : null;
+    $meta = get_current_site_meta();
+    return $meta ? ($meta['type'] ?? false) : false;
 }
