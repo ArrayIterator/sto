@@ -87,7 +87,7 @@ function route_any(string $pattern, callable $callable)
  * @param string|null $uri
  * @return array
  */
-function route_dispatch(string $httpMethod, string $uri = null)
+function route_dispatch(string $httpMethod, string $uri = null): array
 {
     $uri = $uri ?? request_uri();
     $dispatched = route()->isDispatched();
