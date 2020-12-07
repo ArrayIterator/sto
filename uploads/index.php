@@ -1,2 +1,3 @@
 <?php
-// keep silent
+// redirect
+header('Location: ../', true, 302);
