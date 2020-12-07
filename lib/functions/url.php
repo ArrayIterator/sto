@@ -1,18 +1,26 @@
 <?php
 
+use GuzzleHttp\Psr7\Uri;
+use Psr\Http\Message\UriInterface;
+
+/**
+ * @param string $uri
+ * @return Uri
+ */
+function create_uri_for(string $uri): Uri
+{
+    return new Uri($uri);
+}
+
 /**
  * @return string
  */
 function get_current_url(): string
 {
-    $scheme = get_http_scheme();
-    $host = get_host();
     return hook_apply(
         'current_url',
-        sprintf('%s://%s%s', $scheme, $host, request_uri()),
-        $scheme,
-        $host,
-        request_uri()
+        (string)get_uri(),
+        get_uri(),
     );
 }
 
@@ -24,14 +32,13 @@ function get_site_url(string $pathUri = ''): string
 {
     static $path;
     $server = server_environment();
-    $scheme = get_http_scheme();
-    $host = get_host();
     if (!$path) {
         $documentRoot = rtrim(preg_replace('~[\\\/]+~', '/', $server['DOCUMENT_ROOT']), '/');
         $rootPath = rtrim(preg_replace('~[\\\/]+~', '/', realpath(ROOT_DIR) ?: ROOT_DIR), '/');
         $path = trim(substr($rootPath, strlen($documentRoot)), '/') . '/';
     }
-    $uri = sprintf('%s://%s%s', $scheme, $host, $path);
+
+    $uri = (string)get_uri()->withPath($path);
     $originalPath = $pathUri;
     $pathUri = (string)$pathUri;
     $pathUri = substr($pathUri, 0, 1) === '/'
@@ -47,6 +54,17 @@ function get_site_url(string $pathUri = ''): string
     );
 }
 
+/**
+ * @return UriInterface
+ */
+function get_site_uri(): UriInterface
+{
+    static $uri;
+    if (!$uri) {
+        $uri = create_uri_for(get_site_url());
+    }
+    return $uri;
+}
 
 /**
  * @param string $pathUri
@@ -67,6 +85,18 @@ function get_admin_url(string $pathUri = ''): string
         $pathUri,
         $originalPathUri
     );
+}
+
+/**
+ * @return UriInterface
+ */
+function get_admin_uri(): UriInterface
+{
+    static $uri;
+    if (!$uri) {
+        $uri = create_uri_for(get_admin_url());
+    }
+    return $uri;
 }
 
 /* -------------------------------------------------
@@ -204,4 +234,45 @@ function get_api_url(string $pathUri = ''): string
         $pathUri,
         $originalPathUri
     );
+}
+
+/**
+ * @param string $location
+ * @param int $status
+ * @param string|null $x_redirect_by
+ * @return bool
+ */
+function redirect(
+    string $location,
+    int $status = 302,
+    string $x_redirect_by = 'Sto'
+): bool {
+    global $is_IIS;
+
+    $location = hook_apply('redirect', $location, $status);
+    $status = hook_apply('redirect_status', $status, $location);
+
+    if (!is_string($location)) {
+        return false;
+    }
+
+    if ($status < 300 || 399 < $status) {
+        do_exit('HTTP redirect status code must be a redirection code, 3xx.', 255);
+    }
+
+    $location = sanitize_redirect($location);
+
+    if (!$is_IIS && PHP_SAPI != 'cgi-fcgi') {
+        // This causes problems on IIS and some FastCGI setups.
+        set_status_header($status);
+    }
+
+    $x_redirect_by = hook_apply('x_redirect_by', $x_redirect_by, $status, $location);
+    if (is_string($x_redirect_by) && trim($x_redirect_by)) {
+        set_header("X-Redirect-By", trim($x_redirect_by));
+    }
+
+    set_header('Location', $location, $status);
+
+    return true;
 }

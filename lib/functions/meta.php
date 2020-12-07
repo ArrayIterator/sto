@@ -1,6 +1,7 @@
 <?php
 
 use ArrayIterator\Application;
+use ArrayIterator\Cache\Adapter\ObjectCache;
 use ArrayIterator\Database;
 use ArrayIterator\Dependency\Translation;
 use ArrayIterator\Helper\Area\TimeZone;
@@ -13,6 +14,7 @@ use ArrayIterator\Model\Student;
 use ArrayIterator\Model\StudentOnline;
 use ArrayIterator\Model\Supervisor;
 use ArrayIterator\Model\SupervisorOnline;
+use ArrayIterator\Modules;
 use ArrayIterator\Route;
 
 /**
@@ -125,4 +127,30 @@ function supervisor(): Supervisor
 function route(): Route
 {
     return \application()->getRoute();
+}
+
+/**
+ * @return ObjectCache
+ */
+function object_cache(): ObjectCache
+{
+    static $cache;
+    if (!$cache) {
+        $cache = new ObjectCache(get_current_site_id());
+    }
+
+    return $cache;
+}
+
+/**
+ * @return Modules
+ */
+function modules(): Modules
+{
+    static $modules;
+    if (!$modules) {
+        $modules = new Modules(get_modules_dir());
+    }
+
+    return $modules;
 }

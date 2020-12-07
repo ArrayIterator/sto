@@ -89,55 +89,35 @@ function get_status_header(int $code): string
 }
 
 /**
+ * @param string|null $name
  * @return array
  */
-function get_all_headers(): array
+function get_headers_of(string $name = null): array
 {
-    static $headers = [];
-    if (!empty($headers)) {
-        return $headers;
-    }
-    $server = server_environment();
-    $copy_server = [
-        'CONTENT_TYPE' => 'Content-Type',
-        'CONTENT_LENGTH' => 'Content-Length',
-        'CONTENT_MD5' => 'Content-Md5',
-    ];
-
-    foreach ($server as $key => $value) {
-        if (substr($key, 0, 5) === 'HTTP_') {
-            $key = substr($key, 5);
-            if (!isset($copy_server[$key]) || !isset($server[$key])) {
-                $key = sanitize_header_name($key);
-                $headers[$key] = $value;
-            }
-        } elseif (isset($copy_server[$key])) {
-            $headers[$copy_server[$key]] = $value;
-        }
+    if ($name === null) {
+        return server_request()->getHeaders();
     }
 
-    if (!isset($headers['Authorization'])) {
-        if (isset($server['REDIRECT_HTTP_AUTHORIZATION'])) {
-            $headers['Authorization'] = $server['REDIRECT_HTTP_AUTHORIZATION'];
-        } elseif (isset($server['PHP_AUTH_USER'])) {
-            $basic_pass = isset($server['PHP_AUTH_PW']) ? $server['PHP_AUTH_PW'] : '';
-            $headers['Authorization'] = 'Basic ' . base64_encode($server['PHP_AUTH_USER'] . ':' . $basic_pass);
-        } elseif (isset($server['PHP_AUTH_DIGEST'])) {
-            $headers['Authorization'] = $server['PHP_AUTH_DIGEST'];
-        }
-    }
-
-    return $headers;
+    return server_request()->getHeader($name);
 }
 
 /**
  * @param string $name
- * @return string|null
+ * @return string
  */
-function get_header(string $name)
+function get_header(string $name): string
 {
-    $name = sanitize_header_name($name);
-    return get_all_headers()[$name] ?? null;
+    return server_request()->getHeaderLine($name);
+}
+
+/**
+ * @param string $name
+ * @return bool
+ */
+function has_header(string $name): bool
+{
+    $headers = get_headers_of($name);
+    return !empty($headers);
 }
 
 /**
@@ -231,26 +211,27 @@ function is_json_request(): bool
 function is_ajax_request(): bool
 {
     $header = get_header('X-Requested-With');
-    if (!is_string($header)) {
+    if (!$header) {
         return false;
     }
+
     return strtolower($header) === 'xmlhttprequest';
 }
 
 /**
- * @return string|null
+ * @return string|false
  */
 function get_referer()
 {
-    return get_header('Referer');
+    return has_header('Referer') ? get_header('Referer') : false;
 }
 
 /**
- * @return string|null
+ * @return string|false
  */
 function get_user_agent()
 {
-    return get_header('User-Agent');
+    return has_header('User-Agent') ? get_header('User-Agent') : false;
 }
 
 /**

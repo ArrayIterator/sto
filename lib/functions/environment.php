@@ -1,17 +1,52 @@
 <?php
 
+use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Stream;
+use GuzzleHttp\Psr7\UploadedFile;
+use Psr\Http\Message\UriInterface;
+
+/**
+ * @return ServerRequest
+ */
+function server_request(): ServerRequest
+{
+    static $request;
+    if (!$request) {
+        $request = ServerRequest::fromGlobals();
+        $server = $request->getServerParams();
+        $host = $server['HTTP_HOST'] ?? $server['SERVER_NAME'];
+        $port = $server['HTTP_X_FORWARDED_PORT'] ?? $server['SERVER_PORT'] ?? null;
+        if ($port && $port != 443 && $port != 80) {
+            $host = sprintf('%s:%d', $host, $port);
+        }
+        $uri = $request->getUri()->withHost($host);
+        if (($server['HTTPS'] ?? null) == 'on'
+            || ($server['HTTP_X_FORWARDED_PROTO'] ?? null) == 'https'
+            || ($server['SERVER_PORT'] ?? null) == 443
+        ) {
+            $uri = $uri->withScheme('https');
+        }
+
+        $request = $request->withUri($uri);
+    }
+
+    return $request;
+}
+
+/**
+ * @return UriInterface
+ */
+function get_uri(): UriInterface
+{
+    return server_request()->getUri();
+}
 
 /**
  * @return array
  */
 function server_environment(): array
 {
-    static $server;
-    if (!$server) {
-        $server = $_SERVER;
-    }
-    return $server;
+    return server_request()->getServerParams();
 }
 
 /**
@@ -19,41 +54,41 @@ function server_environment(): array
  */
 function get_server_protocol(): string
 {
-    $protocol = server_environment()['SERVER_PROTOCOL'] ?? '';
-    return !in_array($protocol, ['HTTP/1.1', 'HTTP/2', 'HTTP/2.0'])
-        ? $protocol
-        : 'HTTP/1.0';
+    return 'HTTP/' . server_request()->getProtocolVersion();
 }
 
 /**
  * @return array
  */
-function &cookies(): array
+function cookies(): array
 {
-    return $_COOKIE;
+    return server_request()->getCookieParams();
 }
 
 /**
  * @return array
  */
-function &posts(): array
+function posts(): array
 {
-    return $_POST;
+    return server_request()->getParsedBody();
 }
 
 /**
- * @return Stream
+ * @return UploadedFile[]
+ */
+function files(): array
+{
+    return server_request()->getUploadedFiles();
+}
+
+/**
+ * @return Stream rewind stream
  */
 function body_stream(): Stream
 {
-    static $stream;
-    static $resource;
-    if (!is_resource($resource)) {
-        $resource = fopen('php://input', 'r');
-        $stream = new Stream($resource);
-    }
-
-    return $stream;
+    $body = server_request()->getBody();
+    $body->isSeekable() && $body->rewind();
+    return $body;
 }
 
 /**
@@ -81,7 +116,7 @@ function cookie($key = null)
 
 /**
  * @param string|null $key
- * @return array|mixed|null
+ * @return mixed
  */
 function post($key = null)
 {
@@ -94,6 +129,21 @@ function post($key = null)
     }
 
     return posts()[$key] ?? null;
+}
+
+/**
+ * @param string|null $key
+ * @return mixed
+ */
+function query_param($key = null)
+{
+    if ($key === null) {
+        return server_request()->getQueryParams();
+    }
+    if (!is_numeric($key) && !is_string($key)) {
+        return null;
+    }
+    return server_request()->getQueryParams()[$key] ?? null;
 }
 
 /**
@@ -135,20 +185,7 @@ function no_buffer()
  */
 function get_http_scheme(): string
 {
-    static $scheme;
-    if ($scheme) {
-        return $scheme;
-    }
-
-    $scheme = 'http';
-    $server = server_environment();
-    if (isset($server['HTTPS']) && $server['HTTPS'] == 'on'
-        || isset($server['HTTP_X_FORWARDED_PROTO']) && $server['HTTP_X_FORWARDED_PROTO'] == 'https'
-        || $server['SERVER_PORT'] == 443
-    ) {
-        $scheme = 'https';
-    }
-
+    $scheme = get_uri()->getScheme();
     return hook_apply('http_scheme', $scheme);
 }
 
@@ -157,17 +194,7 @@ function get_http_scheme(): string
  */
 function get_host(): string
 {
-    static $host;
-    if ($host) {
-        return $host;
-    }
-    $server = server_environment();
-    $host = $server['HTTP_HOST'] ?? $server['SERVER_NAME'];
-    $port = $server['HTTP_X_FORWARDED_PORT'] ?? $server['SERVER_PORT'] ?? null;
-    if ($port && $port != 443 && $port != 80) {
-        $host = sprintf('%s:%d', $host, $port);
-    }
-
+    $host = get_uri()->getHost();
     return hook_apply('host', $host);
 }
 
@@ -187,7 +214,8 @@ function request_uri(): string
  */
 function http_method(): string
 {
-    return hook_apply('http_method', server_environment()['REQUEST_METHOD']);
+    $method = server_request()->getMethod();
+    return hook_apply('http_method', $method);
 }
 
 /**
