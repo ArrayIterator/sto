@@ -1,5 +1,6 @@
 <?php
 
+use ArrayIterator\Module;
 use ArrayIterator\Route;
 
 /**
@@ -76,7 +77,6 @@ function set_not_allowed_handler(callable $callback)
     \route()->setNotAllowedHandler($callback);
 }
 
-
 /**
  * @param int|string ...$args
  */
@@ -132,4 +132,22 @@ function render(string $data, bool $exit = false)
     if ($exit) {
         do_exit();
     }
+}
+
+/**
+ * @param string $name
+ * @return Module|false
+ */
+function module_get(string $name)
+{
+    return modules()->getModule($name);
+}
+
+/**
+ * @param string $name
+ * @return bool
+ */
+function module_exist(string $name): bool
+{
+    return (bool)module_get($name);
 }
