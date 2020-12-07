@@ -266,6 +266,30 @@ function get_uploads_dir(): string
 /**
  * @return string
  */
+function get_post_uploads_dir(): string
+{
+    return get_uploads_dir() . DIRECTORY_SEPARATOR . 'posts';
+}
+
+/**
+ * @return string
+ */
+function get_question_uploads_dir(): string
+{
+    return get_uploads_dir() . DIRECTORY_SEPARATOR . 'questions';
+}
+
+/**
+ * @return string
+ */
+function get_avatar_uploads_dir(): string
+{
+    return get_uploads_dir() . DIRECTORY_SEPARATOR . 'avatars';
+}
+
+/**
+ * @return string
+ */
 function get_cache_dir(): string
 {
     $cacheDir = CACHE_DIR;
