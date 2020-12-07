@@ -2,6 +2,7 @@
 require_once __DIR__ . '/constant.php';
 require_once __DIR__ . '/functions/meta.php';
 require_once __DIR__ . '/functions/environment.php';
+require_once __DIR__ . '/functions/cache.php';
 require_once __DIR__ . '/functions/path.php';
 require_once __DIR__ . '/functions/url.php';
 require_once __DIR__ . '/functions/software.php';
@@ -116,3 +117,53 @@ if (defined('COOKIE_MULTI_DOMAIN') && COOKIE_MULTI_DOMAIN) {
 
 // no globals variable please!
 unset($configBaseName);
+
+cache_add_global_groups([
+    'users',
+    'site_options',
+    'sites'
+]);
+
+if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
+    $loadedModules = [];
+    foreach (get_site_wide_active_modules() as $moduleName => $time) {
+        if (!is_string($moduleName)) {
+            continue;
+        }
+        if (!($module = module_get($moduleName)) || !$module->isSiteWide()) {
+            continue;
+        }
+
+        // mutable include
+        (function (ArrayIterator\Module $module, $moduleName, $loadedModules) {
+            /** @noinspection PhpIncludeInspection */
+            require_once $module->getPath();
+        })($module, $moduleName, $loadedModules);
+        $loadedModules[$moduleName] = time();
+        hook_run('module_loaded', $moduleName, $time, $module);
+        hook_run('site_wide_module_loaded', $moduleName, $time, $module);
+    }
+
+    // HOOK SITE WIDE LOADED
+    hook_run_once('site_wide_modules_loaded', $loadedModules);
+
+    foreach (get_site_active_modules() as $moduleName => $time) {
+        if (!is_string($moduleName) || isset($loadedModules[$moduleName])) {
+            continue;
+        }
+        if (!($module = module_get($moduleName)) || !$module->isSiteWide()) {
+            continue;
+        }
+
+        // mutable include
+        (function (ArrayIterator\Module $module, $moduleName, $loadedModules) {
+            /** @noinspection PhpIncludeInspection */
+            require_once $module->getPath();
+        })($module, $moduleName, $loadedModules);
+        $loadedModules[$moduleName] = time();
+        hook_run('module_loaded', $moduleName, $time, $module);
+    }
+}
+
+unset($loadedModules, $moduleName, $time);
+hook_run_once('modules_loaded');
