@@ -1,5 +1,7 @@
 <?php
 
+use ArrayIterator\Helper\Path;
+use ArrayIterator\Info\Module;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\UriInterface;
 
@@ -213,6 +215,54 @@ function current_login_url(): string
     return is_admin_page()
         ? get_admin_login_url()
         : get_login_url();
+}
+
+/**
+ * @param string|null $moduleFile
+ * @return string
+ */
+function get_module_uri($moduleFile = null) : string
+{
+    static $moduleUri;
+    static $moduleDir;
+    if (!$moduleDir) {
+        $moduleDir = un_slash_it(normalize_path(get_modules_dir()));
+    }
+    if (!$moduleUri) {
+        $moduleUri = slash_it(get_site_url(get_modules_path()));
+    }
+
+    if (!is_string($moduleFile)) {
+        if ($moduleFile instanceof Module) {
+            $moduleFile = $moduleFile->getPath();
+        }
+        $moduleFile = (string) $moduleFile;
+    }
+
+    if ($moduleFile === null || trim($moduleFile) === '') {
+        return $moduleUri;
+    }
+
+    $mod = normalize_path($moduleFile);
+    if (strpos($mod, $moduleDir) === 0) {
+        if (substr($mod, -4) === '.php') {
+            $path = slash_it(substr(dirname($mod), strlen($moduleDir)));
+        } else {
+            $path = slash_it(substr($mod, strlen($moduleDir)));
+        }
+    } elseif (preg_match('#^[/]*([^/]+)(\1\.php)?$#', $mod, $match)
+        || preg_match('#^[/]*([^/]+)\.php$#', $mod, $match)
+    ) {
+        $path = slash_it($match[1]);
+    } else {
+        $path = strpos($mod, '.php') ? $mod : slash_it($mod);
+    }
+
+    return sprintf(
+        '%s/%s',
+        un_slash_it($moduleUri),
+        $path[0] === '/' ? substr($path, 1) : $path
+    );
 }
 
 /**

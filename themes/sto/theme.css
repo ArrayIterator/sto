@@ -1,6 +1,5 @@
-<?php
-/**
- * Name: Example
+/*!
+ * Name: Example Theme
  * Author: STO
  * Version: 1.0.0
  * Author URI: https://www.example.com
@@ -9,7 +8,5 @@
  * @version: 1.0.0
  * @link http://www.example.com/plugin
  * @license MIT
+ * @todo add theme completion
  */
-if (!defined('ROOT_DIR')) {
-    return;
-}

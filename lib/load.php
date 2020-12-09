@@ -130,7 +130,7 @@ if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
         }
 
         // mutable include
-        (function (ArrayIterator\Module $module, $moduleName, $loadedModules) {
+        (function (ArrayIterator\Info\Module $module, $moduleName, $loadedModules) {
             /** @noinspection PhpIncludeInspection */
             require_once $module->getPath();
         })($module, $moduleName, $loadedModules);
@@ -152,7 +152,7 @@ if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
         }
 
         // mutable include
-        (function (ArrayIterator\Module $module, $moduleName, $loadedModules) {
+        (function (ArrayIterator\Info\Module $module, $moduleName, $loadedModules) {
             /** @noinspection PhpIncludeInspection */
             require_once $module->getPath();
         })($module, $moduleName, $loadedModules);
@@ -163,3 +163,5 @@ if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
 
 unset($loadedModules, $moduleName, $time);
 hook_run_once('modules_loaded');
+
+// @todo load themes

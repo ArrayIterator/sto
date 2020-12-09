@@ -17,6 +17,7 @@ use ArrayIterator\Model\SupervisorOnline;
 use ArrayIterator\Modules;
 use ArrayIterator\Route;
 use ArrayIterator\RouteApi;
+use ArrayIterator\Themes;
 use FastRoute\RouteCollector;
 use GuzzleHttp\Psr7\ServerRequest;
 use Psr\Http\Message\UriInterface;
@@ -168,6 +169,7 @@ function route(): Route
 {
     return \application()->getRoute();
 }
+
 /**
  * @return RouteCollector
  */
@@ -234,4 +236,16 @@ function modules(): Modules
     }
 
     return $modules;
+}
+
+/**
+ * @return Themes
+ */
+function themes() : Themes
+{
+    static $themes;
+    if (!$themes) {
+        $themes = new Themes(get_themes_dir());
+    }
+    return $themes;
 }

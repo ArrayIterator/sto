@@ -1,6 +1,6 @@
 <?php
 
-use ArrayIterator\Module;
+use ArrayIterator\Info\Module;
 use ArrayIterator\Route;
 
 /**
