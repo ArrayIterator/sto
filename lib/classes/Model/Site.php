@@ -178,7 +178,10 @@ class Site extends Model
         return parent::save($where);
     }
 
-    public function delete()
+    /**
+     * @return bool
+     */
+    public function delete() : bool
     {
         // disallow delete site id =1
         $id = $this->userData['id'] ?? null;

@@ -2,6 +2,8 @@
 
 namespace ArrayIterator\Helper;
 
+use function stream_get_wrappers;
+
 /**
  * Class Path
  * @package ArrayIterator\Helper
@@ -21,7 +23,7 @@ class Path
         }
 
         $stream = substr($path, 0, $scheme_separator);
-        return in_array($stream, \stream_get_wrappers(), true);
+        return in_array($stream, stream_get_wrappers(), true);
     }
 
     /**

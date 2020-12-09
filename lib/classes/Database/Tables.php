@@ -149,7 +149,7 @@ class Tables implements QueryPrepareInterface
     /**
      * @return Table[]
      */
-    public function getTableList()
+    public function getTableList() : array
     {
         if ($this->tables) {
             return $this->tables;
@@ -218,6 +218,11 @@ class Tables implements QueryPrepareInterface
         return array_keys($this->getTableList());
     }
 
+    /**
+     * @param string $tableName
+     * @return Table|null
+     * @noinspection PhpMissingReturnTypeInspection
+     */
     public function getTableDefinition(string $tableName)
     {
         return $this->getTableList()[$tableName] ?? (
@@ -225,6 +230,11 @@ class Tables implements QueryPrepareInterface
             );
     }
 
+    /**
+     * @param string $tableName
+     * @return Column[]|null
+     * @noinspection PhpMissingReturnTypeInspection
+     */
     public function getColumns(string $tableName)
     {
         $table = $this->getTableDefinition($tableName);
@@ -234,7 +244,7 @@ class Tables implements QueryPrepareInterface
     /**
      * @return string[]
      */
-    public function getNotExistsTable()
+    public function getNotExistsTable() : array
     {
         return array_diff($this->defaultTables, $this->getListTable());
     }

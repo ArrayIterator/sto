@@ -77,9 +77,9 @@ class Column
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getTableName()
+    public function getTableName() : string
     {
         return $this->tableName;
     }
@@ -118,6 +118,7 @@ class Column
 
     /**
      * @return int|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getMaxLength()
     {
@@ -141,7 +142,8 @@ class Column
     }
 
     /**
-     * @return mixed
+     * @return string|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getExtra()
     {
@@ -149,16 +151,20 @@ class Column
     }
 
     /**
-     * @return mixed
+     * @return string|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getColumnKey()
     {
         return $this->columnKey;
     }
 
-    public function isPrimaryKey()
+    /**
+     * @return bool
+     */
+    public function isPrimaryKey() : bool
     {
-        return $this->isPrimaryKey;
+        return (bool) $this->isPrimaryKey;
     }
 
     /**

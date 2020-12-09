@@ -99,7 +99,7 @@ function get_web_server(): string
         return $software;
     }
 
-    $server = server_environment()['SERVER_SOFTWARE'] ?? '';
+    $server = get_server_environment('SERVER_SOFTWARE') ?? '';
     if (!$server) {
         return $software;
     }

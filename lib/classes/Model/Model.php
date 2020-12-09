@@ -2,18 +2,22 @@
 
 namespace ArrayIterator\Model;
 
+use ArrayAccess;
 use ArrayIterator\Application;
 use ArrayIterator\Database;
 use ArrayIterator\Database\AbstractResult;
 use ArrayIterator\Database\PdoResult;
 use ArrayIterator\Database\PrepareStatement;
 use ArrayIterator\Database\QueryPrepareInterface;
+use BadMethodCallException;
+use Exception;
+use RuntimeException;
 
 /**
  * Class Model
  * @package ArrayIterator\Model
  */
-abstract class Model implements QueryPrepareInterface, \ArrayAccess
+abstract class Model implements QueryPrepareInterface, ArrayAccess
 {
     /**
      * @var int
@@ -56,6 +60,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
 
     /**
      * @return string|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getAutoIncrementColumn()
     {
@@ -68,6 +73,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
 
     /**
      * @return int|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getSiteId()
     {
@@ -77,6 +83,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
 
     /**
      * @return int|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getId()
     {
@@ -94,6 +101,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
 
     /**
      * @return int|mixed
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getModelSiteId()
     {
@@ -132,8 +140,9 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
     public function query(string $sql)
     {
         $pdoRes = $this->database->query($sql);
-        if ($pdoRes->getStatement() instanceof PrepareStatement) {
-            $pdoRes->getStatement()->setFetchClass(
+        $st = $pdoRes->getStatement();
+        if ($st instanceof PrepareStatement) {
+            $st->setFetchClass(
                 static::class,
                 $this->getStatementArguments()
             );
@@ -144,8 +153,9 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
     public function unbufferedQuery(string $sql)
     {
         $pdoRes = $this->database->unbufferedQuery($sql);
-        if ($pdoRes->getStatement() instanceof PrepareStatement) {
-            $pdoRes->getStatement()->setFetchClass(
+        $st = $pdoRes->getStatement();
+        if ($st instanceof PrepareStatement) {
+            $st->setFetchClass(
                 static::class,
                 $this->getStatementArguments()
             );
@@ -249,7 +259,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
                 if ($this->tableName) {
                     self::$tablesModelRecord[$className] = $this->tableName;
                 } else {
-                    throw new \RuntimeException(
+                    throw new RuntimeException(
                         sprintf('Model Object %s has no declared table name', $classNameOri)
                     );
                 }
@@ -410,7 +420,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
             && $this->getAutoIncrementColumn() !== $selector
         ) {
             $sql .= sprintf(' AND site_id=%d', $siteId);
-        };
+        }
 
         $stmt = $this->prepare($sql);
         if ($stmt->execute([$value])) {
@@ -647,7 +657,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         unset($this->userData[$name]);
     }
 
-    public function __isset($name)
+    public function __isset($name) : bool
     {
         return array_key_exists($name, $this->data);
     }
@@ -667,7 +677,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
             $method = $match[1] ?? null;
         }
         if (!$method) {
-            throw new \BadMethodCallException(
+            throw new BadMethodCallException(
                 sprintf('Call to undefined method %s:%s', get_class($this), $name)
             );
         }
@@ -751,11 +761,12 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
             }
         }
 
-        throw new \BadMethodCallException(
+        throw new BadMethodCallException(
             sprintf('Call to undefined method %s:%s', get_class($this), $name)
         );
     }
 
+    /** @noinspection PhpUnusedParameterInspection */
     protected function normalizeColumn(string $column, $value)
     {
         return $value;
@@ -803,11 +814,12 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         }
     }
 
-    public function toArray()
+    public function toArray() : array
     {
         return $this->data;
     }
 
+    /** @noinspection PhpUnusedParameterInspection */
     protected function sanitizeDatabaseValue($column, $value)
     {
         return $value;
@@ -890,7 +902,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
                         }
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
 
             }
         }
@@ -977,7 +989,10 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         return $this->findOneBy($value, $selector)->fetchClose();
     }
 
-    public function delete()
+    /**
+     * @return bool
+     */
+    public function delete() : bool
     {
         $autoIncrement = $this->getAutoIncrementColumn();
         $selector = null;
@@ -1023,8 +1038,7 @@ abstract class Model implements QueryPrepareInterface, \ArrayAccess
         if (empty($values)) {
             return false;
         }
-        $sql = sprintf('DELETE FROM %s', $this->getTableName());
-        $sql .= ' WHERE ';
+        $sql = sprintf('DELETE FROM %s WHERE ', $this->getTableName());
         $args = [];
         $c = 0;
         foreach ($values as $key => $item) {

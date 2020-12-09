@@ -53,7 +53,7 @@ class TimeZoneConvert
      */
     public function getTransitions(int $begin = null, int $end = null): array
     {
-        return $this->timezone->getTransitions();
+        return $this->timezone->getTransitions($begin, $end);
     }
 
     /**

@@ -2,6 +2,7 @@
 /* -------------------------------------------------
  *                     JSON
  * ------------------------------------------------*/
+
 /**
  * @param mixed $data
  * @param int $options
@@ -55,11 +56,11 @@ function serve_json_data(string $data, int $code = 200)
 {
     clean_buffer();
     hook_run('before_serve_json_data', $data, $code);
-    set_header(
-        'Content-Type',
+    set_content_type(
         hook_apply('serve_json_data_header', 'application/json; charset=utf-8', $data, $code),
         $code
     );
+
 
     render($data);
     hook_run('after_serve_json_data', $data, $code);

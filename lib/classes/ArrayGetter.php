@@ -2,11 +2,14 @@
 
 namespace ArrayIterator;
 
+use ArrayAccess;
+use Countable;
+
 /**
  * Class ArrayGetter
  * @package ArrayIterator
  */
-class ArrayGetter implements \ArrayAccess, \Countable
+class ArrayGetter implements ArrayAccess, Countable
 {
     protected $data;
 
@@ -22,7 +25,11 @@ class ArrayGetter implements \ArrayAccess, \Countable
         return $this->data[$name] ?? null;
     }
 
-    public function __isset($name)
+    /**
+     * @param mixed $name
+     * @return bool
+     */
+    public function __isset($name) : bool
     {
         return array_key_exists($name, $this->data);
     }
@@ -37,7 +44,7 @@ class ArrayGetter implements \ArrayAccess, \Countable
         $this->set($name, $value);
     }
 
-    public function offsetExists($offset)
+    public function offsetExists($offset) : bool
     {
         return $this->exist($offset);
     }
@@ -69,7 +76,7 @@ class ArrayGetter implements \ArrayAccess, \Countable
         $this->data[$name] = $value;
     }
 
-    public function exist($name)
+    public function exist($name) : bool
     {
         return array_key_exists($name, $this->data);
     }
@@ -79,7 +86,7 @@ class ArrayGetter implements \ArrayAccess, \Countable
         unset($this->data[$name]);
     }
 
-    public function count()
+    public function count() : int
     {
         return count($this->data);
     }

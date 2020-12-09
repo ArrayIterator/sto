@@ -53,6 +53,7 @@ class Option extends Model
 
     /**
      * @return string|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getName()
     {
@@ -123,7 +124,12 @@ class Option extends Model
         return $default;
     }
 
-    public function values(int $siteId = null, ...$optionNames)
+    /**
+     * @param int|null $siteId
+     * @param mixed ...$optionNames
+     * @return ArrayGetter
+     */
+    public function values(int $siteId = null, ...$optionNames) : ArrayGetter
     {
         $siteId = $siteId ?? $this->getModelSiteId();
         $optionName = [];

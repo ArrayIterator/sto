@@ -24,27 +24,27 @@ class PrepareStatement extends PDOStatement
 
     /**
      * @param $className
-     * @param array $ctorargs
+     * @param array $ctorArgs
      */
-    public function setFetchClass($className, array $ctorargs = [])
+    public function setFetchClass($className, array $ctorArgs = [])
     {
         $this->fetchClass = $className;
-        $this->ctorArgs = $ctorargs;
+        $this->ctorArgs = $ctorArgs;
     }
 
     /**
-     * @param null|int $fetch_style
-     * @param int $cursor_orientation
-     * @param int $cursor_offset
+     * @param null|int $mode
+     * @param int $cursorOrientation
+     * @param int $cursorOffset
      * @return Model|array|object|mixed
      */
-    public function fetch($fetch_style = null, $cursor_orientation = PDO::FETCH_ORI_NEXT, $cursor_offset = 0)
+    public function fetch($mode = null, $cursorOrientation = PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
     {
-        if ($fetch_style === PDO::FETCH_CLASS || $fetch_style === null) {
+        if ($mode === PDO::FETCH_CLASS || $mode === null) {
             $this->setFetchMode(PDO::FETCH_CLASS, $this->fetchClass, $this->ctorArgs);
         }
 
-        return parent::fetch($fetch_style, $cursor_orientation, $cursor_offset);
+        return parent::fetch($mode, $cursorOrientation, $cursorOffset);
     }
 
     /**
@@ -65,7 +65,7 @@ class PrepareStatement extends PDOStatement
         $this->closeCursor();
     }
 
-    public function closeCursor()
+    public function closeCursor() : bool
     {
         $this->closed = true;
         return parent::closeCursor();
@@ -77,7 +77,7 @@ class PrepareStatement extends PDOStatement
      */
     public function data($offset)
     {
-        return $this->fetch(null, \PDO::FETCH_ORI_ABS, $offset);
+        return $this->fetch(null, PDO::FETCH_ORI_ABS, $offset);
     }
 
     /**
@@ -85,7 +85,7 @@ class PrepareStatement extends PDOStatement
      */
     public function first()
     {
-        return $this->fetch(null, \PDO::FETCH_ORI_FIRST);
+        return $this->fetch(null, PDO::FETCH_ORI_FIRST);
     }
 
     /**
@@ -93,7 +93,7 @@ class PrepareStatement extends PDOStatement
      */
     public function last()
     {
-        return $this->fetch(null, \PDO::FETCH_ORI_ABS);
+        return $this->fetch(null, PDO::FETCH_ORI_ABS);
     }
 
     public function next()
@@ -123,19 +123,19 @@ class PrepareStatement extends PDOStatement
 
     public function fetchAssoc()
     {
-        return $this->fetch(\PDO::FETCH_ASSOC);
+        return $this->fetch(PDO::FETCH_ASSOC);
     }
 
     /**
-     * @param array|mixed|null $input_parameters
+     * @param array|mixed|null $params
      * @return bool
      */
-    public function execute($input_parameters = null)
+    public function execute($params = null) : bool
     {
-        if (func_num_args() > 0 && !is_array($input_parameters)) {
-            $input_parameters = (array)$input_parameters;
+        if (func_num_args() > 0 && !is_array($params)) {
+            $params = (array)$params;
         }
-        return parent::execute($input_parameters);
+        return parent::execute($params);
     }
 
     public function __destruct()

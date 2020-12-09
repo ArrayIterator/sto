@@ -4,34 +4,23 @@ namespace ArrayIterator\Model;
 
 
 use ArrayIterator\Database;
-use ArrayIterator\Dependency\Translation;
+use PDO;
 
 /**
  * Class Languages
  * @package ArrayIterator\Model
  */
-class Languages extends Model
+class TranslationsDictionary extends Model
 {
-    protected $tableName = 'sto_languages';
-    protected $translation;
+    protected $tableName = 'sto_translations_dictionary';
 
     /**
      * Languages constructor.
      * @param Database $database
-     * @param Translation $translation
      */
-    public function __construct(Database $database, Translation $translation)
+    public function __construct(Database $database)
     {
         parent::__construct($database);
-        $this->translation = $translation;
-    }
-
-    /**
-     * @return Translation
-     */
-    public function getTranslation(): Translation
-    {
-        return $this->translation;
     }
 
     /**
@@ -65,9 +54,14 @@ class Languages extends Model
     {
         $selector = sha1($message);
         $stmt = $this
-            ->prepare('SELECT code, translate FROM languages WHERE code = ? OR translate = ?');
+            ->prepare(
+                sprintf(
+                    'SELECT code, translate FROM %s WHERE code = ? OR translate = ?',
+                    $this->getTableName()
+                )
+            );
         $stmt->execute([$selector, $message]);
-        $fetch = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $fetch = $stmt->fetch(PDO::FETCH_ASSOC);
         $stmt->closeCursor();
         if ($fetch) {
             if ($fetch['code'] === $selector && $fetch['translate'] !== $message) {
@@ -80,30 +74,12 @@ class Languages extends Model
         }
 
         $result = $this
-            ->prepare('INSERT INTO languages(code, translate) value(?, ?)')
+            ->prepare(sprintf('INSERT INTO %s(code, translate) value(?, ?)', $this->getTableName()))
             ->execute([$selector, $message]);
         if (!$result) {
             return false;
         }
 
         return $selector;
-    }
-
-    /**
-     * @param string $message
-     * @param string $translation
-     * @param string $languageCode
-     * @return bool|null
-     */
-    public function createTranslation(
-        string $message,
-        string $translation,
-        string $languageCode
-    ) {
-        $translator = $this->translation->getTranslator($languageCode);
-        if (!$translator) {
-            return null;
-        }
-        return $translator->set($message, $translation);
     }
 }

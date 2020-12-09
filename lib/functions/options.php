@@ -97,6 +97,7 @@ function update_options(array $value, int $siteId = null): bool
 
     $siteId = $siteId ?? get_current_site_id() ?: $options->getSiteId();
     $optionTable = $options->getTableName();
+    /** @noinspection SyntaxError */
     $sql = sprintf(
         'INSERT INTO %s (site_id, option_name, option_value) VALUES ',
         $optionTable

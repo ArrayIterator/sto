@@ -23,7 +23,7 @@ abstract class AbstractAdapter implements AdapterConnectionInterface
     protected $port = self::DEFAULT_PORT;
     protected $dbname;
     /**
-     * @var \PDOException|\Exception
+     * @var PDOException|Exception
      */
     protected $connect_error;
 
@@ -97,6 +97,7 @@ abstract class AbstractAdapter implements AdapterConnectionInterface
 
     /**
      * @return string|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getDbName()
     {
@@ -167,7 +168,10 @@ abstract class AbstractAdapter implements AdapterConnectionInterface
         return $this->getConnection()->query($sql);
     }
 
-    public function hasConnection()
+    /**
+     * @return bool
+     */
+    public function hasConnection() : bool
     {
         return (bool)$this->connection;
     }
@@ -184,6 +188,11 @@ abstract class AbstractAdapter implements AdapterConnectionInterface
         return $this->connection;
     }
 
+    /**
+     * @param $name
+     * @param array $arguments
+     * @return mixed
+     */
     public function __call($name, array $arguments)
     {
         return call_user_func_array([$this->getConnection(), $name], $arguments);

@@ -150,7 +150,18 @@ function set_header(
     if (is_int($httpCode)) {
         $args[] = $httpCode;
     }
+
     header(...$args);
+    registered_headers()[$headerName] = true;
+}
+
+/**
+ * @return array
+ */
+function &registered_headers() : array
+{
+    static $headers = [];
+    return $headers;
 }
 
 /**
@@ -160,6 +171,9 @@ function set_header(
 function remove_header(string $headerName, bool $normalize = true)
 {
     $headerName = $normalize ? normalize_header_name($headerName) : $headerName;
+    if (isset(registered_headers()[$headerName])) {
+        registered_headers()[$headerName] = false;
+    }
     header_remove($headerName);
 }
 
@@ -188,8 +202,26 @@ function set_status_header(int $code, string $description = null)
     );
 
     if (!headers_sent()) {
+        registered_headers()[$protocol] = true;
         header($status_header, true, $code);
     }
+}
+
+/**
+ * @param string $value
+ * @param int|null $code
+ */
+function set_content_type(string $value, int $code = null)
+{
+    set_header('Content-Type', $value, $code);
+}
+
+/**
+ * @return false|string
+ */
+function get_content_type()
+{
+    return get_header('Content-Type')?:false;
 }
 
 /**
@@ -197,7 +229,7 @@ function set_status_header(int $code, string $description = null)
  */
 function is_json_request(): bool
 {
-    $header = get_header('Content-Type');
+    $header = get_content_type();
     if (!is_string($header)) {
         return false;
     }

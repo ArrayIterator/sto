@@ -20,7 +20,7 @@ function get_current_url(): string
     return hook_apply(
         'current_url',
         (string)get_uri(),
-        get_uri(),
+        get_uri()
     );
 }
 
@@ -31,10 +31,10 @@ function get_current_url(): string
 function get_site_url(string $pathUri = ''): string
 {
     static $path;
-    $server = server_environment();
     if (!$path) {
-        $documentRoot = rtrim(preg_replace('~[\\\/]+~', '/', $server['DOCUMENT_ROOT']), '/');
-        $rootPath = rtrim(preg_replace('~[\\\/]+~', '/', realpath(ROOT_DIR) ?: ROOT_DIR), '/');
+        $documentRoot = get_server_environment('DOCUMENT_ROOT')?:ROOT_DIR;
+        $documentRoot = un_slash_it(preg_replace('~[\\\/]+~', '/', $documentRoot));
+        $rootPath = un_slash_it(preg_replace('~[\\\/]+~', '/', realpath(ROOT_DIR) ?: ROOT_DIR));
         $path = trim(substr($rootPath, strlen($documentRoot)), '/') . '/';
     }
 

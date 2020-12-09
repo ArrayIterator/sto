@@ -7,6 +7,7 @@ use ArrayIterator\Database\Adapter\PDO;
 use ArrayIterator\Database\AdapterConnectionInterface;
 use ArrayIterator\Database\Tables;
 use DateTimeZone;
+use RuntimeException;
 
 /**
  * Class Database
@@ -26,7 +27,7 @@ class Database
     protected $adapter;
 
     /**
-     * @var Tables
+     * @var Tables[]
      */
     protected static $tablesRecord = [];
 
@@ -51,7 +52,7 @@ class Database
                 && in_array('mysql', \PDO::getAvailableDrivers());
         }
         if (!self::$is_pdo_supported) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'Driver pdo_mysql not supported'
             );
         }
@@ -69,13 +70,13 @@ class Database
     }
 
     /**
-     * @return Tables|null
+     * @return Tables
      */
-    public function getTables()
+    public function getTables() : Tables
     {
         $dbName = $this->adapter->getDbName();
         if (!$dbName) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'Database configuration does not have a database name'
             );
         }

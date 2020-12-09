@@ -4777,6 +4777,7 @@ final class Country
     /**
      * @param string $code
      * @return array|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getCountryByCode(string $code)
     {

@@ -30,26 +30,30 @@ interface AdapterConnectionInterface extends QueryPrepareInterface
         $port = self::DEFAULT_PORT
     );
 
-    public function connect();
+    /**
+     * @return bool
+     */
+    public function connect() : bool;
 
     /**
      * @return string
      */
-    public function getDriver();
+    public function getDriver() : string;
 
     /**
      * @return bool
      */
-    public function ping();
+    public function ping() : bool;
 
     /**
      * @param string $str
-     * @return string
+     * @return string|false
      */
-    public function escape($str);
+    public function escape(string $str);
 
     /**
      * @return Exception|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getConnectError();
 

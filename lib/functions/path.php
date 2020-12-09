@@ -266,6 +266,20 @@ function get_uploads_dir(): string
 /**
  * @return string
  */
+function get_language_dir() : string
+{
+    static $path;
+    if (!$path) {
+        $path = normalize_directory(LANGUAGE_DIR);
+        $path = un_slash_it($path);
+    }
+
+    return $path;
+}
+
+/**
+ * @return string
+ */
 function get_post_uploads_dir(): string
 {
     return get_uploads_dir() . DIRECTORY_SEPARATOR . 'posts';

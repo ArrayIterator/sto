@@ -12,7 +12,7 @@ class Random
      * @return string
      * @noinspection PhpUnused
      */
-    public static function char(int $length = 64, ?string $char = null): string
+    public static function char(int $length = 64, string $char = null): string
     {
         if ($length < 1) {
             return '';

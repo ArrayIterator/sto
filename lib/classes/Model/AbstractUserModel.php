@@ -14,14 +14,23 @@ namespace ArrayIterator\Model;
  */
 abstract class AbstractUserModel extends Model
 {
-    public function encodePlainPassword(string $password)
+    /**
+     * @param string $password
+     * @return string
+     */
+    public function encodePlainPassword(string $password) : string
     {
         return sha1($password);
     }
 
-    public function isPasswordEncoded(string $password)
+    /**
+     * Check if is Password hashed with sha1
+     * @param string $password
+     * @return bool
+     */
+    public function isPasswordEncoded(string $password) : bool
     {
-        return preg_match('~^[a-f0-9]{40}$~', $password);
+        return (bool) preg_match('~^[a-f0-9]{40}$~', $password);
     }
 
     public function hasPassword(string $password, $reEncode = true)
@@ -55,6 +64,7 @@ abstract class AbstractUserModel extends Model
 
     /**
      * @return string|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     private function getPassword()
     {
@@ -64,7 +74,7 @@ abstract class AbstractUserModel extends Model
     public function setUsername(string $username)
     {
         $username = strtolower(trim($username));
-        if (!$username || preg_match('~[^a-z0-9\_\-\.]~', $username)) {
+        if (!$username || preg_match('~[^a-z0-9_.\-]~', $username)) {
             return false;
         }
 
@@ -74,6 +84,10 @@ abstract class AbstractUserModel extends Model
         return $this->userData['username'] = $username;
     }
 
+    /**
+     * @param string $email
+     * @return false|string
+     */
     public function setEmail(string $email)
     {
         $email = strtolower(trim($email));
@@ -87,13 +101,21 @@ abstract class AbstractUserModel extends Model
         return $this->userData['email'] = $email;
     }
 
+    /**
+     * @param string $password
+     * @return false|string|null
+     */
     public function setPassword(string $password)
     {
         $this->userData['password'] = $this->hasPassword($password);
         return $this->userData['password'];
     }
 
-    public function setGender(string $gender)
+    /**
+     * @param string $gender
+     * @return string
+     */
+    public function setGender(string $gender) : string
     {
         $gender = strtoupper($gender);
         if (array_key_exists('gender', $this->data) && $this->data['gender'] === $gender

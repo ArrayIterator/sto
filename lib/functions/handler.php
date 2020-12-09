@@ -25,29 +25,31 @@ function shutdown_handler()
         clean_buffer();
     }
     if (!headers_sent()) {
-        set_header('Content-Type', 'text/html; charset=utf-8', 500);
+        set_content_type('text/html; charset=utf-8', 500);
     }
 
-    include ROOT_TEMPLATES_DIR . '/error/error.php';
+    include ROOT_TEMPLATES_DIR . '/500.php';
 }
 
 /**
  * @param Route $route
+ * @noinspection PhpUnusedParameterInspection
  */
 function route_not_found_handler(Route $route)
 {
-    set_header('Content-Type', 'text/html; charset=utf-8', 404);
-    include ROOT_TEMPLATES_DIR . '/error/not-found.php';
+    set_content_type('text/html; charset=utf-8', 404);
+    include ROOT_TEMPLATES_DIR . '/404.php';
 }
 
 /**
  * @param Route $route
  * @param array $allowedMethods
+ * @noinspection PhpUnusedParameterInspection
  */
 function route_not_allowed_handler(Route $route, $allowedMethods = [])
 {
-    set_header('Content-Type', 'text/html; charset=utf-8', 404);
-    include ROOT_TEMPLATES_DIR . '/error/not-allowed-method.php';
+    set_content_type('text/html; charset=utf-8', 404);
+    include ROOT_TEMPLATES_DIR . '/405.php';
 }
 
 function route_json_not_found_handler()
@@ -102,8 +104,12 @@ function do_exit(...$args)
     }
 
     if ($count > 1) {
-        if ($message === null && (is_string($args[1]) || is_object($args[0]) && method_exists($args[0],
-                    '__tostring'))) {
+        if ($message === null
+            && (is_string($args[1])
+                || is_object($args[0])
+                && method_exists($args[0], '__tostring')
+            )
+        ) {
             $message = $args[1];
         }
 
@@ -178,10 +184,35 @@ function module_exist(string $name): bool
 
 /**
  * @param string $name
- * @return Module|false only return valid modulex
+ * @return Module|false only return valid modules
  */
 function get_module(string $name)
 {
     $mod = module_get($name);
     return $mod && $mod->isValid() ? $mod : false;
+}
+
+/**
+ * Add 404 Hook
+ */
+function set_404()
+{
+    hook_add('is_404', 'return_true');
+}
+
+/**
+ * @return bool
+ */
+function is_404() : bool
+{
+    return (bool) hook_apply('is_404', false);
+}
+
+
+/**
+ * @return bool
+ */
+function is_not_allowed_method() : bool
+{
+    return (bool) hook_apply('is_not_allowed_method', false);
 }

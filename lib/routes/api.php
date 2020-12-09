@@ -2,6 +2,6 @@
 /**
  * Routes API Configurations
  */
-route_any('/ping[/]', function () {
+route_api_any('/ping[/]', function () {
     require __DIR__ . '/callback/api/ping.php';
 });

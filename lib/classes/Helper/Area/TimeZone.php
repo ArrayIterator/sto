@@ -2,6 +2,7 @@
 
 namespace ArrayIterator\Helper\Area;
 
+use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
 
@@ -4829,7 +4830,7 @@ final class TimeZone
             $time = new DateTimeZone($time);
         }
         if ($time instanceof DateTimeZone) {
-            $offset = (new \DateTimeImmutable())->setTimezone($time)->getOffset();
+            $offset = (new DateTimeImmutable())->setTimezone($time)->getOffset();
         }
         $tz = [];
         if (!is_int($offset)) {
@@ -4858,7 +4859,7 @@ final class TimeZone
             $time = new DateTimeZone($time);
         }
         if ($time instanceof DateTimeZone) {
-            $offset = (new \DateTimeImmutable())->setTimezone($time)->getOffset();
+            $offset = (new DateTimeImmutable())->setTimezone($time)->getOffset();
         }
         $tz = false;
         if (!is_int($offset)) {

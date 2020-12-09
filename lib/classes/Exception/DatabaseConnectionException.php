@@ -2,13 +2,14 @@
 
 namespace ArrayIterator\Exception;
 
+use RuntimeException;
 use Throwable;
 
 /**
  * Class DatabaseConnectionException
  * @package ArrayIterator\Exception
  */
-class DatabaseConnectionException extends \RuntimeException
+class DatabaseConnectionException extends RuntimeException
 {
     public $error_list = [];
 
@@ -21,7 +22,7 @@ class DatabaseConnectionException extends \RuntimeException
     /**
      * @return array
      */
-    public function getErrorList()
+    public function getErrorList() : array
     {
         return $this->error_list;
     }

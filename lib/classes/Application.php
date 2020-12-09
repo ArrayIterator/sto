@@ -5,7 +5,7 @@ namespace ArrayIterator;
 use ArrayIterator\Dependency\Translation;
 use ArrayIterator\Helper\Area\TimeZone;
 use ArrayIterator\Helper\TimeZoneConvert;
-use ArrayIterator\Model\Languages;
+use ArrayIterator\Model\TranslationsDictionary;
 use ArrayIterator\Model\Option;
 use ArrayIterator\Model\Site;
 use ArrayIterator\Model\StudentOnline;
@@ -35,7 +35,7 @@ class Application
     protected $translation;
 
     /**
-     * @var Languages
+     * @var TranslationsDictionary
      */
     protected $languages;
 
@@ -169,20 +169,19 @@ class Application
     public function getTranslation(): Translation
     {
         if (!$this->translation) {
-            $this->translation = new Translation($this->getLanguages());
+            $this->translation = new Translation($this->getTranslationDictionary());
         }
         return $this->translation;
     }
 
     /**
-     * @return Languages
+     * @return TranslationsDictionary
      */
-    public function getLanguages(): Languages
+    public function getTranslationDictionary(): TranslationsDictionary
     {
         if (!$this->languages) {
-            $this->languages = new Languages(
-                $this->getDatabase(),
-                $this->getTranslation()
+            $this->languages = new TranslationsDictionary(
+                $this->getDatabase()
             );
         }
         return $this->languages;

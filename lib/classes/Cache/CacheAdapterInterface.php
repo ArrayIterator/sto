@@ -30,6 +30,7 @@ interface CacheAdapterInterface
 
     /**
      * @return Cache|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getCache();
 

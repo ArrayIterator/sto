@@ -4,13 +4,24 @@ use ArrayIterator\Helper\StringFilter;
 use ArrayIterator\Model\Supervisor;
 
 /**
- * @return array|null
+ * @return mixed|array
+ * @noinspection PhpMissingReturnTypeInspection
  */
 function &student_global()
 {
     static $student = null;
 
     return $student;
+}
+
+/**
+ * @return mixed|array
+ * @noinspection PhpMissingReturnTypeInspection
+ */
+function &supervisor_global()
+{
+    static $supervisor = null;
+    return $supervisor;
 }
 
 /**
@@ -72,7 +83,7 @@ function get_current_student_data()
             || $cookies['type'] !== STUDENT
             || !is_int($cookies['user_id'])
             || !is_int($cookies['site_id'])
-            || !($data = \student()->findOneById($cookies['user_id'])->fetchClose())
+            || !($data = student()->findOneById($cookies['user_id'])->fetchClose())
             || ($data->getSiteId() ?? $cookies['site_id']) !== $cookies['site_id']
         ) {
             return false;
@@ -101,8 +112,8 @@ function get_current_student_data()
  */
 function get_current_supervisor_data()
 {
-    static $supervisor = null;
 
+    $supervisor =& supervisor_global();
     if ($supervisor !== null) {
         return $supervisor;
     }
@@ -215,5 +226,55 @@ function is_login(): bool
     if (is_admin_page()) {
         return is_supervisor();
     }
+
     return is_student();
+}
+
+/**
+ * @return array|false
+ */
+function get_current_user_data()
+{
+    if (!is_login()) {
+        return false;
+    }
+    return is_admin_page()
+        ? get_current_supervisor_data()
+        : get_current_student_data();
+}
+
+/**
+ * @return int
+ */
+function get_current_user_id() : int
+{
+    $user = get_current_user_data();
+    return $user ? $user['user_id'] : 0;
+}
+
+/**
+ * @return false|string
+ */
+function get_current_user_type()
+{
+    $userData = get_current_student_data();
+    return $userData ? $userData['type'] : false;
+}
+
+/**
+ * @return false|string
+ */
+function get_current_user_status()
+{
+    $userData = get_current_user_data();
+    return $userData ? ($userData['status']??false) : false;
+}
+
+/**
+ * @return false|string
+ */
+function get_current_supervisor_role()
+{
+    $userData = get_current_supervisor();
+    return $userData ? ($userData['role']??false) : false;
 }

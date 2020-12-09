@@ -11,6 +11,12 @@ class Supervisor extends AbstractUserModel
     protected $tableName = 'sto_supervisor';
     protected $primaryKey = 'id';
 
+    /**
+     * @param $column
+     * @param $value
+     * @return mixed
+     * @noinspection PhpMissingReturnTypeInspection
+     */
     protected function sanitizeDatabaseValue($column, $value)
     {
         switch ($column) {

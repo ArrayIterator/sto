@@ -14,8 +14,8 @@ set_no_index_header();
 
 // check login
 if (!is_login()
-    && (!defined('ADMIN_LOGIN_PAGE') || !ADMIN_LOGIN_PAGE)
-    && (!defined('INSTALLATION_FILE') || !INSTALLATION_FILE)
+    && ! is_admin_login_page()
+    && ! is_install_page()
 ) {
     redirect(get_admin_login_url());
     do_exit(0);

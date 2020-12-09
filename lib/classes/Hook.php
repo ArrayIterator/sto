@@ -158,16 +158,12 @@ final class Hook implements Iterator, ArrayAccess
     }
 
     /**
-     * Unhooks a function or method from a specific filter action.
-     *
-     * @param string $tag The filter hook to which the function to be removed is hooked.
-     * @param callable $function_to_remove The callback to be removed from running when the filter is applied.
-     * @param int $priority The exact priority used when adding the original filter callback.
-     * @return bool Whether the callback existed before it was removed.
-     * @since 4.7.0
-     *
+     * @param string $tag
+     * @param callable $function_to_remove
+     * @param int $priority
+     * @return bool
      */
-    public function remove(string $tag, callable $function_to_remove, int $priority = 10)
+    public function remove(string $tag, callable $function_to_remove, int $priority = 10) : bool
     {
         $function_key = $this->hooks->buildUniqueId($tag, $function_to_remove, $priority);
 
@@ -359,7 +355,7 @@ final class Hook implements Iterator, ArrayAccess
      * @link https://www.php.net/manual/en/arrayaccess.offsetexists.php
      *
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset) : bool
     {
         return isset($this->callbacks[$offset]);
     }
@@ -408,7 +404,7 @@ final class Hook implements Iterator, ArrayAccess
     /**
      * Returns the current element.
      *
-     * @return array Of callbacks at current priority.
+     * @return array|false Of callbacks at current priority.
      * @link https://www.php.net/manual/en/iterator.current.php
      */
     public function current()
@@ -419,7 +415,7 @@ final class Hook implements Iterator, ArrayAccess
     /**
      * Moves forward to the next element.
      *
-     * @return array Of callbacks at next priority.
+     * @return array|false Of callbacks at next priority.
      * @link https://www.php.net/manual/en/iterator.next.php
      */
     public function next()

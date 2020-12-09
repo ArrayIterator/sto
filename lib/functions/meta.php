@@ -7,7 +7,7 @@ use ArrayIterator\Dependency\Translation;
 use ArrayIterator\Helper\Area\TimeZone;
 use ArrayIterator\Helper\TimeZoneConvert;
 use ArrayIterator\Hooks;
-use ArrayIterator\Model\Languages;
+use ArrayIterator\Model\TranslationsDictionary;
 use ArrayIterator\Model\Option;
 use ArrayIterator\Model\Site;
 use ArrayIterator\Model\Student;
@@ -16,6 +16,10 @@ use ArrayIterator\Model\Supervisor;
 use ArrayIterator\Model\SupervisorOnline;
 use ArrayIterator\Modules;
 use ArrayIterator\Route;
+use ArrayIterator\RouteApi;
+use FastRoute\RouteCollector;
+use GuzzleHttp\Psr7\ServerRequest;
+use Psr\Http\Message\UriInterface;
 
 /**
  * @return Application
@@ -23,6 +27,42 @@ use ArrayIterator\Route;
 function application(): Application
 {
     return Application::getInstance();
+}
+
+/**
+ * @return ServerRequest
+ */
+function server_request(): ServerRequest
+{
+    static $request;
+    if (!$request) {
+        $request = ServerRequest::fromGlobals();
+        $server = $request->getServerParams();
+        $host = $server['HTTP_HOST'] ?? $server['SERVER_NAME'];
+        $port = $server['HTTP_X_FORWARDED_PORT'] ?? $server['SERVER_PORT'] ?? null;
+        if ($port && $port != 443 && $port != 80) {
+            $host = sprintf('%s:%d', $host, $port);
+        }
+        $uri = $request->getUri()->withHost($host);
+        if (($server['HTTPS'] ?? null) == 'on'
+            || ($server['HTTP_X_FORWARDED_PROTO'] ?? null) == 'https'
+            || ($server['SERVER_PORT'] ?? null) == 443
+        ) {
+            $uri = $uri->withScheme('https');
+        }
+
+        $request = $request->withUri($uri);
+    }
+
+    return $request;
+}
+
+/**
+ * @return UriInterface
+ */
+function get_uri(): UriInterface
+{
+    return server_request()->getUri();
 }
 
 /**
@@ -50,11 +90,11 @@ function database(): Database
 }
 
 /**
- * @return Languages
+ * @return TranslationsDictionary
  */
-function languages(): Languages
+function translation_dictionary(): TranslationsDictionary
 {
-    return \application()->getLanguages();
+    return \application()->getTranslationDictionary();
 }
 
 /**
@@ -127,6 +167,47 @@ function supervisor(): Supervisor
 function route(): Route
 {
     return \application()->getRoute();
+}
+/**
+ * @return RouteCollector
+ */
+function route_collector(): RouteCollector
+{
+    return application()->getRoute()->getRouteCollector();
+}
+
+/**
+ * @return RouteApi
+ */
+function route_api() : RouteApi
+{
+    static $route_api;
+    if (!$route_api) {
+        $route_api = new RouteApi(
+            \route(),
+            get_route_api_path(),
+            true
+        );
+    }
+
+    return $route_api;
+}
+
+/**
+ * @return RouteApi
+ */
+function route_public() : RouteApi
+{
+    static $route_api;
+    if (!$route_api) {
+        $route_api = new RouteApi(
+            \route(),
+            '{path: (?!'.get_route_api_path().')}',
+            true
+        );
+    }
+
+    return $route_api;
 }
 
 /**

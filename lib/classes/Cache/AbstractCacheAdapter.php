@@ -2,8 +2,6 @@
 
 namespace ArrayIterator\Cache;
 
-use ArrayIterator\Cache\CacheAdapterInterface;
-
 /**
  * Class AbstractCacheAdapter
  * @package ArrayIterator\Cache
@@ -30,7 +28,6 @@ class AbstractCacheAdapter implements CacheAdapterInterface
     /**
      * The amount of times the cache data was already stored in the cache.
      *
-     * @since 2.5.0
      * @var int
      */
     public $cache_hits = 0;
@@ -114,6 +111,7 @@ class AbstractCacheAdapter implements CacheAdapterInterface
 
     /**
      * @return Cache|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getCache()
     {
@@ -216,7 +214,7 @@ class AbstractCacheAdapter implements CacheAdapterInterface
      * @param float|int|string $key
      * @param string $group
      * @param $found
-     * @return mixed
+     * @return bool|int
      */
     public function get($key, string $group = self::DEFAULT_GROUP, &$found = null)
     {

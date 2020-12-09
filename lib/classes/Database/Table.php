@@ -70,8 +70,9 @@ class Table
 
     /**
      * @return string|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
-    public function getAutoIncrement(): string
+    public function getAutoIncrement()
     {
         return $this->autoIncrement;
     }
@@ -87,7 +88,7 @@ class Table
     /**
      * @return string[]
      */
-    public function getPrimaryKey()
+    public function getPrimaryKey() : array
     {
         return $this->primaryKey;
     }
@@ -127,6 +128,7 @@ class Table
     /**
      * @param string $columnName
      * @return Column|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getColumn(string $columnName)
     {

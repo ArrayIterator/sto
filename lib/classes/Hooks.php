@@ -39,7 +39,7 @@ final class Hooks implements ArrayAccess
      * @param array $filters Filters to normalize.
      * @return Hook[] Array of normalized filters.
      */
-    public function preInitializedHooks(array $filters)
+    public function preInitializedHooks(array $filters) : array
     {
         /** @var Hook[] $normalized */
         $normalized = [];
@@ -71,6 +71,7 @@ final class Hooks implements ArrayAccess
      * @param ?int $priority
      * @return string|null
      * @noinspection PhpUnusedParameterInspection
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function buildUniqueId(string $tag, callable $function, int $priority = 10)
     {
@@ -196,7 +197,7 @@ final class Hooks implements ArrayAccess
      * @param $tag
      * @return int
      */
-    public function hasRun($tag)
+    public function hasRun($tag) : int
     {
         if (!isset($this->actions[$tag])) {
             return 0;
@@ -271,7 +272,12 @@ final class Hooks implements ArrayAccess
         return $r;
     }
 
-    public function removeAll(string $tag, int $priority = null)
+    /**
+     * @param string $tag
+     * @param int|null $priority
+     * @return bool
+     */
+    public function removeAll(string $tag, int $priority = null) : bool
     {
         if (isset($this->filters[$tag])) {
             $this->filters[$tag]->removeAllFilters($priority);
@@ -332,7 +338,11 @@ final class Hooks implements ArrayAccess
         return isset($this->filters[$offset]);
     }
 
-    public function offsetGet($offset)
+    /**
+     * @param mixed $offset
+     * @return Hook|mixed
+     */
+    public function offsetGet($offset) : Hook
     {
         return $this->filters[$offset];
     }

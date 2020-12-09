@@ -9,6 +9,7 @@ define('LIB_PATH', basename(__DIR__));
 define('ROOT_DIR', dirname(__DIR__));
 define('ROOT_TEMPLATES_DIR', __DIR__ . '/templates');
 define('DEFAULT_CACHE_DIR', ROOT_DIR . ' /cache');
+define('DEFAULT_LANGUAGE_DIR', ROOT_DIR . '/languages');
 
 define('DEFAULT_API_PATH', '/api');
 define('DEFAULT_LOGIN_PATH', '/login');

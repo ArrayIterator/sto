@@ -2,12 +2,15 @@
 
 namespace ArrayIterator\Dependency;
 
+use PDO;
+
 /**
  * Class Translator
  * @package ArrayIterator\Dependency
  */
 class Translator
 {
+    protected $tableName = '';
     protected $translation;
     protected $info;
     protected $records = [];
@@ -54,6 +57,35 @@ class Translator
     }
 
     /**
+     * @param string $code
+     * @param string $trans
+     * @return array
+     */
+    public function setRecord(string $code, string $trans) : array
+    {
+        $code = sha1($code);
+        $this->records[$code] = [
+            'code' => $code,
+            'translation' => $trans
+        ];
+
+        return $this->records[$code];
+    }
+
+    /**
+     * @param string $code
+     * @param string $translation
+     * @return array|false
+     */
+    public function addRecord(string $code, string $translation)
+    {
+        if (isset($this->records[sha1($code)])) {
+            return false;
+        }
+
+        return $this->setRecord($code, $translation);
+    }
+    /**
      * @return Translation
      */
     public function getTranslation(): Translation
@@ -98,19 +130,27 @@ class Translator
         return $this->records;
     }
 
+    public function clearRecords()
+    {
+        $this->records = [];
+    }
+
     /**
      * @param string $message
      * @return array|false
      */
     public function get(string $message)
     {
+        $code = sha1($message);
         if ($this->getIso2() === Translation::ISO_2_NO_TRANSLATE) {
             return [
-                'code' => sha1($message),
+                'code' => $code,
                 'translation' => $message
             ];
         }
-
+        if (isset($this->records[$code])) {
+            return $this->records[$code];
+        }
         $stmt = $this
             ->translation
             ->prepare("
@@ -129,7 +169,7 @@ class Translator
             return false;
         }
 
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
         $stmt->closeCursor();
         return $result ? [
             'code' => $result['code'],
@@ -137,7 +177,20 @@ class Translator
         ] : false;
     }
 
-    public function set($message, $translation)
+    /**
+     * @return string
+     */
+    public function getTableName(): string
+    {
+        return $this->tableName;
+    }
+
+    /**
+     * @param string $message
+     * @param string $translation
+     * @return bool
+     */
+    public function set(string $message, string $translation) : bool
     {
         if ($this->getIso2() === Translation::ISO_2_NO_TRANSLATE) {
             return true;
@@ -149,7 +202,10 @@ class Translator
                 && $this->records[$hash]['code'] === $hash
             ) {
                 return $this->translation->prepare(
-                    'UPDATE languages_translation SET translation=? WHERE language_code=?'
+                    sprintf(
+                        'UPDATE %s SET translation=? WHERE dictionary_code=?',
+                        $this->getTableName()
+                    )
                 )->execute([$translation, $hash]);
             }
 
@@ -160,7 +216,7 @@ class Translator
             }
         }
 
-        $selector = $this->translation->getLanguages()->set($message);
+        $selector = $this->translation->getTranslationsDictionary()->set($message);
         if (!$selector) {
             return false;
         }
@@ -168,9 +224,12 @@ class Translator
         $stmt = $this
             ->translation
             ->prepare(
-                'INSERT INTO languages_translation (language_code, iso_3, translation)
-                values(:c, :i, :t) ON DUPLICATE KEY UPDATE translation=:t
-            '
+                sprintf(
+                    'INSERT INTO %s (dictionary_code, iso_3, translation)
+                        values(:c, :i, :t) ON DUPLICATE KEY UPDATE translation=:t
+                    ',
+                    $this->getTableName()
+                )
             );
 
         $this->records[$hash] = [
@@ -186,11 +245,14 @@ class Translator
 
     public function trans($message, $fallback = null)
     {
+        $selector = sha1($message);
         if ($this->getIso2() === Translation::ISO_2_NO_TRANSLATE) {
+            if (isset($this->records[$selector])) {
+                return $this->records[$selector]['translation'];
+            }
             return $message;
         }
 
-        $selector = sha1($message);
         if (!isset($this->records[$selector])) {
             $this->records[$selector] = $this->get($message);
         }
@@ -220,7 +282,7 @@ class Translator
                 return $translation;
             }
 
-            $this->translation->getLanguages()->set($message);
+            $this->translation->getTranslationsDictionary()->set($message);
             return $this->trans($message);
         }
 

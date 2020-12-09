@@ -25,7 +25,7 @@ class PDO extends AbstractAdapter
      * @return bool
      * @throws Exception
      */
-    public function connect()
+    public function connect() : bool
     {
         if ($this->connection) {
             $this->connect_error = null;
@@ -75,7 +75,7 @@ class PDO extends AbstractAdapter
         return true;
     }
 
-    public function getDriver()
+    public function getDriver() : string
     {
         return 'pdo_mysql';
     }
@@ -83,7 +83,7 @@ class PDO extends AbstractAdapter
     /**
      * @return bool
      */
-    public function ping()
+    public function ping() : bool
     {
         try {
             if (!$this->connection) {
@@ -93,18 +93,17 @@ class PDO extends AbstractAdapter
             if ($stmt) {
                 $stmt->closeCursor();
             }
+            return true;
         } catch (PDOException $e) {
             return false;
         }
-
-        return true;
     }
 
     /**
-     * @param string $query
+     * @param string $sql
      * @return false|AbstractResult
      */
-    public function query(string $query)
+    public function query(string $sql)
     {
         $this->rollbackBuffer();
         $connection = $this->getConnection();
@@ -113,12 +112,12 @@ class PDO extends AbstractAdapter
         }
 
         $this->setAttribute(CorePdo::ATTR_CURSOR, CorePdo::CURSOR_SCROLL);
-        $query = $connection->query($query);
-        if ($query instanceof PDOStatement) {
-            $query = new PdoResult($query);
+        $sql = $connection->query($sql);
+        if ($sql instanceof PDOStatement) {
+            $sql = new PdoResult($sql);
         }
 
-        return $query;
+        return $sql;
     }
 
     /**
@@ -135,7 +134,7 @@ class PDO extends AbstractAdapter
         return $this->query($sql);
     }
 
-    public function escape($str)
+    public function escape(string $str)
     {
         $connection = $this->getConnection();
         if (!$connection) {

@@ -2,13 +2,14 @@
 
 namespace ArrayIterator\Exception;
 
+use Exception;
 use Throwable;
 
 /**
  * Class MethodNotAllowedException
  * @package ArrayIterator\Exception
  */
-class MethodNotAllowedException extends \Exception
+class MethodNotAllowedException extends Exception
 {
     protected $methods;
 

@@ -32,12 +32,12 @@ class RandomToken
     /**
      * @param string $hash
      * @param string $secretKey
-     * @return array|null
+     * @return array|false
      */
-    public static function parse(string $hash, string $secretKey): ?array
+    public static function parse(string $hash, string $secretKey)
     {
         if (preg_match('~[^a-f0-9]~', $hash)) {
-            return null;
+            return false;
         }
         $hash = str_split(hex2bin($hash), 2);
         $allTime = '';
@@ -48,7 +48,7 @@ class RandomToken
             }
         }
         if (strlen($allTime) !== 60 || !is_numeric($allTime)) {
-            return null;
+            return false;
         }
 
         $expireRandom = '';
@@ -68,7 +68,7 @@ class RandomToken
         if ($expireRandom[0] !== $startRandom[1]
             || $expireRandom[1] !== $startRandom[0]
         ) {
-            return null;
+            return false;
         }
 
         $hash = implode($hash);
@@ -82,7 +82,7 @@ class RandomToken
             $item = substr($item, 0, 3);
         }
         if (strlen($iv) !== static::BYTES_LENGTH) {
-            return null;
+            return false;
         }
         $hash = implode($hash);
         $hash = str_split($hash, (int)(round(strlen($hash) / 6) + 1));
@@ -97,7 +97,7 @@ class RandomToken
 
         $hash = implode('', $hash);
         if (!is_numeric($yPos)) {
-            return null;
+            return false;
         }
         $yStart = null;
         $ordinal = '';
@@ -115,11 +115,11 @@ class RandomToken
         }
         $ordinal = chr((int)$ordinal);
         if (preg_match('~[^a-z]~i', $ordinal)) {
-            return null;
+            return false;
         }
         $hash = sprintf('$%s%s$%s$%s', $yStart, $ordinal, $round, $hash);
         if (strlen($hash) !== 60) {
-            return null;
+            return false;
         }
 
         $secretKey = static::hashKey($secretKey);
@@ -173,7 +173,7 @@ class RandomToken
      * @param int $expiredAfter 0 for never expired default 1 day
      * @return string
      */
-    public static function create(string $privateKey, int $expiredAfter = self::A_DAY_IN_SECOND)
+    public static function create(string $privateKey, int $expiredAfter = self::A_DAY_IN_SECOND) : string
     {
         $secretKey = static::hashKey($privateKey);
         $iv = Random::bytes(static::BYTES_LENGTH);

@@ -1,45 +1,7 @@
 <?php
 
-use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\UploadedFile;
-use Psr\Http\Message\UriInterface;
-
-/**
- * @return ServerRequest
- */
-function server_request(): ServerRequest
-{
-    static $request;
-    if (!$request) {
-        $request = ServerRequest::fromGlobals();
-        $server = $request->getServerParams();
-        $host = $server['HTTP_HOST'] ?? $server['SERVER_NAME'];
-        $port = $server['HTTP_X_FORWARDED_PORT'] ?? $server['SERVER_PORT'] ?? null;
-        if ($port && $port != 443 && $port != 80) {
-            $host = sprintf('%s:%d', $host, $port);
-        }
-        $uri = $request->getUri()->withHost($host);
-        if (($server['HTTPS'] ?? null) == 'on'
-            || ($server['HTTP_X_FORWARDED_PROTO'] ?? null) == 'https'
-            || ($server['SERVER_PORT'] ?? null) == 443
-        ) {
-            $uri = $uri->withScheme('https');
-        }
-
-        $request = $request->withUri($uri);
-    }
-
-    return $request;
-}
-
-/**
- * @return UriInterface
- */
-function get_uri(): UriInterface
-{
-    return server_request()->getUri();
-}
 
 /**
  * @return array
@@ -47,6 +9,17 @@ function get_uri(): UriInterface
 function server_environment(): array
 {
     return server_request()->getServerParams();
+}
+
+/**
+ * @param string $name
+ * @return mixed|null
+ */
+function get_server_environment(string $name)
+{
+    return server_environment()[$name]??(
+        server_environment()[strtoupper($name)]??null
+    );
 }
 
 /**
@@ -117,6 +90,7 @@ function cookie($key = null)
 /**
  * @param string|null $key
  * @return mixed
+ * @noinspection PhpMissingReturnTypeInspection
  */
 function post($key = null)
 {
@@ -205,7 +179,7 @@ function request_uri(): string
 {
     return hook_apply(
         'request_uri',
-        server_environment()['REQUEST_URI']
+        get_server_environment('REQUEST_URI')
     );
 }
 
@@ -324,7 +298,7 @@ function hook_add(
     int $priority = 10,
     int $accepted_args = 1
 ): bool {
-    return \hooks()->add($tag, $function_to_add, $priority, $accepted_args);
+    return hooks()->add($tag, $function_to_add, $priority, $accepted_args);
 }
 
 /**
@@ -334,7 +308,7 @@ function hook_add(
  */
 function hook_apply(string $tag, $value)
 {
-    return \hooks()->apply(...func_get_args());
+    return hooks()->apply(...func_get_args());
 }
 
 /**
@@ -344,7 +318,7 @@ function hook_apply(string $tag, $value)
  */
 function hook_remove_all(string $tag, int $priority = null): bool
 {
-    return \hooks()->removeAll($tag, $priority);
+    return hooks()->removeAll($tag, $priority);
 }
 
 /**
@@ -355,7 +329,7 @@ function hook_remove_all(string $tag, int $priority = null): bool
  */
 function hook_remove(string $tag, callable $function_to_remove, int $priority = 10): bool
 {
-    return \hooks()->remove($tag, $function_to_remove, $priority);
+    return hooks()->remove($tag, $function_to_remove, $priority);
 }
 
 /**
@@ -365,12 +339,12 @@ function hook_remove(string $tag, callable $function_to_remove, int $priority = 
  */
 function hook_exist(string $tag, $function_to_check = false): bool
 {
-    return \hooks()->exist($tag, $function_to_check);
+    return hooks()->exist($tag, $function_to_check);
 }
 
 function hook_run(string $tag, ...$arg)
 {
-    \hooks()->run($tag, ...$arg);
+    hooks()->run($tag, ...$arg);
 }
 
 /**
@@ -379,7 +353,7 @@ function hook_run(string $tag, ...$arg)
  */
 function hook_run_once(string $tag, ...$arg)
 {
-    \hooks()->runOnceAndRemove($tag, ...$arg);
+    hooks()->runOnceAndRemove($tag, ...$arg);
 }
 
 /**
@@ -388,7 +362,7 @@ function hook_run_once(string $tag, ...$arg)
  */
 function hook_has_run(string $tag): int
 {
-    return \hooks()->hasRun($tag);
+    return hooks()->hasRun($tag);
 }
 
 /**
@@ -397,7 +371,7 @@ function hook_has_run(string $tag): int
  */
 function hook_is_in_stack(string $filter = null): bool
 {
-    return \hooks()->inStack($filter);
+    return hooks()->inStack($filter);
 }
 
 /**
@@ -406,7 +380,7 @@ function hook_is_in_stack(string $filter = null): bool
  */
 function hook_run_ref_array(string $tag, array $args)
 {
-    \hooks()->runRefArray($tag, $args);
+    hooks()->runRefArray($tag, $args);
 }
 
 /**

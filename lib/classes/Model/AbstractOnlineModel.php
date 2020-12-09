@@ -3,6 +3,7 @@
 namespace ArrayIterator\Model;
 
 use ArrayIterator\Database\PrepareStatement;
+use Throwable;
 
 /**
  * Class AbstractOnlineModel
@@ -30,7 +31,7 @@ abstract class AbstractOnlineModel extends Model
     /**
      * @return bool
      */
-    public function replaceOffline()
+    public function replaceOffline() : bool
     {
         $time = time();
         if ($this->lastExecute && $this->lastExecute + 4 > $time) {
@@ -47,7 +48,7 @@ abstract class AbstractOnlineModel extends Model
             $stmt->closeCursor();
             $this->lastExecute = $time;
             return true;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // pass
         }
 
@@ -102,8 +103,11 @@ abstract class AbstractOnlineModel extends Model
         return false;
     }
 
-
-    public function setOnline(AbstractUserModel $abstractUser)
+    /**
+     * @param AbstractUserModel $abstractUser
+     * @return bool
+     */
+    public function setOnline(AbstractUserModel $abstractUser) : bool
     {
         $id = $abstractUser->getId();
         if (!$abstractUser->isFromStatement()) {
@@ -130,7 +134,11 @@ abstract class AbstractOnlineModel extends Model
         return $stmt->execute([$id]);
     }
 
-    public function setOffline(AbstractUserModel $student)
+    /**
+     * @param AbstractUserModel $student
+     * @return bool
+     */
+    public function setOffline(AbstractUserModel $student) : bool
     {
         $id = $student->getId();
         if (!$student->isFromStatement()) {

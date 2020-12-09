@@ -3,6 +3,7 @@
 namespace ArrayIterator;
 
 use FastRoute\DataGenerator\GroupCountBased;
+use FastRoute\Dispatcher\GroupCountBased as GroupDispatcher;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std;
@@ -19,13 +20,33 @@ class Route
     protected $notFoundHandler;
     protected $notAllowedHandler;
     protected $dispatched = false;
+    protected $routeParser;
+    protected $generator;
 
     /**
      * Route constructor.
      */
     public function __construct()
     {
-        $this->routeCollector = new RouteCollector(new Std(), new GroupCountBased());
+        $this->routeParser = new Std();
+        $this->generator = new GroupCountBased();
+        $this->routeCollector = new RouteCollector($this->routeParser, $this->generator);
+    }
+
+    /**
+     * @return Std
+     */
+    public function getRouteParser(): Std
+    {
+        return $this->routeParser;
+    }
+
+    /**
+     * @return GroupCountBased
+     */
+    public function getGenerator(): GroupCountBased
+    {
+        return $this->generator;
     }
 
     /**
@@ -36,16 +57,14 @@ class Route
         return $this->dispatched;
     }
 
-    /**
-     * @return mixed
-     */
     public function getRouteInfo()
     {
         return $this->routeInfo;
     }
 
     /**
-     * @return callable
+     * @return callable|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getNotFoundHandler()
     {
@@ -61,7 +80,8 @@ class Route
     }
 
     /**
-     * @return callable
+     * @return callable|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function getNotAllowedHandler()
     {
@@ -84,10 +104,13 @@ class Route
         return $this->routeCollector;
     }
 
-    public function getDispatcher()
+    /**
+     * @return GroupDispatcher
+     */
+    public function getDispatcher() : GroupDispatcher
     {
         if (!$this->dispatcher) {
-            $this->dispatcher = new \FastRoute\Dispatcher\GroupCountBased(
+            $this->dispatcher = new GroupDispatcher(
                 $this->routeCollector->getData()
             );
         }
@@ -149,11 +172,17 @@ class Route
         $this->routeCollector->addGroup($prefix, $callback);
     }
 
+    /**
+     * @param $httpMethod
+     * @param string|null $uri
+     * @param Hooks|null $hook
+     * @return array|mixed[]
+     */
     public function dispatch(
         $httpMethod,
         string $uri = null,
         Hooks $hook = null
-    ) {
+    ) : array {
         $this->dispatched = true;
         if (!$this->routeInfo) {
             $httpMethod = strtoupper($httpMethod);
@@ -162,10 +191,11 @@ class Route
             if (false !== $pos = strpos($uri, '?')) {
                 $uri = substr($uri, 0, $pos);
             }
+
             $uri = rawurldecode($uri);
             $this->routeInfo = $this->getDispatcher()->dispatch($httpMethod, $uri);
             $routeInfo = $this->routeInfo[0];
-            $route = $hook ? $hook->apply('route_info', $routeInfo, $this) : $this->routeInfo;
+            $route = $hook ? $hook->apply('route_info', $this->routeInfo, $this) : $this->routeInfo;
             if (!is_array($route)
                 || !isset($route[0])
                 || !in_array($route[0], [
@@ -178,6 +208,11 @@ class Route
             ) {
                 $route = $routeInfo;
             }
+
+            $hook && $hook->add('is_404', function () use ($route) {
+                return $route[0] === Dispatcher::NOT_FOUND;
+            });
+
             switch ($route[0]) {
                 case Dispatcher::NOT_FOUND:
                     // ... 404 Not Found

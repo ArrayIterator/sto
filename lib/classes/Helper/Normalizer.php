@@ -177,7 +177,7 @@ final class Normalizer
      * @author Leonard Lin <leonard@acm.org>
      * @license GPL
      */
-    public static function forceBalanceTags(string $text)
+    public static function forceBalanceTags(string $text) : string
     {
         $tagStack = [];
         $stackSize = 0;
@@ -384,11 +384,11 @@ final class Normalizer
      * @param array $slugCollections
      * @return string
      */
-    public static function uniqueSlug(string $slug, array $slugCollections)
+    public static function uniqueSlug(string $slug, array $slugCollections) : string
     {
         $separator = '-';
         $inc = 1;
-        $slug = static::normalizeSlug($slug);
+        $slug = self::normalizeSlug($slug);
         $baseSlug = $slug;
         while (in_array($slug, $slugCollections)) {
             $slug = $baseSlug . $separator . $inc++;
@@ -401,11 +401,11 @@ final class Normalizer
      * @param callable $callable must be returning true for valid
      * @return string
      */
-    public static function uniqueSlugCallback(string $slug, callable $callable)
+    public static function uniqueSlugCallback(string $slug, callable $callable) : string
     {
         $separator = '-';
         $inc = 1;
-        $slug = static::normalizeSlug($slug);
+        $slug = self::normalizeSlug($slug);
         $baseSlug = $slug;
         while (!$callable($slug)) {
             $slug = $baseSlug . $separator . $inc++;

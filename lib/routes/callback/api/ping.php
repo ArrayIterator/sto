@@ -22,7 +22,7 @@ if ($data) {
     ];
 }
 
-json(200, [
+json(200, hook_apply('route_ping_result',[
     'site_id' => get_current_site_id(),
     'login' => !empty($loggedAs),
     'as' => $loggedAs,
@@ -33,4 +33,4 @@ json(200, [
     'response_time' => microtime(true) - MICRO_TIME_FLOAT,
     'time' => time(),
     'timezone' => date_default_timezone_get(),
-]);
+]));

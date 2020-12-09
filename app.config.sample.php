@@ -63,6 +63,7 @@ define('THEMES_PATH', '/themes');
 define('UPLOADS_PATH', '/uploads');
 define('MODULES_PATH', '/modules');
 define('CACHE_DIR', __DIR__ . '/cache');
+define('LANGUAGE_DIR', __DIR__ . '/languages');
 
 // MISC
 define('TIMEZONE', 'Asia/Jakarta');

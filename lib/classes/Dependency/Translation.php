@@ -6,7 +6,7 @@ use ArrayIterator\Database\AbstractResult;
 use ArrayIterator\Database\PdoResult;
 use ArrayIterator\Database\PrepareStatement;
 use ArrayIterator\Database\QueryPrepareInterface;
-use ArrayIterator\Model\Languages;
+use ArrayIterator\Model\TranslationsDictionary;
 
 /**
  * Class Translation
@@ -14,6 +14,8 @@ use ArrayIterator\Model\Languages;
  */
 class Translation implements QueryPrepareInterface
 {
+    protected $tableName = 'sto_translations_language';
+
     const ISO_2_NO_TRANSLATE = 'en';
 
     /**
@@ -22,19 +24,14 @@ class Translation implements QueryPrepareInterface
     protected $translations = [];
 
     /**
-     * @var string[]
-     */
-    protected $translationRelation = [];
-
-    /**
      * @var array
      */
     protected $availableLanguages;
 
     /**
-     * @var Languages
+     * @var TranslationsDictionary
      */
-    protected $languages;
+    protected $translationsDictionary;
 
     /**
      * @var string
@@ -43,11 +40,19 @@ class Translation implements QueryPrepareInterface
 
     /**
      * Translation constructor.
-     * @param Languages $language
+     * @param TranslationsDictionary $language
      */
-    public function __construct(Languages $language)
+    public function __construct(TranslationsDictionary $language)
     {
-        $this->languages = $language;
+        $this->translationsDictionary = $language;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTableName(): string
+    {
+        return $this->tableName;
     }
 
     /**
@@ -56,7 +61,7 @@ class Translation implements QueryPrepareInterface
      */
     public function query(string $sql)
     {
-        return $this->languages->query($sql);
+        return $this->translationsDictionary->query($sql);
     }
 
     /**
@@ -65,30 +70,30 @@ class Translation implements QueryPrepareInterface
      */
     public function prepare(string $sql)
     {
-        return $this->languages->prepare($sql);
+        return $this->translationsDictionary->prepare($sql);
     }
 
     public function unbufferedQuery(string $sql)
     {
-        return $this->languages->unbufferedQuery($sql);
+        return $this->translationsDictionary->unbufferedQuery($sql);
     }
 
     public function unbufferedPrepare(string $sql)
     {
-        return $this->languages->unbufferedPrepare($sql);
+        return $this->translationsDictionary->unbufferedPrepare($sql);
     }
 
     public function rollbackBuffer()
     {
-        $this->languages->rollbackBuffer();
+        $this->translationsDictionary->rollbackBuffer();
     }
 
     /**
-     * @return Languages
+     * @return TranslationsDictionary
      */
-    public function getLanguages(): Languages
+    public function getTranslationsDictionary(): TranslationsDictionary
     {
-        return $this->languages;
+        return $this->translationsDictionary;
     }
 
     /**
@@ -115,14 +120,17 @@ class Translation implements QueryPrepareInterface
         $this->selected_language = $selected_language;
     }
 
-    public function getAvailableLanguages()
+    /**
+     * @return array
+     */
+    public function getAvailableLanguages() : array
     {
         if (is_array($this->availableLanguages)) {
             return $this->availableLanguages;
         }
 
-        $stmt = $this->languages->unbufferedQuery(
-            'SELECT * FROM languages_code'
+        $stmt = $this->translationsDictionary->unbufferedQuery(
+            sprintf('SELECT * FROM %s', $this->getTableName())
         );
 
         while ($row = $stmt->fetchAssoc()) {
@@ -136,11 +144,19 @@ class Translation implements QueryPrepareInterface
     }
 
     /**
-     * @param $code
+     * @param string $code
      * @return Translator|null
+     * @noinspection PhpMissingReturnTypeInspection
      */
-    public function getTranslator($code)
+    public function getTranslator(string $code = null)
     {
+        if ($code === null) {
+            $code = $this->getSelectedLanguage();
+            if (!$code) {
+                $code = self::ISO_2_NO_TRANSLATE;
+            }
+        }
+
         $code = trim(strtolower($code));
         if (strlen($code) > 3 && strlen($code) < 2) {
             return null;
@@ -150,10 +166,10 @@ class Translation implements QueryPrepareInterface
             return $this->translations[$code];
         }
 
-        $languages = $this->getAvailableLanguages();
+        $languageDetails = $this->getAvailableLanguages();
         if (strlen($code) === 3) {
             $oldCode = $code;
-            foreach ($languages as $item) {
+            foreach ($languageDetails as $item) {
                 if ($code === $item['iso_3']) {
                     $code = $item['iso_2'];
                     break;
@@ -162,17 +178,35 @@ class Translation implements QueryPrepareInterface
             if ($code === $oldCode) {
                 return null;
             }
-            $languages = $languages[$code];
-            $this->translations[$code] = new Translator($this, $languages);
+            $languageDetails = $languageDetails[$code];
+            $this->translations[$code] = new Translator($this, $languageDetails);
             return $this->translations[$code];
         }
-        if (!isset($languages[$code])) {
-            unset($languages);
+        if (!isset($languageDetails[$code])) {
+            unset($languageDetails);
             return null;
         }
-        $languages = $languages[$code];
-        $this->translations[$code] = new Translator($this, $languages);
+        $languageDetails = $languageDetails[$code];
+        $this->translations[$code] = new Translator($this, $languageDetails);
         return $this->translations[$code];
+    }
+
+    /**
+     * @param string $message
+     * @param string $translation
+     * @param string $languageCode
+     * @return bool
+     */
+    public function createTranslation(
+        string $message,
+        string $translation,
+        string $languageCode
+    ) : bool {
+        $translator = $this->getTranslator($languageCode);
+        if (!$translator) {
+            return false;
+        }
+        return $translator->set($message, $translation);
     }
 
     public function clear()

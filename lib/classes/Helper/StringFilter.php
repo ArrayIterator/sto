@@ -2,10 +2,10 @@
 
 namespace ArrayIterator\Helper;
 
-use ArrayAccess;
 use Exception;
 use LogicException;
 use Throwable;
+use Traversable;
 
 /**
  * Class StringFilter
@@ -44,7 +44,7 @@ final class StringFilter
 
     public static function resetMbStringEncoding()
     {
-        \mb_string_binary_safe_encoding(true);
+        self::mbStringBinarySafeEncoding(true);
     }
 
     /**
@@ -88,7 +88,7 @@ final class StringFilter
      * @param string $data
      * @return string
      */
-    public static function sanitizeUtf8Encode(string $data)
+    public static function sanitizeUtf8Encode(string $data) : string
     {
         static $utf8;
         if (!is_bool($utf8)) {
@@ -156,6 +156,7 @@ final class StringFilter
                  * use trim if possible
                  * Serialized value could not start & end with white space
                  */
+                /** @noinspection PhpComposerExtensionStubsInspection */
                 $result = iconv('windows-1250', 'UTF-8//IGNORE', $string);
             } catch (Exception $e) {
                 // pass
@@ -183,7 +184,7 @@ final class StringFilter
             return self::sanitizeInvalidUtf8FromString($data);
         }
 
-        if (is_array($data) || is_iterable($data) || is_object($data) && $data instanceof ArrayAccess) {
+        if (is_array($data) || $data instanceof Traversable) {
             foreach ($data as $key => $item) {
                 $data[$key] = self::sanitizeInvalidUtf8($item);
             }
@@ -219,7 +220,7 @@ final class StringFilter
      * @param bool $strict Optional. Whether to be strict about the end of the string. Defaults true.
      * @return bool  false if not serialized and true if it was.
      */
-    public static function isSerialized($data, $strict = true)
+    public static function isSerialized($data, $strict = true) : bool
     {
         /* if it isn't a string, it isn't serialized
          ------------------------------------------- */
@@ -285,6 +286,7 @@ final class StringFilter
      *
      * @param mixed $original Maybe un-serialized original, if is needed.
      * @return mixed  Un-serialized data can be any type.
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public static function unSerialize($original)
     {
@@ -356,12 +358,12 @@ final class StringFilter
     /**
      * @param string $email
      * @param bool $validateDNSSR
-     * @return string|null
+     * @return string|false
      */
     public static function filterEmailCommon(
         string $email,
         bool $validateDNSSR = false
-    ): ?string {
+    ) {
         $email = trim(strtolower($email));
         $explode = explode('@', $email);
         // validate email address & domain
@@ -373,17 +375,17 @@ final class StringFilter
             // check validate email
             || !preg_match('~^[a-zA-Z0-9]+(?:[a-zA-Z0-9._\-]?[a-zA-Z0-9]+)?$~', $explode[0])
         ) {
-            return null;
+            return false;
         }
 
         // filtering Email Address
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return null;
+            return false;
         }
 
         // if validate DNS
         if ($validateDNSSR === true && !@checkdnsrr($explode[0], 'MX')) {
-            return null;
+            return false;
         }
 
         return $email;

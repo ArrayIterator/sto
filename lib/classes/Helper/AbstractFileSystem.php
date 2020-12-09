@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpUnusedParameterInspection */
 
 namespace ArrayIterator\Helper;
 
@@ -110,7 +111,7 @@ abstract class AbstractFileSystem
                 }
             }
 
-            // Prefix matches ( folder = CONSTANT/subdir ),
+            // Prefix matches ( folder = CONSTANT/sub dir ),
             foreach ($constant_overrides as $constant => $dir) {
                 if (!defined($constant)) {
                     continue;
@@ -127,12 +128,12 @@ abstract class AbstractFileSystem
                 }
             }
         } elseif ('direct' == $this->method) {
-            $folder = str_replace('\\', '/', $folder); // Windows path sanitisation.
+            $folder = str_replace('\\', '/', $folder); // Windows path sanitization.
             return Path::slashIt($folder);
         }
 
-        $folder = preg_replace('|^([a-z]{1}):|i', '', $folder); // Strip out Windows drive letter if it's there.
-        $folder = str_replace('\\', '/', $folder); // Windows path sanitisation.
+        $folder = preg_replace('|^([a-z]):|i', '', $folder); // Strip out Windows drive letter if it's there.
+        $folder = str_replace('\\', '/', $folder); // Windows path sanitization.
 
         if (isset($this->cache[$folder])) {
             return $this->cache[$folder];
@@ -416,7 +417,7 @@ abstract class AbstractFileSystem
 
     /**
      * @param string $file
-     * @return false
+     * @return bool|int|mixed|string
      */
     public function owner(string $file)
     {
@@ -425,7 +426,7 @@ abstract class AbstractFileSystem
 
     /**
      * @param string $file
-     * @return false
+     * @return bool|int|mixed|string
      */
     public function group(string $file)
     {

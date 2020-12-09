@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpComposerExtensionStubsInspection */
 
 namespace ArrayIterator\Helper\FileSystem;
 
@@ -137,6 +138,10 @@ class Direct extends AbstractFileSystem
         return true;
     }
 
+    /**
+     * @param string $file
+     * @return bool|int|mixed|string
+     */
     public function owner(string $file)
     {
         if (!$this->exists($file)) {
@@ -235,7 +240,7 @@ class Direct extends AbstractFileSystem
 
         // At this point it's a folder, and we're in recursive mode.
         $file = Path::slashIt($file);
-        $fileList = $this->dirList($file, true);
+        $fileList = $this->dirList($file);
 
         $retVal = true;
         if (is_array($fileList)) {
