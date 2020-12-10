@@ -17,9 +17,9 @@ function server_environment(): array
  */
 function get_server_environment(string $name)
 {
-    return server_environment()[$name]??(
-        server_environment()[strtoupper($name)]??null
-    );
+    return server_environment()[$name] ?? (
+            server_environment()[strtoupper($name)] ?? null
+        );
 }
 
 /**
@@ -47,11 +47,20 @@ function posts(): array
 }
 
 /**
- * @return UploadedFile[]
+ * @return UploadedFile[]|UploadedFile[][]
  */
 function files(): array
 {
     return server_request()->getUploadedFiles();
+}
+
+/**
+ * @param string $name
+ * @return false|UploadedFile|UploadedFile[]
+ */
+function get_uploaded_file(string $name)
+{
+    return files()[$name] ?? false;
 }
 
 /**
@@ -272,7 +281,7 @@ function create_cookie(
         ]
     );
 
-    return setcookie(...$arguments);
+    return call_user_func_array('setcookie', $arguments);
 }
 
 /**
@@ -426,4 +435,68 @@ function get_question_statuses(): array
         STATUS_DELETED,
         STATUS_HIDDEN
     ];
+}
+
+/**
+ * @return bool
+ */
+function is_login_page(): bool
+{
+    static $login_page = null;
+    if ($login_page !== null) {
+        return hook_apply(
+            'is_login_page',
+            $login_page
+        );
+    }
+
+    $siteUri = preg_replace('#(https?://)[^/]+/?#', '/', get_current_url());
+    $loginUri = preg_replace('#(https?://)[^/]+/?#', '/', rtrim(get_login_url(), '/'));
+    $path = preg_quote($loginUri, '~');
+    $login_page = $loginUri === $siteUri || (bool)preg_match("~^{$path}(/)?(?:\?.*)?$~", $siteUri);
+    return hook_apply(
+        'is_login_page',
+        $login_page
+    );
+}
+
+/**
+ * @param int $code
+ * @return string
+ */
+function get_error_string_by_code(int $code): string
+{
+    switch ($code) {
+        case E_ERROR:
+            return 'E_ERROR';
+        case E_RECOVERABLE_ERROR:
+            return 'E_RECOVERABLE_ERROR';
+        case E_WARNING:
+            return 'E_WARNING';
+        case E_PARSE:
+            return 'E_PARSE';
+        case E_NOTICE:
+            return 'E_NOTICE';
+        case E_STRICT:
+            return 'E_STRICT';
+        case E_DEPRECATED:
+            return 'E_DEPRECATED';
+        case E_CORE_ERROR:
+            return 'E_CORE_ERROR';
+        case E_CORE_WARNING:
+            return 'E_CORE_WARNING';
+        case E_COMPILE_ERROR:
+            return 'E_COMPILE_ERROR';
+        case E_COMPILE_WARNING:
+            return 'E_COMPILE_WARNING';
+        case E_USER_ERROR:
+            return 'E_USER_ERROR';
+        case E_USER_WARNING:
+            return 'E_USER_WARNING';
+        case E_USER_NOTICE:
+            return 'E_USER_NOTICE';
+        case E_USER_DEPRECATED:
+            return 'E_USER_DEPRECATED';
+    }
+    return 'E_UNKNOWN';
 }

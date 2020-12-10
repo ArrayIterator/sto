@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html<?=get_html_attributes();?>>
 <head>
-    <title><?= htmlentities(trans('404 Page Not Found'));?></title>
-<?php hook_run('html_head'); ?>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?php esc_html_trans_e('404 Page Not Found');?></title>
 </head>
 <body<?=get_body_attributes();?>>
-<?php hook_run('html_body_open'); ?>
-<h1>404</h1>
-<h3><?= trans('Page Not Found');?></h3>
-<?php hook_run('html_footer'); ?>
+<div class="wrap" id="page">
+    <h1>404</h1>
+    <h3><?php esc_html_trans_e('Page Not Found');?></h3>
+</div>
 </body>
 </html>

@@ -2,6 +2,18 @@
 /**
  * @return string
  */
+function get_root_dir(): string
+{
+    static $rootDir;
+    if (!$rootDir) {
+        $rootDir = normalize_directory(realpath(ROOT_DIR) ?: ROOT_DIR);
+    }
+    return $rootDir;
+}
+
+/**
+ * @return string
+ */
 function get_admin_path(): string
 {
     static $adminPath = null;
@@ -266,7 +278,7 @@ function get_uploads_dir(): string
 /**
  * @return string
  */
-function get_language_dir() : string
+function get_language_dir(): string
 {
     static $path;
     if (!$path) {
@@ -299,6 +311,18 @@ function get_question_uploads_dir(): string
 function get_avatar_uploads_dir(): string
 {
     return get_uploads_dir() . DIRECTORY_SEPARATOR . 'avatars';
+}
+
+/**
+ * @param string $name
+ * @return string
+ */
+function get_avatar_uri(string $name = ''): string
+{
+    $path = un_slash_it(get_uploads_path()) . '/avatars/';
+    $name = ltrim($name, '/');
+    $path = sprintf('%s%s', $path, $name);
+    return get_site_url($path);
 }
 
 /**

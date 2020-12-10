@@ -209,12 +209,11 @@ class Route
                 $route = $routeInfo;
             }
 
-            $hook && $hook->add('is_404', function () use ($route) {
-                return $route[0] === Dispatcher::NOT_FOUND;
-            });
-
             switch ($route[0]) {
                 case Dispatcher::NOT_FOUND:
+                    $hook && $hook->add('is_404', function () use ($route) {
+                        return true;
+                    });
                     // ... 404 Not Found
                     if ($this->notFoundHandler) {
                         $handler = $this->notFoundHandler;
@@ -222,6 +221,9 @@ class Route
                     }
                     break;
                 case Dispatcher::METHOD_NOT_ALLOWED:
+                    $hook && $hook->add('is_405', function () use ($route) {
+                        return true;
+                    });
                     $allowedMethods = !isset($route[1]) || !is_array($route[1])
                         ? $this->routeInfo[1]
                         : $route[1];

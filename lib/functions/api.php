@@ -85,12 +85,15 @@ function is_route_api(): bool
     if (defined('ROUTE_API')) {
         return (bool)hook_apply('is_route_api', ROUTE_API, null);
     }
+    $siteUri = preg_replace('#(https?://)[^/]+/?#', '/', get_current_url());
+    $apiUri = preg_replace('#(https?://)[^/]+/?#', '/', rtrim(get_api_url(), '/'));
+    $path = preg_quote($apiUri, '~');
+    $bool = $apiUri === $siteUri
+        || (bool)preg_match("~^{$path}(/$|/.*)?(?:\?.*)?$~", $siteUri);
+    define('ROUTE_API', $bool);
 
-    $path = preg_quote(get_route_api_path(), '~');
-    define('ROUTE_API', (bool)preg_match("~^{$path}(/.*)?$~", request_uri()));
     return hook_apply(
         'is_route_api',
-        ROUTE_API,
-        $path
+        ROUTE_API
     );
 }

@@ -1,4 +1,10 @@
 <?php
+// DENY DIRECT ACCESS
+if (($_SERVER['SCRIPT_FILENAME']??null) === __FILE__) {
+    !headers_sent() && header('Location: ../', true, 302);
+    exit(0);
+}
+
 require_once __DIR__ . '/constant.php';
 require_once __DIR__ . '/functions/meta.php';
 require_once __DIR__ . '/functions/environment.php';
@@ -10,6 +16,7 @@ require_once __DIR__ . '/functions/filters.php';
 require_once __DIR__ . '/functions/handler.php';
 require_once __DIR__ . '/functions/headers.php';
 require_once __DIR__ . '/functions/settings.php';
+require_once __DIR__ . '/functions/attachments.php';
 require_once __DIR__ . '/functions/api.php';
 require_once __DIR__ . '/functions/database.php';
 require_once __DIR__ . '/functions/options.php';
@@ -116,7 +123,8 @@ unset($configBaseName);
 cache_add_global_groups([
     'users',
     'site_options',
-    'sites'
+    'sites',
+    'languages'
 ]);
 
 if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
@@ -140,7 +148,7 @@ if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
     }
 
     // HOOK SITE WIDE LOADED
-    hook_run_once('site_wide_modules_loaded', $loadedModules);
+    hook_run('site_wide_modules_loaded', $loadedModules);
 
     foreach (get_site_active_modules() as $moduleName => $time) {
         if (!is_string($moduleName) || isset($loadedModules[$moduleName])) {
@@ -162,6 +170,21 @@ if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
 }
 
 unset($loadedModules, $moduleName, $time);
-hook_run_once('modules_loaded');
+hook_run('modules_loaded');
 
-// @todo load themes
+if ((!defined('DISABLE_THEME') || !DISABLE_THEME)
+    && !is_admin_page()
+    && !is_route_api()
+) {
+    $theme = get_active_theme();
+    $path = $theme->getPath();
+    if ($path && is_file($path.'functions.php')) {
+        /** @noinspection PhpIncludeInspection */
+        require_once $path.'/functions.php';
+        hook_run('theme_loaded');
+    }
+
+    unset($theme, $path);
+}
+
+hook_run('init');

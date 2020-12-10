@@ -10,4 +10,12 @@ class Student extends AbstractUserModel
 {
     protected $tableName = 'sto_student';
     protected $primaryKey = 'id';
+
+    /**
+     * @return string
+     */
+    public function getUserRoleType(): string
+    {
+        return 'student';
+    }
 }

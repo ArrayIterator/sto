@@ -158,7 +158,7 @@ function set_header(
 /**
  * @return array
  */
-function &registered_headers() : array
+function &registered_headers(): array
 {
     static $headers = [];
     return $headers;
@@ -221,7 +221,7 @@ function set_content_type(string $value, int $code = null)
  */
 function get_content_type()
 {
-    return get_header('Content-Type')?:false;
+    return get_header('Content-Type') ?: false;
 }
 
 /**

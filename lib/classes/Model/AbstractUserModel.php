@@ -14,6 +14,8 @@ namespace ArrayIterator\Model;
  */
 abstract class AbstractUserModel extends Model
 {
+    abstract public function getUserRoleType() : string;
+
     /**
      * @param string $password
      * @return string

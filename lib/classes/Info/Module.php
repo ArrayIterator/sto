@@ -31,6 +31,14 @@ class Module extends AbstractInfo
     /**
      * @return bool
      */
+    public function isValid(): bool
+    {
+        return $this->valid;
+    }
+
+    /**
+     * @return bool
+     */
     public function isSiteWide(): bool
     {
         return (bool)($this->info['site_wide'] ?? false);

@@ -1,6 +1,7 @@
 <?php
 
 use ArrayIterator\ArrayGetter;
+use ArrayIterator\Info\Theme;
 
 /**
  * @param string $name
@@ -350,4 +351,34 @@ function get_all_active_modules(): array
 
     asort($modules);
     return $modules;
+}
+
+/**
+ * @return Theme
+ */
+function get_active_theme(): Theme
+{
+    $theme = get_option('active_theme', null, get_current_site_id(), $found);
+    if ($theme) {
+        $theme = get_theme($theme);
+    }
+
+    if (!$theme || !$found) {
+        $themes = get_all_themes();
+        $theme = key($themes);
+        if ($theme) {
+            update_option('active_theme', $theme, get_current_site_id());
+        }
+        $theme = $themes[$theme];
+    }
+
+    return $theme ?: new Theme('', []);
+}
+
+/**
+ * @return Theme
+ */
+function get_current_theme(): Theme
+{
+    return get_active_theme();
 }

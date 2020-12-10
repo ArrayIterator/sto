@@ -12,6 +12,8 @@ abstract class AbstractResult
 {
     abstract public function close();
 
+    abstract public function closeCursor();
+
     abstract public function free();
 
     abstract public function seek($offset);

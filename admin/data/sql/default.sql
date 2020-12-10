@@ -311,6 +311,7 @@ CREATE TABLE `sto_student` (
     `gender` enum('M','F') NOT NULL,
     `status` varchar(255) DEFAULT 'active' COMMENT 'active, delete, banned, pending',
     `religion` varchar(5) DEFAULT NULL,
+    `avatar` varchar(255) DEFAULT NULL COMMENT 'User Avatar',
     `created_at` datetime NOT NULL DEFAULT current_timestamp(),
     `updated_at` datetime DEFAULT '0000-00-00 00:00:00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -422,6 +423,7 @@ CREATE TABLE `sto_supervisor` (
     `role` varchar(255) DEFAULT NULL COMMENT 'superadmin, admin, teacher, invigilator, contributor, editor',
     `status` varchar(255) NOT NULL DEFAULT 'active' COMMENT 'active, deleted, banned, pending',
     `religion` varchar(5) DEFAULT NULL,
+    `avatar` varchar(255) DEFAULT NULL COMMENT 'User Avatar',
     `created_at` datetime NOT NULL DEFAULT current_timestamp(),
     `updated_at` datetime DEFAULT '0000-00-00 00:00:00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

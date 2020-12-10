@@ -1,6 +1,7 @@
 <?php
 
 use ArrayIterator\Info\Module;
+use ArrayIterator\Info\Theme;
 use ArrayIterator\Route;
 
 /**
@@ -9,7 +10,7 @@ use ArrayIterator\Route;
 function shutdown_handler()
 {
     $error = error_get_last();
-    if (!$error || $error['type'] !== E_ERROR) {
+    if (!$error || !in_array($error['type'], [E_ERROR, E_PARSE])) {
         return;
     }
 
@@ -38,7 +39,9 @@ function shutdown_handler()
 function route_not_found_handler(Route $route)
 {
     set_content_type('text/html; charset=utf-8', 404);
-    include ROOT_TEMPLATES_DIR . '/404.php';
+    if (!load_template('404')) {
+        include ROOT_TEMPLATES_DIR . '/404.php';
+    }
 }
 
 /**
@@ -49,7 +52,9 @@ function route_not_found_handler(Route $route)
 function route_not_allowed_handler(Route $route, $allowedMethods = [])
 {
     set_content_type('text/html; charset=utf-8', 404);
-    include ROOT_TEMPLATES_DIR . '/405.php';
+    if (!load_template('405')) {
+        include ROOT_TEMPLATES_DIR . '/405.php';
+    }
 }
 
 function route_json_not_found_handler()
@@ -61,7 +66,6 @@ function route_json_not_allowed_handler()
 {
     json(405, hook_apply('route_json_not_allowed', 'Method not allowed'));
 }
-
 
 /**
  * @param callable $callback
@@ -150,6 +154,27 @@ function return_null()
     return null;
 }
 
+function return_zero(): int
+{
+    return 0;
+}
+
+/**
+ * @return string
+ */
+function return_string(): string
+{
+    return '';
+}
+
+/**
+ * @return array
+ */
+function return_array(): array
+{
+    return [];
+}
+
 /**
  * @param string $data
  * @param bool|null $exit
@@ -193,6 +218,42 @@ function get_module(string $name)
 }
 
 /**
+ * @param string $name
+ * @return Theme|false
+ */
+function theme_get(string $name)
+{
+    return themes()->getTheme($name);
+}
+
+/**
+ * @param string $name
+ * @return bool
+ */
+function theme_exist(string $name): bool
+{
+    return (bool)theme_get($name);
+}
+
+/**
+ * @param string $name
+ * @return Module|false only return valid modules
+ */
+function get_theme(string $name)
+{
+    $thm = theme_get($name);
+    return $thm ?: false;
+}
+
+/**
+ * @return Theme[]
+ */
+function get_all_themes(): array
+{
+    return themes()->getThemes();
+}
+
+/**
  * Add 404 Hook
  */
 function set_404()
@@ -201,18 +262,27 @@ function set_404()
 }
 
 /**
+ * Override 404
+ */
+function set_200()
+{
+    hook_add('is_404', 'return_false');
+    hook_add('is_405', 'return_false');
+}
+
+/**
  * @return bool
  */
-function is_404() : bool
+function is_404(): bool
 {
-    return (bool) hook_apply('is_404', false);
+    return (bool)hook_apply('is_404', false);
 }
 
 
 /**
  * @return bool
  */
-function is_not_allowed_method() : bool
+function is_405(): bool
 {
-    return (bool) hook_apply('is_not_allowed_method', false);
+    return (bool)hook_apply('is_405', false);
 }

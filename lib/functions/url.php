@@ -2,6 +2,7 @@
 
 use ArrayIterator\Helper\Path;
 use ArrayIterator\Info\Module;
+use ArrayIterator\Info\Theme;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\UriInterface;
 
@@ -34,13 +35,16 @@ function get_site_url(string $pathUri = ''): string
 {
     static $path;
     if (!$path) {
-        $documentRoot = get_server_environment('DOCUMENT_ROOT')?:ROOT_DIR;
+        $documentRoot = get_server_environment('DOCUMENT_ROOT') ?: ROOT_DIR;
         $documentRoot = un_slash_it(preg_replace('~[\\\/]+~', '/', $documentRoot));
         $rootPath = un_slash_it(preg_replace('~[\\\/]+~', '/', realpath(ROOT_DIR) ?: ROOT_DIR));
         $path = trim(substr($rootPath, strlen($documentRoot)), '/') . '/';
     }
 
-    $uri = (string)get_uri()->withPath($path);
+    $uri = (string)get_uri()
+        ->withPath($path)
+        ->withQuery('');
+
     $originalPath = $pathUri;
     $pathUri = (string)$pathUri;
     $pathUri = substr($pathUri, 0, 1) === '/'
@@ -68,6 +72,10 @@ function get_site_uri(): UriInterface
     return $uri;
 }
 
+/* -------------------------------------------------
+ *                     ADMIN
+ * ------------------------------------------------*/
+
 /**
  * @param string $pathUri
  * @return string
@@ -90,6 +98,32 @@ function get_admin_url(string $pathUri = ''): string
 }
 
 /**
+ * @param string $uri
+ * @return string
+ */
+function get_assets_url(string $uri = ''): string
+{
+    $assets = '/assets/';
+    if ($uri && $uri[0] == '/') {
+        $uri = substr($uri, 1);
+    }
+    return get_site_url($assets . $uri);
+}
+
+/**
+ * @param string $uri
+ * @return string
+ */
+function get_assets_vendor_url(string $uri = ''): string
+{
+    $assets = '/assets/vendor/';
+    if ($uri && $uri[0] == '/') {
+        $uri = substr($uri, 1);
+    }
+    return get_site_url($assets . $uri);
+}
+
+/**
  * @return UriInterface
  */
 function get_admin_uri(): UriInterface
@@ -100,10 +134,6 @@ function get_admin_uri(): UriInterface
     }
     return $uri;
 }
-
-/* -------------------------------------------------
- *                     ADMIN
- * ------------------------------------------------*/
 
 /**
  * @return string
@@ -218,75 +248,6 @@ function current_login_url(): string
 }
 
 /**
- * @param string|null $moduleFile
- * @return string
- */
-function get_module_uri($moduleFile = null) : string
-{
-    static $moduleUri;
-    static $moduleDir;
-    if (!$moduleDir) {
-        $moduleDir = un_slash_it(normalize_path(get_modules_dir()));
-    }
-    if (!$moduleUri) {
-        $moduleUri = slash_it(get_site_url(get_modules_path()));
-    }
-
-    if (!is_string($moduleFile)) {
-        if ($moduleFile instanceof Module) {
-            $moduleFile = $moduleFile->getPath();
-        }
-        $moduleFile = (string) $moduleFile;
-    }
-
-    if ($moduleFile === null || trim($moduleFile) === '') {
-        return $moduleUri;
-    }
-
-    $mod = normalize_path($moduleFile);
-    if (strpos($mod, $moduleDir) === 0) {
-        if (substr($mod, -4) === '.php') {
-            $path = slash_it(substr(dirname($mod), strlen($moduleDir)));
-        } else {
-            $path = slash_it(substr($mod, strlen($moduleDir)));
-        }
-    } elseif (preg_match('#^[/]*([^/]+)(\1\.php)?$#', $mod, $match)
-        || preg_match('#^[/]*([^/]+)\.php$#', $mod, $match)
-    ) {
-        $path = slash_it($match[1]);
-    } else {
-        $path = strpos($mod, '.php') ? $mod : slash_it($mod);
-    }
-
-    return sprintf(
-        '%s/%s',
-        un_slash_it($moduleUri),
-        $path[0] === '/' ? substr($path, 1) : $path
-    );
-}
-
-/**
- * @param string $pathUri
- * @return string
- */
-function get_api_url(string $pathUri = ''): string
-{
-    $path = sprintf('%s/', get_route_api_path());
-    $originalPathUri = $pathUri;
-    $pathUri = substr($pathUri, 0, 1) === '/'
-        ? ltrim($pathUri, '/')
-        : $pathUri;
-    $apiUri = get_site_url($path);
-    return hook_apply(
-        'api_url',
-        sprintf('%s%s', $apiUri, $pathUri),
-        $apiUri,
-        $pathUri,
-        $originalPathUri
-    );
-}
-
-/**
  * @param string $location
  * @param int $status
  * @param string|null $x_redirect_by
@@ -325,4 +286,161 @@ function redirect(
     set_header('Location', $location, $status);
 
     return true;
+}
+
+/* -------------------------------------------------
+ *                     MODULES
+ * ------------------------------------------------*/
+
+/**
+ * @param string|null $moduleFile
+ * @return string
+ */
+function get_modules_uri($moduleFile = null): string
+{
+    static $moduleUri;
+    static $moduleDir;
+    if (!$moduleDir) {
+        $moduleDir = un_slash_it(normalize_path(get_modules_dir()));
+    }
+    if (!$moduleUri) {
+        $moduleUri = slash_it(get_site_url(get_modules_path()));
+    }
+
+    if (!is_string($moduleFile)) {
+        if ($moduleFile instanceof Module) {
+            $moduleFile = $moduleFile->getPath();
+        }
+        $moduleFile = (string)$moduleFile;
+    }
+
+    if (!$moduleFile || trim($moduleFile) === '') {
+        return $moduleUri;
+    }
+
+    $mod = normalize_path($moduleFile);
+    $root = normalize_path(get_root_dir());
+    if (strpos($mod, $moduleDir) === 0) {
+        if (substr($mod, -4) === '.php') {
+            $path = slash_it(substr(dirname($mod), strlen($moduleDir)));
+        } else {
+            $path = slash_it(substr($mod, strlen($moduleDir)));
+        }
+    } elseif (strpos($mod, $root) === 0) {
+        $path = slash_it(substr(dirname($mod), strlen($root)));
+    } elseif (preg_match('#^[/]*([^/]+)(\1\.php)?$#', $mod, $match)
+        || preg_match('#^[/]*([^/]+)\.php$#', $mod, $match)
+    ) {
+        $path = slash_it($match[1]);
+    } else {
+        $path = strpos($mod, '.php') ? $mod : slash_it($mod);
+    }
+
+    return sprintf(
+        '%s/%s',
+        un_slash_it($moduleUri),
+        $path[0] === '/' ? substr($path, 1) : $path
+    );
+}
+
+/* -------------------------------------------------
+ *                     THEMES
+ * ------------------------------------------------*/
+
+/**
+ * @param string|null $themeFile
+ * @return string
+ */
+function get_themes_uri($themeFile = null): string
+{
+    static $themeUri;
+    static $themeDir;
+    if (!$themeDir) {
+        $themeDir = un_slash_it(normalize_path(get_themes_dir()));
+    }
+    if (!$themeUri) {
+        $themeUri = slash_it(get_site_url(get_themes_path()));
+    }
+
+    if (!is_string($themeFile)) {
+        if ($themeFile instanceof Theme) {
+            $themeFile = basename($themeFile->getPath());
+        }
+        $themeFile = (string)$themeFile;
+    }
+
+    if (!$themeFile || trim($themeFile) === '') {
+        return $themeUri;
+    }
+
+    $mod = normalize_path($themeFile);
+    $root = normalize_path(get_root_dir());
+    if (strpos($mod, $themeDir) === 0) {
+        if (substr($mod, -4) === '.php') {
+            $path = slash_it(substr(dirname($mod), strlen($themeDir)));
+        } else {
+            $path = slash_it(substr($mod, strlen($themeDir)));
+        }
+    } elseif (strpos($mod, $root) === 0) {
+        $path = slash_it(substr(dirname($mod), strlen($root)));
+    } elseif (preg_match('#^[/]*([^/]+)(\1\.php)?$#', $mod, $match)
+        || preg_match('#^[/]*([^/]+)\.php$#', $mod, $match)
+    ) {
+        $path = slash_it($match[1]);
+    } else {
+        $path = strpos($mod, '.php') ? $mod : slash_it($mod);
+    }
+
+    return sprintf(
+        '%s/%s',
+        un_slash_it($themeUri),
+        $path[0] === '/' ? substr($path, 1) : $path
+    );
+}
+
+/**
+ * @param string $path
+ * @return string
+ */
+function get_theme_uri(string $path = ''): string
+{
+    $uri = un_slash_it(get_themes_uri(get_active_theme()));
+    if ($path !== '') {
+        $path = $path[0] === '/' ? substr($path, 1) : $path;
+    }
+
+    return sprintf('%s/%s', $uri, $path);
+}
+
+/**
+ * @return string
+ */
+function get_css_uri(): string
+{
+    return get_theme_uri('theme.css');
+}
+
+/* -------------------------------------------------
+ *                     API
+ * ------------------------------------------------*/
+
+/**
+ * @param string $pathUri
+ * @return string
+ */
+function get_api_url(string $pathUri = ''): string
+{
+    $path = sprintf('%s/', get_route_api_path());
+    $originalPathUri = $pathUri;
+    $pathUri = substr($pathUri, 0, 1) === '/'
+        ? ltrim($pathUri, '/')
+        : $pathUri;
+    $apiUri = get_site_url($path);
+    return hook_apply(
+        'api_url',
+        sprintf('%s%s', $apiUri, $pathUri),
+        $apiUri,
+        $pathUri,
+        $originalPathUri
+    );
 }

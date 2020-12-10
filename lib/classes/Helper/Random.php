@@ -4,6 +4,10 @@ namespace ArrayIterator\Helper;
 
 use Throwable;
 
+/**
+ * Class Random
+ * @package ArrayIterator\Helper
+ */
 class Random
 {
     /**

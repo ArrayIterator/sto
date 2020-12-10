@@ -1,6 +1,8 @@
 <?php
 
+use ArrayIterator\Database\PrepareStatement;
 use ArrayIterator\Helper\StringFilter;
+use ArrayIterator\Model\Student;
 use ArrayIterator\Model\Supervisor;
 
 /**
@@ -177,6 +179,37 @@ function get_current_student()
 }
 
 /**
+ * @param int $id
+ * @return false|Student
+ */
+function get_student_by_id(int $id)
+{
+    $res = student()->findById($id);
+    if ($res) {
+        $user = $res->fetch();
+        $res->closeCursor();
+        return $user;
+    }
+
+    return false;
+}
+
+/**
+ * @param int $id
+ * @return false|Supervisor
+ */
+function get_supervisor_by_id(int $id)
+{
+    $res = supervisor()->findById($id);
+    if ($res) {
+        $user = $res->fetch();
+        $res->closeCursor();
+        return $user;
+    }
+    return false;
+}
+
+/**
  * @return bool
  */
 function is_supervisor(): bool
@@ -219,6 +252,8 @@ function is_allow_access_dashboard(): bool
 }
 
 /**
+ * Detect user logged in by dashboard area
+ *
  * @return bool
  */
 function is_login(): bool
@@ -231,6 +266,15 @@ function is_login(): bool
 }
 
 /**
+ * Check user if logged in, even student or supervisor
+ * @return bool
+ */
+function is_user_logged(): bool
+{
+    return is_student() || is_supervisor();
+}
+
+/**
  * @return array|false
  */
 function get_current_user_data()
@@ -238,6 +282,7 @@ function get_current_user_data()
     if (!is_login()) {
         return false;
     }
+
     return is_admin_page()
         ? get_current_supervisor_data()
         : get_current_student_data();
@@ -246,7 +291,7 @@ function get_current_user_data()
 /**
  * @return int
  */
-function get_current_user_id() : int
+function get_current_user_id(): int
 {
     $user = get_current_user_data();
     return $user ? $user['user_id'] : 0;
@@ -267,7 +312,7 @@ function get_current_user_type()
 function get_current_user_status()
 {
     $userData = get_current_user_data();
-    return $userData ? ($userData['status']??false) : false;
+    return $userData ? ($userData['status'] ?? false) : false;
 }
 
 /**
@@ -276,5 +321,5 @@ function get_current_user_status()
 function get_current_supervisor_role()
 {
     $userData = get_current_supervisor();
-    return $userData ? ($userData['role']??false) : false;
+    return $userData ? ($userData['role'] ?? false) : false;
 }

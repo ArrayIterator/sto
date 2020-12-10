@@ -3,6 +3,52 @@
 use ArrayIterator\Dependency\Translation;
 use ArrayIterator\Dependency\Translator;
 
+/**
+ * Get available translated Languages
+ *
+ * @return array
+ */
+function get_available_translated_language(): array
+{
+    $cache = cache_get('available_translated_language', 'languages', $found);
+    if ($found && is_array($cache)) {
+        return hook_apply('available_translated_language', $cache);
+    }
+
+    $stmt = database_query(
+        sprintf(
+            'SELECT k.iso_3, k.iso_2, k.language_name 
+            FROM `%s` as k
+            INNER JOIN `%s` as l ON l.iso_3 = k.iso_3
+            GROUP BY l.iso_3',
+            \translation()->getTableName(),
+            \translation()->getTranslator()->getTableName()
+        )
+    );
+
+    $data = [];
+    while ($row = $stmt->fetchAssoc()) {
+        $row['iso_2'] = strtolower($row['iso_2']);
+        $row['iso_3'] = strtolower($row['iso_3']);
+        $row['path'] = false;
+        $row['db'] = true;
+        $data[$row['iso_2']] = $row;
+    }
+    $stmt->closeCursor();
+    foreach (get_language_files() as $key => $item) {
+        if (isset($data[$key])) {
+            $data[$key]['path'] = $item['path'] ?: null;
+            continue;
+        }
+
+        $item['db'] = false;
+        $data[$key] = $item;
+    }
+
+    cache_set('available_translated_language', $data, 'languages');
+    return hook_apply('available_translated_language', $data);
+}
+
 function get_available_languages()
 {
     $cache = cache_get('available_languages', 'languages', $found);
@@ -17,7 +63,7 @@ function get_available_languages()
 /**
  * @return array
  */
-function get_language_files() : array
+function get_language_files(): array
 {
     static $files;
     if (is_array($files)) {
@@ -42,11 +88,11 @@ function get_language_files() : array
         $files[$key] = $l;
     }
     if (!isset($files[Translation::ISO_2_NO_TRANSLATE])) {
-        $lang = $lang??[
-            'iso_3' => 'eng',
-            'iso_2' => 'en',
-            'language_name' => 'English',
-        ];
+        $lang = $lang ?? [
+                'iso_3' => 'eng',
+                'iso_2' => 'en',
+                'language_name' => 'English',
+            ];
         $lang['path'] = null;
         $files[Translation::ISO_2_NO_TRANSLATE] = $lang;
     }
@@ -56,7 +102,7 @@ function get_language_files() : array
 /**
  * @return string
  */
-function get_selected_site_language() : string
+function get_selected_site_language(): string
 {
     $selectedLanguage = \translation()->getSelectedLanguage();
     $lang = get_option('selected_language', null, get_current_site_id(), $found);
@@ -85,13 +131,14 @@ function get_selected_site_language() : string
     if ($selectedLanguage !== $language) {
         \translation()->setSelectedLanguage($language);
     }
+
     return $language;
 }
 
 /**
  * @return Translator
  */
-function translator() : Translator
+function translator(): Translator
 {
     static $required = [];
 
@@ -128,7 +175,7 @@ function translator() : Translator
  * @param string $code
  * @return string
  */
-function translate(string $code) : string
+function translate(string $code): string
 {
     return translator()->trans($code);
 }
@@ -137,7 +184,68 @@ function translate(string $code) : string
  * @param string $code
  * @return string
  */
-function trans(string $code) : string
+function trans(string $code): string
 {
     return \translator()->trans($code);
+}
+
+/**
+ * @param string $code
+ */
+function trans_e(string $code)
+{
+    echo trans($code);
+}
+
+/**
+ * @param string $code
+ * @param mixed ...$args
+ * @return string
+ */
+function trans_sprintf(string $code, ...$args): string
+{
+    return sprintf(trans($code), ...$args);
+}
+
+/**
+ * @param string $code
+ * @param mixed ...$args
+ */
+function trans_printf(string $code, ...$args)
+{
+    printf(trans($code), ...$args);
+}
+
+/**
+ * @param string $code
+ * @param null $flags
+ * @return string
+ */
+function esc_html_trans(string $code, $flags = null): string
+{
+    return htmlentities(trans($code), $flags);
+}
+
+function esc_html_trans_e(string $code, $flags = null)
+{
+    echo esc_html_trans($code, $flags);
+}
+
+/**
+ * @param string $code
+ * @param int|string $entity
+ * @return string
+ */
+function esc_attr_trans(string $code, int $entity = ENT_QUOTES | ENT_COMPAT): string
+{
+    return htmlspecialchars(trans($code), $entity);
+}
+
+/**
+ * @param string $code
+ * @param int|string $entity
+ */
+function esc_attr_trans_e(string $code, int $entity = ENT_QUOTES | ENT_COMPAT)
+{
+    echo esc_attr_trans($code, $entity);
 }

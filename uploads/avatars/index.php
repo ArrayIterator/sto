@@ -1,2 +1,0 @@
-<?php
-// keep silent

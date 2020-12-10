@@ -35,7 +35,7 @@ class AbstractInfo
      */
     public function isValid(): bool
     {
-        return $this->valid;
+        return false;
     }
 
     public function getName() : string
@@ -82,5 +82,13 @@ class AbstractInfo
     public function getPath(): string
     {
         return $this->path;
+    }
+
+    /**
+     * @return string
+     */
+    public function __tostring() : string
+    {
+        return $this->getName();
     }
 }

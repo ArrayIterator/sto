@@ -12,6 +12,14 @@ class Supervisor extends AbstractUserModel
     protected $primaryKey = 'id';
 
     /**
+     * @return string
+     */
+    public function getUserRoleType(): string
+    {
+        return 'supervisor';
+    }
+
+    /**
      * @param $column
      * @param $value
      * @return mixed

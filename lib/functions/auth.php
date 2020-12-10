@@ -58,8 +58,8 @@ function create_auth_hash(int $userId, string $type)
 
     $uuid = UuidV4::generate();
     $user = $type === SUPERVISOR
-        ? supervisor()->getById($userId)
-        : student()->getById($userId);
+        ? get_supervisor_by_id($userId)
+        : get_student_by_id($userId);
 
     if (!$user) {
         return false;

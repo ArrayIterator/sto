@@ -10,7 +10,7 @@ use PDO;
  */
 class Translator
 {
-    protected $tableName = '';
+    protected $tableName = 'sto_translations';
     protected $translation;
     protected $info;
     protected $records = [];
@@ -39,12 +39,16 @@ class Translator
 
         $stmt = $this
             ->translation
-            ->prepare("SELECT 
+            ->prepare(
+                sprintf(
+                    "SELECT 
                     translation as translation,
-                    language_code as code
-                    FROM languages_translation
+                    dictionary_code as code
+                    FROM %s
                     WHERE iso_3=? 
-                    "
+                    ",
+                    $this->getTableName()
+                )
             );
         if (!$stmt->execute([$this->getIso3()])) {
             return false;
@@ -151,15 +155,20 @@ class Translator
         if (isset($this->records[$code])) {
             return $this->records[$code];
         }
+        $tableName = $this->getTableName();
+        $tableDictionary = $this
+            ->getTranslation()
+            ->getTranslationsDictionary()
+            ->getTableName();
         $stmt = $this
             ->translation
             ->prepare("
             SELECT 
                    translation as translation,
-                   code as code,
+                   dictionary_code as code,
                    l.translate as translate
-            FROM languages_translation
-            INNER JOIN languages l on languages_translation.language_code = l.code
+            FROM {$tableName}
+            INNER JOIN {$tableDictionary} l on {$tableName}.dictionary_code = l.code
             WHERE l.translate = ? 
             LIMIT 1
         ");
@@ -265,7 +274,12 @@ class Translator
         return $record['translation'] ?? ($fallback === null ? $message : $fallback);
     }
 
-    public function transOrSet($message, $translation = null)
+    /**
+     * @param string $message
+     * @param mixed $translation
+     * @return mixed
+     */
+    public function transOrSet(string $message, $translation = null)
     {
         if ($this->getIso2() === Translation::ISO_2_NO_TRANSLATE) {
             return $message;

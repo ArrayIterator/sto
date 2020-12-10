@@ -37,6 +37,7 @@ function server_request(): ServerRequest
 {
     static $request;
     if (!$request) {
+
         $request = ServerRequest::fromGlobals();
         $server = $request->getServerParams();
         $host = $server['HTTP_HOST'] ?? $server['SERVER_NAME'];
@@ -181,7 +182,7 @@ function route_collector(): RouteCollector
 /**
  * @return RouteApi
  */
-function route_api() : RouteApi
+function route_api(): RouteApi
 {
     static $route_api;
     if (!$route_api) {
@@ -198,13 +199,13 @@ function route_api() : RouteApi
 /**
  * @return RouteApi
  */
-function route_public() : RouteApi
+function route_public(): RouteApi
 {
     static $route_api;
     if (!$route_api) {
         $route_api = new RouteApi(
             \route(),
-            '{path: (?!'.get_route_api_path().')}',
+            '{path: (?!' . get_route_api_path() . ')}',
             true
         );
     }
@@ -241,7 +242,7 @@ function modules(): Modules
 /**
  * @return Themes
  */
-function themes() : Themes
+function themes(): Themes
 {
     static $themes;
     if (!$themes) {
