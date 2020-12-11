@@ -72,7 +72,7 @@ class Database
     /**
      * @return Tables
      */
-    public function getTables() : Tables
+    public function getTables(): Tables
     {
         $dbName = $this->adapter->getDbName();
         if (!$dbName) {

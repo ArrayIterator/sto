@@ -129,7 +129,7 @@ class Option extends Model
      * @param mixed ...$optionNames
      * @return ArrayGetter
      */
-    public function values(int $siteId = null, ...$optionNames) : ArrayGetter
+    public function values(int $siteId = null, ...$optionNames): ArrayGetter
     {
         $siteId = $siteId ?? $this->getModelSiteId();
         $optionName = [];

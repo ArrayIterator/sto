@@ -38,6 +38,31 @@ function get_admin_path(): string
 /**
  * @return string
  */
+function get_admin_directory(): string
+{
+    if (defined('ADMIN_DIR')) {
+        return ADMIN_DIR;
+    }
+
+    define('ADMIN_DIR', normalize_directory(ROOT_DIR . '/' . ADMIN_PATH));
+    return ADMIN_DIR;
+}
+
+/**
+ * @return string
+ */
+function get_admin_includes_directory(): string
+{
+    static $dir;
+    if (!$dir) {
+        $dir = normalize_directory(get_admin_directory() . '/includes');
+    }
+    return $dir;
+}
+
+/**
+ * @return string
+ */
 function get_scanned_admin_path(): string
 {
     static $admin;

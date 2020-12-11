@@ -1,6 +1,5 @@
 <?php
 
-use ArrayIterator\Database\PrepareStatement;
 use ArrayIterator\Helper\StringFilter;
 use ArrayIterator\Model\Student;
 use ArrayIterator\Model\Supervisor;

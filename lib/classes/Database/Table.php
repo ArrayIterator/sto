@@ -88,7 +88,7 @@ class Table
     /**
      * @return string[]
      */
-    public function getPrimaryKey() : array
+    public function getPrimaryKey(): array
     {
         return $this->primaryKey;
     }

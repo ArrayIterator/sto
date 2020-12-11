@@ -1,6 +1,7 @@
 <?php
 
 use ArrayIterator\Helper\Path;
+use ArrayIterator\Helper\StringFilter;
 
 /**
  * @param string $headerName
@@ -32,14 +33,7 @@ function normalize_header_name(string $headerName)
  */
 function deep_replace($search, string $subject)
 {
-    $subject = (string)$subject;
-
-    $count = 1;
-    while ($count) {
-        $subject = str_replace($search, '', $subject, $count);
-    }
-
-    return $subject;
+    return StringFilter::deepReplace($search, $subject);
 }
 
 /**
@@ -47,14 +41,9 @@ function deep_replace($search, string $subject)
  * @param bool $slash_zero
  * @return string
  */
-function replace_null_string(string $string, $slash_zero = true): string
+function replace_null_string(string $string, bool $slash_zero = true): string
 {
-    $string = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', $string);
-    if ($slash_zero) {
-        $string = preg_replace('/\\\\+0+/', '', $string);
-    }
-
-    return $string;
+    return StringFilter::replaceNullString($string, $slash_zero);
 }
 
 /**

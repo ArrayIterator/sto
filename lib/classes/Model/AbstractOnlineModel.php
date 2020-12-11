@@ -31,7 +31,7 @@ abstract class AbstractOnlineModel extends Model
     /**
      * @return bool
      */
-    public function replaceOffline() : bool
+    public function replaceOffline(): bool
     {
         $time = time();
         if ($this->lastExecute && $this->lastExecute + 4 > $time) {
@@ -107,7 +107,7 @@ abstract class AbstractOnlineModel extends Model
      * @param AbstractUserModel $abstractUser
      * @return bool
      */
-    public function setOnline(AbstractUserModel $abstractUser) : bool
+    public function setOnline(AbstractUserModel $abstractUser): bool
     {
         $id = $abstractUser->getId();
         if (!$abstractUser->isFromStatement()) {
@@ -138,7 +138,7 @@ abstract class AbstractOnlineModel extends Model
      * @param AbstractUserModel $student
      * @return bool
      */
-    public function setOffline(AbstractUserModel $student) : bool
+    public function setOffline(AbstractUserModel $student): bool
     {
         $id = $student->getId();
         if (!$student->isFromStatement()) {
@@ -166,7 +166,7 @@ abstract class AbstractOnlineModel extends Model
      * @param AbstractUserModel $student
      * @return bool
      */
-    public function remove(AbstractUserModel $student) : bool
+    public function remove(AbstractUserModel $student): bool
     {
         $id = $student->getId();
         if (!$student->isFromStatement()) {

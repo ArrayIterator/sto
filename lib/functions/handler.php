@@ -72,7 +72,7 @@ function route_json_not_allowed_handler()
  */
 function set_not_found_handler(callable $callback)
 {
-    \route()->setNotFoundHandler($callback);
+    route()->setNotFoundHandler($callback);
 }
 
 /**
@@ -80,7 +80,7 @@ function set_not_found_handler(callable $callback)
  */
 function set_not_allowed_handler(callable $callback)
 {
-    \route()->setNotAllowedHandler($callback);
+    route()->setNotAllowedHandler($callback);
 }
 
 /**

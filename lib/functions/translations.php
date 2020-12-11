@@ -142,7 +142,7 @@ function translator(): Translator
 {
     static $required = [];
 
-    $selectedLanguage = \translation()->getSelectedLanguage();
+    $selectedLanguage = get_selected_site_language();
     $translator = translation()->getTranslator($selectedLanguage);
     if (!isset($required[$selectedLanguage])) {
         $required[$selectedLanguage] = true;

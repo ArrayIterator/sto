@@ -173,7 +173,7 @@ class RandomToken
      * @param int $expiredAfter 0 for never expired default 1 day
      * @return string
      */
-    public static function create(string $privateKey, int $expiredAfter = self::A_DAY_IN_SECOND) : string
+    public static function create(string $privateKey, int $expiredAfter = self::A_DAY_IN_SECOND): string
     {
         $secretKey = static::hashKey($privateKey);
         $iv = Random::bytes(static::BYTES_LENGTH);

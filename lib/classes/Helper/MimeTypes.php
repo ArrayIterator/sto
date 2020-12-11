@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Helper;
 
 use RuntimeException;
@@ -23,10 +24,10 @@ final class MimeTypes
      *
      * @return string[][]|array[]
      */
-    public static function getExtensionMimeTypes() : array
+    public static function getExtensionMimeTypes(): array
     {
         if (self::$extensionMimeTypes === null) {
-            $jsonFile = __DIR__ .'/MimeTypes/mime.types.json';
+            $jsonFile = __DIR__ . '/MimeTypes/mime.types.json';
             if (!file_exists($jsonFile)) {
                 throw new RuntimeException(
                     'File mime.types.json is no exists',
@@ -35,7 +36,7 @@ final class MimeTypes
             }
             $stream = new Stream(fopen($jsonFile, 'r'));
             self::$extensionMimeTypes = json_decode(
-                (string) $stream,
+                (string)$stream,
                 true
             );
             $stream->close();
@@ -53,7 +54,7 @@ final class MimeTypes
     public static function fromMimeType(string $extension)
     {
         $extension = strtolower($extension);
-        return self::getExtensionMimeTypes()[$extension]?? null;
+        return self::getExtensionMimeTypes()[$extension] ?? null;
     }
 
     /**
@@ -101,15 +102,16 @@ final class MimeTypes
      */
     public static function mime(string $extension)
     {
-        return self::fromExtension($extension)[0]??false;
+        return self::fromExtension($extension)[0] ?? false;
     }
+
     /**
      * @param string $mimeType
      * @return string|false
      */
     public static function extension(string $mimeType)
     {
-        return self::fromMimeType($mimeType)[0]??false;
+        return self::fromMimeType($mimeType)[0] ?? false;
     }
 
     /**

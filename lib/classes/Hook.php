@@ -163,7 +163,7 @@ final class Hook implements Iterator, ArrayAccess
      * @param int $priority
      * @return bool
      */
-    public function remove(string $tag, callable $function_to_remove, int $priority = 10) : bool
+    public function remove(string $tag, callable $function_to_remove, int $priority = 10): bool
     {
         $function_key = $this->hooks->buildUniqueId($tag, $function_to_remove, $priority);
 
@@ -355,7 +355,7 @@ final class Hook implements Iterator, ArrayAccess
      * @link https://www.php.net/manual/en/arrayaccess.offsetexists.php
      *
      */
-    public function offsetExists($offset) : bool
+    public function offsetExists($offset): bool
     {
         return isset($this->callbacks[$offset]);
     }

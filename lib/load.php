@@ -1,10 +1,12 @@
 <?php
 // DENY DIRECT ACCESS
-if (($_SERVER['SCRIPT_FILENAME']??null) === __FILE__) {
+if (($_SERVER['SCRIPT_FILENAME'] ?? null) === __FILE__) {
     !headers_sent() && header('Location: ../', true, 302);
     exit(0);
 }
 
+// require autoload
+require __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/constant.php';
 require_once __DIR__ . '/functions/meta.php';
 require_once __DIR__ . '/functions/environment.php';
@@ -26,6 +28,7 @@ require_once __DIR__ . '/functions/filters.php';
 require_once __DIR__ . '/functions/translations.php';
 require_once __DIR__ . '/functions/route.php';
 require_once __DIR__ . '/functions/calendar.php';
+require_once __DIR__ . '/functions/assets.php';
 require_once __DIR__ . '/functions/templates.php';
 require_once __DIR__ . '/functions/admin.environment.php';
 
@@ -34,9 +37,6 @@ if (ob_get_level() < 1) {
 }
 
 register_shutdown_function('shutdown_handler');
-
-// require autoload
-require __DIR__ . '/vendor/autoload.php';
 
 $configBaseName = CONFIG_BASE_FILENAME;
 $configBaseName = substr($configBaseName, -4) !== 'php'
@@ -92,6 +92,7 @@ defined('DB_HOST') || define('DB_HOST', 'localhost');
 get_scanned_admin_path();
 // PATH
 defined('ADMIN_PATH') || define('ADMIN_PATH', get_scanned_admin_path());
+defined('ADMIN_DIR') || get_admin_directory();
 defined('LOGIN_PATH') || define('LOGIN_PATH', DEFAULT_LOGIN_PATH);
 defined('UPLOADS_PATH') || define('UPLOADS_PATH', DEFAULT_UPLOADS_PATH);
 defined('THEMES_PATH') || define('THEMES_PATH', DEFAULT_THEMES_PATH);
@@ -126,6 +127,11 @@ cache_add_global_groups([
     'sites',
     'languages'
 ]);
+
+// REQUIRE FILTERS BEFORE MODULE LOAD
+require_once __DIR__ . '/filters.php';
+// LOAD ROUTES
+require_once __DIR__ . '/routes.php';
 
 if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
     $loadedModules = [];
@@ -170,21 +176,24 @@ if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
 }
 
 unset($loadedModules, $moduleName, $time);
+
 hook_run('modules_loaded');
 
-if ((!defined('DISABLE_THEME') || !DISABLE_THEME)
-    && !is_admin_page()
-    && !is_route_api()
-) {
-    $theme = get_active_theme();
-    $path = $theme->getPath();
-    if ($path && is_file($path.'functions.php')) {
-        /** @noinspection PhpIncludeInspection */
-        require_once $path.'/functions.php';
+if (!is_admin_page()) {
+    // LOAD THEME
+    if ((!defined('DISABLE_THEME') || !DISABLE_THEME)
+        && !is_route_api()
+    ) {
+        $theme = get_active_theme();
+        $path = $theme->getPath();
+        if ($path && is_file($path . 'functions.php')) {
+            /** @noinspection PhpIncludeInspection */
+            require_once $path . '/functions.php';
+        }
+
         hook_run('theme_loaded');
+        unset($theme, $path);
     }
-
-    unset($theme, $path);
+    // do init
+    init();
 }
-
-hook_run('init');

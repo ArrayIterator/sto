@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator;
 
 use Exception;
@@ -38,7 +39,7 @@ abstract class GroupingRoute
         bool $groupCaseSensitive = true
     ) {
         $this->route = $route;
-        $this->prefix = '/'.trim($prefix, '/');
+        $this->prefix = '/' . trim($prefix, '/');
         $this->groupPrefix = strpos($prefix, '{') !== false
             ? $prefix
             : sprintf(
@@ -149,6 +150,7 @@ abstract class GroupingRoute
     {
         return $this->add('PUT', $path, $callable);
     }
+
     public function patch(string $path, callable $callable)
     {
         return $this->add('PATCH', $path, $callable);

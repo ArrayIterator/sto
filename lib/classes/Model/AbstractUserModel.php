@@ -14,13 +14,13 @@ namespace ArrayIterator\Model;
  */
 abstract class AbstractUserModel extends Model
 {
-    abstract public function getUserRoleType() : string;
+    abstract public function getUserRoleType(): string;
 
     /**
      * @param string $password
      * @return string
      */
-    public function encodePlainPassword(string $password) : string
+    public function encodePlainPassword(string $password): string
     {
         return sha1($password);
     }
@@ -30,9 +30,9 @@ abstract class AbstractUserModel extends Model
      * @param string $password
      * @return bool
      */
-    public function isPasswordEncoded(string $password) : bool
+    public function isPasswordEncoded(string $password): bool
     {
-        return (bool) preg_match('~^[a-f0-9]{40}$~', $password);
+        return (bool)preg_match('~^[a-f0-9]{40}$~', $password);
     }
 
     public function hasPassword(string $password, $reEncode = true)
@@ -117,7 +117,7 @@ abstract class AbstractUserModel extends Model
      * @param string $gender
      * @return string
      */
-    public function setGender(string $gender) : string
+    public function setGender(string $gender): string
     {
         $gender = strtoupper($gender);
         if (array_key_exists('gender', $this->data) && $this->data['gender'] === $gender

@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator;
 
 /**
@@ -29,14 +30,14 @@ class DataError
     public function __construct(string $type = '', $message = '', $code = null)
     {
         $this->type = $type;
-        $this->messages = (array) $message;
+        $this->messages = (array)$message;
         $this->code = $code;
     }
 
     /**
      * @return array
      */
-    public function getMessages() : array
+    public function getMessages(): array
     {
         return $this->messages;
     }

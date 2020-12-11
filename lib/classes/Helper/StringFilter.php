@@ -14,6 +14,174 @@ use Traversable;
 final class StringFilter
 {
     /**
+     * @var string[]
+     */
+    protected static $protocols = [
+        'http',
+        'https',
+        'ftp',
+        'ftps',
+        'mailto',
+        'news',
+        'irc',
+        'gopher',
+        'nntp',
+        'feed',
+        'telnet',
+        'mms',
+        'rtsp',
+        'sms',
+        'svn',
+        'tel',
+        'fax',
+        'xmpp',
+        'webcal',
+        'urn'
+    ];
+
+    /**
+     * @param string $string
+     * @param bool $slash_zero
+     * @return string
+     */
+    public static function replaceNullString(string $string, bool $slash_zero = true): string
+    {
+        $string = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', $string);
+        if ($slash_zero) {
+            $string = preg_replace('/\\\\+0+/', '', $string);
+        }
+
+        return $string;
+    }
+
+    /**
+     * @param $search
+     * @param string $subject
+     * @return string|string[]
+     */
+    public static function deepReplace($search, string $subject)
+    {
+        $subject = (string)$subject;
+
+        $count = 1;
+        while ($count) {
+            $subject = str_replace($search, '', $subject, $count);
+        }
+        return $subject;
+    }
+
+    /**
+     * @param string $url
+     * @param array|mixed|null $protocols
+     * @param bool $display
+     * @return string
+     */
+    public static function escapeUrl(
+        string $url,
+        $protocols = null,
+        bool $display = true
+    ): string {
+        if ('' == trim($url)) {
+            return $url;
+        }
+
+        $url = str_replace(' ', '%20', ltrim($url));
+        $url = preg_replace('|[^a-z0-9-~+_.?#=!&;,/:%@$\|*\'()\[\]\\x80-\\xff]|i', '', $url);
+
+        if ('' === $url) {
+            return $url;
+        }
+
+        if (0 !== stripos($url, 'mailto:')) {
+            $strip = array('%0d', '%0a', '%0D', '%0A');
+            $url = self::deepReplace($strip, $url);
+        }
+
+        $url = str_replace(';//', '://', $url);
+        /*
+         * If the URL doesn't appear to contain a scheme, we presume
+         * it needs http:// prepended (unless it's a relative link
+         * starting with /, # or ?, or a PHP file).
+         */
+        if (strpos($url, ':') === false && !in_array($url[0], array('/', '#', '?')) &&
+            !preg_match('/^[a-z0-9-]+?\.php/i', $url)) {
+            $url = 'http://' . $url;
+        }
+
+        // Replace ampersands and single quotes only when displaying.
+        if ($display) {
+            $url = htmlentities($url);
+            $url = str_replace('&amp;', '&#038;', $url);
+            $url = str_replace("'", '&#039;', $url);
+        }
+
+        if ((false !== strpos($url, '[')) || (false !== strpos($url, ']'))) {
+
+            $parsed = parse_url($url);
+            $front = '';
+
+            if (isset($parsed['scheme'])) {
+                $front .= $parsed['scheme'] . '://';
+            } elseif ('/' === $url[0]) {
+                $front .= '//';
+            }
+
+            if (isset($parsed['user'])) {
+                $front .= $parsed['user'];
+            }
+
+            if (isset($parsed['pass'])) {
+                $front .= ':' . $parsed['pass'];
+            }
+
+            if (isset($parsed['user']) || isset($parsed['pass'])) {
+                $front .= '@';
+            }
+
+            if (isset($parsed['host'])) {
+                $front .= $parsed['host'];
+            }
+
+            if (isset($parsed['port'])) {
+                $front .= ':' . $parsed['port'];
+            }
+
+            $end_dirty = str_replace($front, '', $url);
+            $end_clean = str_replace(array('[', ']'), array('%5B', '%5D'), $end_dirty);
+            $url = str_replace($end_dirty, $end_clean, $url);
+
+        }
+        if ('/' === $url[0]) {
+            $good_protocol_url = $url;
+        } else {
+            if (!is_array($protocols)) {
+                $protocols = self::$protocols;
+            }
+
+            preg_match('#^([^:]+):([/]+)?([^/].+)#', $url, $match);
+            $protocol = $match[1] ?? null;
+            $uri = $match[3] ?? null;
+            if (!$protocol || !in_array($protocol, $protocols)) {
+                return '';
+            }
+
+            $good_protocol_url = sprintf('%s://%s', $protocol, $uri);
+            if (strtolower($good_protocol_url) != strtolower($url)) {
+                return '';
+            }
+        }
+
+        /**
+         * Filters a string cleaned and escaped for output as a URL.
+         *
+         * @param string $good_protocol_url The cleaned URL to be returned.
+         * @param string $original_url The URL prior to cleaning.
+         * @param string $display If 'display', replace ampersands and single quotes only.
+         */
+        return $good_protocol_url;
+    }
+
+    /**
      * @param bool $reset
      */
     public static function mbStringBinarySafeEncoding(bool $reset = false)
@@ -88,7 +256,7 @@ final class StringFilter
      * @param string $data
      * @return string
      */
-    public static function sanitizeUtf8Encode(string $data) : string
+    public static function sanitizeUtf8Encode(string $data): string
     {
         static $utf8;
         if (!is_bool($utf8)) {
@@ -220,7 +388,7 @@ final class StringFilter
      * @param bool $strict Optional. Whether to be strict about the end of the string. Defaults true.
      * @return bool  false if not serialized and true if it was.
      */
-    public static function isSerialized($data, $strict = true) : bool
+    public static function isSerialized($data, $strict = true): bool
     {
         /* if it isn't a string, it isn't serialized
          ------------------------------------------- */
@@ -410,12 +578,12 @@ final class StringFilter
         return $regexP;
     }
 
-    public static function sha256(string $string) : string
+    public static function sha256(string $string): string
     {
         return hash('sha256', $string);
     }
 
-    public static function sha512(string $string) : string
+    public static function sha512(string $string): string
     {
         return hash('sha512', $string);
     }

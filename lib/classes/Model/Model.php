@@ -657,7 +657,7 @@ abstract class Model implements QueryPrepareInterface, ArrayAccess
         unset($this->userData[$name]);
     }
 
-    public function __isset($name) : bool
+    public function __isset($name): bool
     {
         return array_key_exists($name, $this->data);
     }
@@ -814,7 +814,7 @@ abstract class Model implements QueryPrepareInterface, ArrayAccess
         }
     }
 
-    public function toArray() : array
+    public function toArray(): array
     {
         return $this->data;
     }
@@ -992,7 +992,7 @@ abstract class Model implements QueryPrepareInterface, ArrayAccess
     /**
      * @return bool
      */
-    public function delete() : bool
+    public function delete(): bool
     {
         $autoIncrement = $this->getAutoIncrementColumn();
         $selector = null;

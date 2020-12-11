@@ -84,6 +84,173 @@ final class Normalizer
     }
 
     /**
+     * @param mixed $value
+     * @param mixed $callback
+     * @return array|false|mixed
+     */
+    public static function mapDeep($value, $callback)
+    {
+        if (is_array($value)) {
+            foreach ($value as $index => $item) {
+                $value[$index] = self::mapDeep($item, $callback);
+            }
+        } elseif (is_object($value)) {
+            $object_vars = get_object_vars($value);
+            foreach ($object_vars as $property_name => $property_value) {
+                $value->$property_name = self::mapDeep($property_value, $callback);
+            }
+        } else {
+            $value = call_user_func($callback, $value);
+        }
+
+        return $value;
+    }
+
+    public static function parseStr($string, &$array)
+    {
+        parse_str($string, $array);
+    }
+
+    /**
+     * @param $data
+     * @param string|null $prefix
+     * @param string|null $sep
+     * @param string $key
+     * @param bool $urlEncode
+     * @return string
+     */
+    public static function buildQuery(
+        $data,
+        string $prefix = null,
+        string $sep = null,
+        string $key = '',
+        bool $urlEncode = true
+    ): string {
+        $ret = [];
+
+        foreach ((array)$data as $k => $v) {
+            if ($urlEncode) {
+                $k = urlencode($k);
+            }
+            if (is_int($k) && null != $prefix) {
+                $k = $prefix . $k;
+            }
+            if (!empty($key)) {
+                $k = $key . '%5B' . $k . '%5D';
+            }
+            if (null === $v) {
+                continue;
+            } elseif (false === $v) {
+                $v = '0';
+            }
+
+            if (is_array($v) || is_object($v)) {
+                array_push($ret, self::buildQuery($v, '', $sep, $k, $urlEncode));
+            } elseif ($urlEncode) {
+                array_push($ret, $k . '=' . urlencode($v));
+            } else {
+                array_push($ret, $k . '=' . $v);
+            }
+        }
+
+        if (null === $sep) {
+            $sep = ini_get('arg_separator.output');
+        }
+
+        return implode($sep, $ret);
+    }
+
+    /**
+     * @param mixed ...$args
+     * @return string
+     */
+    public static function addQueryArgs(...$args): string
+    {
+        if (is_array($args[0])) {
+            if (count($args) < 2 || false === $args[1]) {
+                $uri = $_SERVER['REQUEST_URI'];
+            } else {
+                $uri = $args[1];
+            }
+        } else {
+            if (count($args) < 3 || false === $args[2]) {
+                $uri = $_SERVER['REQUEST_URI'];
+            } else {
+                $uri = $args[2];
+            }
+        }
+
+        $frag = strstr($uri, '#');
+        if ($frag) {
+            $uri = substr($uri, 0, -strlen($frag));
+        } else {
+            $frag = '';
+        }
+
+        if (0 === stripos($uri, 'http://')) {
+            $protocol = 'http://';
+            $uri = substr($uri, 7);
+        } elseif (0 === stripos($uri, 'https://')) {
+            $protocol = 'https://';
+            $uri = substr($uri, 8);
+        } else {
+            $protocol = '';
+        }
+
+        if (strpos($uri, '?') !== false) {
+            list($base, $query) = explode('?', $uri, 2);
+            $base .= '?';
+        } elseif ($protocol || strpos($uri, '=') === false) {
+            $base = $uri . '?';
+            $query = '';
+        } else {
+            $base = '';
+            $query = $uri;
+        }
+
+        self::parseStr($query, $qs);
+        $qs = self::mapDeep($qs, 'urlencode');
+        if (is_array($args[0])) {
+            foreach ($args[0] as $k => $v) {
+                $qs[$k] = $v;
+            }
+        } else {
+            $qs[$args[0]] = $args[1];
+        }
+
+        foreach ($qs as $k => $v) {
+            if (false === $v) {
+                unset($qs[$k]);
+            }
+        }
+
+        $ret = self::buildQuery($qs);
+        $ret = trim($ret, '?');
+        $ret = preg_replace('#=(&|$)#', '$1', $ret);
+        $ret = $protocol . $base . $ret . $frag;
+        $ret = rtrim($ret, '?');
+        return $ret;
+    }
+
+    /**
+     * Removes an item or items from a query string.
+     *
+     * @param string|array $key Query key or keys to remove.
+     * @param bool|string $query Optional. When false uses the current URL. Default false.
+     * @return string New URL query string.
+     */
+    function removeQueryArg($key, $query = false)
+    {
+        if (is_array($key)) { // Removing multiple keys.
+            foreach ($key as $k) {
+                $query = self::addQueryArgs($k, false, $query);
+            }
+            return $query;
+        }
+        return self::addQueryArgs($key, false, $query);
+    }
+
+    /**
      * @param string $string
      * @return string
      */
@@ -144,7 +311,7 @@ final class Normalizer
     public static function removeJSContent(string $data): string
     {
         return preg_replace(
-            '/<(script)[^>]+?>.*?<\/\\1>/smi',
+            '/<(script)[^>]+?>.*?</\1>/smi',
             '',
             $data
         );
@@ -177,7 +344,7 @@ final class Normalizer
      * @author Leonard Lin <leonard@acm.org>
      * @license GPL
      */
-    public static function forceBalanceTags(string $text) : string
+    public static function forceBalanceTags(string $text): string
     {
         $tagStack = [];
         $stackSize = 0;
@@ -384,7 +551,7 @@ final class Normalizer
      * @param array $slugCollections
      * @return string
      */
-    public static function uniqueSlug(string $slug, array $slugCollections) : string
+    public static function uniqueSlug(string $slug, array $slugCollections): string
     {
         $separator = '-';
         $inc = 1;
@@ -401,7 +568,7 @@ final class Normalizer
      * @param callable $callable must be returning true for valid
      * @return string
      */
-    public static function uniqueSlugCallback(string $slug, callable $callable) : string
+    public static function uniqueSlugCallback(string $slug, callable $callable): string
     {
         $separator = '-';
         $inc = 1;

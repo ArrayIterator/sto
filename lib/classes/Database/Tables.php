@@ -149,7 +149,7 @@ class Tables implements QueryPrepareInterface
     /**
      * @return Table[]
      */
-    public function getTableList() : array
+    public function getTableList(): array
     {
         if ($this->tables) {
             return $this->tables;
@@ -244,7 +244,7 @@ class Tables implements QueryPrepareInterface
     /**
      * @return string[]
      */
-    public function getNotExistsTable() : array
+    public function getNotExistsTable(): array
     {
         return array_diff($this->defaultTables, $this->getListTable());
     }

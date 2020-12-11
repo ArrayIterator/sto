@@ -42,7 +42,7 @@ class PdoResult extends AbstractResult
      * @param int|null $resultType
      * @return array
      */
-    public function fetchAll(int $resultType = PDO::FETCH_ASSOC) : array
+    public function fetchAll(int $resultType = PDO::FETCH_ASSOC): array
     {
         return $this->statement->fetchAll($resultType);
     }

@@ -22,7 +22,7 @@ class Module extends AbstractInfo
     public function __construct(string $path, array $info)
     {
         parent::__construct($path, $info);
-        $this->valid = $this->info['name']??'';
+        $this->valid = $this->info['name'] ?? '';
         $this->valid = !empty($this->valid)
             && is_string($this->valid)
             && trim($this->info['name']) !== '';

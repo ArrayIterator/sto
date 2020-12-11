@@ -33,17 +33,17 @@ interface AdapterConnectionInterface extends QueryPrepareInterface
     /**
      * @return bool
      */
-    public function connect() : bool;
+    public function connect(): bool;
 
     /**
      * @return string
      */
-    public function getDriver() : string;
+    public function getDriver(): string;
 
     /**
      * @return bool
      */
-    public function ping() : bool;
+    public function ping(): bool;
 
     /**
      * @param string $str

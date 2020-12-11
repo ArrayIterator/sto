@@ -6,6 +6,7 @@ if (!defined('ROOT_DIR')) {
 <html<?= get_html_attributes();?>>
 <head>
 <?php html_head();?>
+
 </head>
 <body<?=get_body_attributes();?>>
 <?php body_open();?>

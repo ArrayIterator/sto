@@ -94,3 +94,10 @@ define('TYPE_POST', 'post');
 define('TYPE_PAGE', 'page');
 define('TYPE_ANNOUNCEMENT', 'announcement');
 define('TYPE_REVISION', 'revision');
+
+// ASSETS VERSION
+define('VERSION_JQUERY', 'v3.5.1');
+define('VERSION_BOOTSTRAP', 'v4.5.3');
+define('VERSION_CHART_JS', 'v2.9.4');
+define('VERSION_MOMENT_JS', '2.29.1');
+define('VERSION_ICOFONT_CSS', '1.0.1');

@@ -37,3 +37,7 @@ hook_add('json_success_options', function () {
 });
 
 ```
+
+### NOTE CODES
+
+**Many codes take from wordpress scripts**

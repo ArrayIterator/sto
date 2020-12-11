@@ -3,6 +3,8 @@
 use ArrayIterator\Application;
 use ArrayIterator\Cache\Adapter\ObjectCache;
 use ArrayIterator\Database;
+use ArrayIterator\Dependency\Scripts;
+use ArrayIterator\Dependency\Styles;
 use ArrayIterator\Dependency\Translation;
 use ArrayIterator\Helper\Area\TimeZone;
 use ArrayIterator\Helper\TimeZoneConvert;
@@ -72,7 +74,7 @@ function get_uri(): UriInterface
  */
 function timezone_convert(): TimeZoneConvert
 {
-    return \application()->getTimeZoneConvert();
+    return application()->getTimeZoneConvert();
 }
 
 /**
@@ -80,7 +82,7 @@ function timezone_convert(): TimeZoneConvert
  */
 function timezone(): TimeZone
 {
-    return \application()->getTimezone();
+    return application()->getTimezone();
 }
 
 /**
@@ -88,7 +90,7 @@ function timezone(): TimeZone
  */
 function database(): Database
 {
-    return \application()->getDatabase();
+    return application()->getDatabase();
 }
 
 /**
@@ -96,7 +98,7 @@ function database(): Database
  */
 function translation_dictionary(): TranslationsDictionary
 {
-    return \application()->getTranslationDictionary();
+    return application()->getTranslationDictionary();
 }
 
 /**
@@ -104,7 +106,7 @@ function translation_dictionary(): TranslationsDictionary
  */
 function translation(): Translation
 {
-    return \application()->getTranslation();
+    return application()->getTranslation();
 }
 
 /**
@@ -112,7 +114,7 @@ function translation(): Translation
  */
 function option(): Option
 {
-    return \application()->getOption();
+    return application()->getOption();
 }
 
 /**
@@ -120,7 +122,7 @@ function option(): Option
  */
 function site(): Site
 {
-    return \application()->getSite();
+    return application()->getSite();
 }
 
 /**
@@ -128,7 +130,7 @@ function site(): Site
  */
 function hooks(): Hooks
 {
-    return \application()->getHooks();
+    return application()->getHooks();
 }
 
 /**
@@ -136,7 +138,7 @@ function hooks(): Hooks
  */
 function student_online(): StudentOnline
 {
-    return \application()->getStudentOnline();
+    return application()->getStudentOnline();
 }
 
 /**
@@ -144,7 +146,7 @@ function student_online(): StudentOnline
  */
 function supervisor_online(): SupervisorOnline
 {
-    return \application()->getSupervisorOnline();
+    return application()->getSupervisorOnline();
 }
 
 /**
@@ -168,7 +170,7 @@ function supervisor(): Supervisor
  */
 function route(): Route
 {
-    return \application()->getRoute();
+    return application()->getRoute();
 }
 
 /**
@@ -202,10 +204,13 @@ function route_api(): RouteApi
 function route_public(): RouteApi
 {
     static $route_api;
+
     if (!$route_api) {
+        // $admin = preg_quote(get_route_api_path(), '#');
+        $api = preg_quote(get_admin_path(), '#');
         $route_api = new RouteApi(
             \route(),
-            '{path: (?!' . get_route_api_path() . ')}',
+            "{path: (?!{$api})}",
             true
         );
     }
@@ -249,4 +254,31 @@ function themes(): Themes
         $themes = new Themes(get_themes_dir());
     }
     return $themes;
+}
+
+/**
+ * @return Scripts
+ */
+function assets_scripts(): Scripts
+{
+    static $scripts;
+    if (!$scripts) {
+        $scripts = new Scripts(get_site_url(), hooks());
+        hook_run_ref_array('assets_default_scripts', [&$scripts]);
+    }
+    return $scripts;
+}
+
+/**
+ * @return Styles
+ */
+function assets_styles(): Styles
+{
+    static $styles;
+    if (!$styles) {
+        $styles = new Styles(get_site_url(), hooks());
+        hook_run_ref_array('assets_default_styles', [&$styles]);
+    }
+
+    return $styles;
 }

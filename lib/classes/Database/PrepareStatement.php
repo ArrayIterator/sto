@@ -65,7 +65,7 @@ class PrepareStatement extends PDOStatement
         $this->closeCursor();
     }
 
-    public function closeCursor() : bool
+    public function closeCursor(): bool
     {
         $this->closed = true;
         return parent::closeCursor();
@@ -130,7 +130,7 @@ class PrepareStatement extends PDOStatement
      * @param array|mixed|null $params
      * @return bool
      */
-    public function execute($params = null) : bool
+    public function execute($params = null): bool
     {
         if (func_num_args() > 0 && !is_array($params)) {
             $params = (array)$params;

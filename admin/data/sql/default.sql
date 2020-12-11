@@ -21,16 +21,18 @@ SET time_zone = "+00:00";
 -- Table structure for table `sto_attachments`
 --
 
-CREATE TABLE `sto_attachments` (
-   `id` bigint(20) NOT NULL,
-   `path` tinytext NOT NULL,
-   `name` varchar(255) DEFAULT NULL,
-   `created_by` bigint(20) DEFAULT NULL,
-   `metadata` text DEFAULT NULL,
-   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-   `attachment_to` varchar(128) DEFAULT NULL,
-   `attachment_to_id` bigint(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_attachments`
+(
+    `id`               bigint(20) NOT NULL,
+    `path`             tinytext   NOT NULL,
+    `name`             varchar(255)        DEFAULT NULL,
+    `created_by`       bigint(20)          DEFAULT NULL,
+    `metadata`         text                DEFAULT NULL,
+    `created_at`       datetime   NOT NULL DEFAULT current_timestamp(),
+    `attachment_to`    varchar(128)        DEFAULT NULL,
+    `attachment_to_id` bigint(20)          DEFAULT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -38,13 +40,15 @@ CREATE TABLE `sto_attachments` (
 -- Table structure for table `sto_classes`
 --
 
-CREATE TABLE `sto_classes` (
-   `id` bigint(20) NOT NULL,
-   `site_id` bigint(20) DEFAULT 1,
-   `code` varchar(60) NOT NULL,
-   `name` varchar(255) NOT NULL,
-   `note` longtext NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_classes`
+(
+    `id`      bigint(20)   NOT NULL,
+    `site_id` bigint(20) DEFAULT 1,
+    `code`    varchar(60)  NOT NULL,
+    `name`    varchar(255) NOT NULL,
+    `note`    longtext     NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -52,11 +56,13 @@ CREATE TABLE `sto_classes` (
 -- Table structure for table `sto_classes_teacher`
 --
 
-CREATE TABLE `sto_classes_teacher` (
-   `class_id` bigint(20) NOT NULL,
-   `teacher` bigint(20) NOT NULL,
-   `year` year(4) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_classes_teacher`
+(
+    `class_id` bigint(20) NOT NULL,
+    `teacher`  bigint(20) NOT NULL,
+    `year`     year(4)    NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -64,20 +70,22 @@ CREATE TABLE `sto_classes_teacher` (
 -- Table structure for table `sto_exam`
 --
 
-CREATE TABLE `sto_exam` (
-    `id` bigint(20) NOT NULL,
-    `task_code` varchar(255) NOT NULL,
-    `exam_status` varchar(128) NOT NULL DEFAULT 'pending',
-    `revisions` int(11) NOT NULL DEFAULT 0,
-    `exam_code` varchar(255) NOT NULL,
-    `invigilator` bigint(20) DEFAULT NULL,
-    `exam_date` date DEFAULT NULL,
-    `exam_time_start` time DEFAULT NULL,
-    `exam_time_end` time DEFAULT NULL,
-    `created_by` bigint(20) DEFAULT NULL,
-    `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-    `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_exam`
+(
+    `id`              bigint(20)   NOT NULL,
+    `task_code`       varchar(255) NOT NULL,
+    `exam_status`     varchar(128) NOT NULL DEFAULT 'pending',
+    `revisions`       int(11)      NOT NULL DEFAULT 0,
+    `exam_code`       varchar(255) NOT NULL,
+    `invigilator`     bigint(20)            DEFAULT NULL,
+    `exam_date`       date                  DEFAULT NULL,
+    `exam_time_start` time                  DEFAULT NULL,
+    `exam_time_end`   time                  DEFAULT NULL,
+    `created_by`      bigint(20)            DEFAULT NULL,
+    `created_at`      datetime     NOT NULL DEFAULT current_timestamp(),
+    `updated_at`      datetime     NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -85,10 +93,12 @@ CREATE TABLE `sto_exam` (
 -- Table structure for table `sto_exam_classes_id`
 --
 
-CREATE TABLE `sto_exam_classes_id` (
-   `exam_id` bigint(20) NOT NULL,
-   `class_id` bigint(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_exam_classes_id`
+(
+    `exam_id`  bigint(20) NOT NULL,
+    `class_id` bigint(20) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -96,10 +106,12 @@ CREATE TABLE `sto_exam_classes_id` (
 -- Table structure for table `sto_exam_room_id`
 --
 
-CREATE TABLE `sto_exam_room_id` (
+CREATE TABLE `sto_exam_room_id`
+(
     `exam_id` bigint(20) NOT NULL,
     `room_id` bigint(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -107,10 +119,12 @@ CREATE TABLE `sto_exam_room_id` (
 -- Table structure for table `sto_exam_student_assign`
 --
 
-CREATE TABLE `sto_exam_student_assign` (
-   `exam_id` bigint(20) NOT NULL,
-   `student_id` bigint(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_exam_student_assign`
+(
+    `exam_id`    bigint(20) NOT NULL,
+    `student_id` bigint(20) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -118,12 +132,14 @@ CREATE TABLE `sto_exam_student_assign` (
 -- Table structure for table `sto_options`
 --
 
-CREATE TABLE `sto_options` (
-   `id` bigint(10) NOT NULL,
-   `site_id` bigint(20) NOT NULL DEFAULT 1,
-   `option_name` varchar(255) NOT NULL,
-   `option_value` longtext DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_options`
+(
+    `id`           bigint(10)   NOT NULL,
+    `site_id`      bigint(20)   NOT NULL DEFAULT 1,
+    `option_name`  varchar(255) NOT NULL,
+    `option_value` longtext              DEFAULT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -131,20 +147,22 @@ CREATE TABLE `sto_options` (
 -- Table structure for table `sto_post`
 --
 
-CREATE TABLE `sto_post` (
-    `id` bigint(20) NOT NULL,
-    `site_id` bigint(20) DEFAULT 1,
-    `title` varchar(255) NOT NULL DEFAULT '',
-    `slug` varchar(255) NOT NULL,
-    `author` bigint(20) DEFAULT NULL,
-    `type` varchar(60) DEFAULT 'post',
+CREATE TABLE `sto_post`
+(
+    `id`         bigint(20)   NOT NULL,
+    `site_id`    bigint(20)            DEFAULT 1,
+    `title`      varchar(255) NOT NULL DEFAULT '',
+    `slug`       varchar(255) NOT NULL,
+    `author`     bigint(20)            DEFAULT NULL,
+    `type`       varchar(60)           DEFAULT 'post',
     `visibility` varchar(128) NOT NULL DEFAULT 'public',
-    `status` varchar(60) NOT NULL DEFAULT 'draft' COMMENT 'draft, published, trash, pending',
-    `parent_id` bigint(20) DEFAULT NULL,
-    `content` longtext NOT NULL DEFAULT '',
-    `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-    `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `status`     varchar(60)  NOT NULL DEFAULT 'draft' COMMENT 'draft, published, trash, pending',
+    `parent_id`  bigint(20)            DEFAULT NULL,
+    `content`    longtext     NOT NULL DEFAULT '',
+    `created_at` datetime     NOT NULL DEFAULT current_timestamp(),
+    `updated_at` datetime     NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -152,19 +170,21 @@ CREATE TABLE `sto_post` (
 -- Table structure for table `sto_question`
 --
 
-CREATE TABLE `sto_question` (
-    `id` bigint(20) NOT NULL,
-    `task_code` varchar(255) NOT NULL,
-    `status` enum('published','draft','pending','deleted','hidden') NOT NULL,
-    `question` text NOT NULL,
-    `question_note` text DEFAULT NULL,
-    `question_type` enum('choice','essay') NOT NULL,
-    `answer_alpha` char(1) DEFAULT NULL,
-    `score_default` int(10) NOT NULL DEFAULT 10,
-    `created_by` bigint(20) DEFAULT NULL,
-    `created_at` datetime NOT NULL,
-    `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_question`
+(
+    `id`            bigint(20)                                              NOT NULL,
+    `task_code`     varchar(255)                                            NOT NULL,
+    `status`        enum ('published','draft','pending','deleted','hidden') NOT NULL,
+    `question`      text                                                    NOT NULL,
+    `question_note` text                                                             DEFAULT NULL,
+    `question_type` enum ('choice','essay')                                 NOT NULL,
+    `answer_alpha`  char(1)                                                          DEFAULT NULL,
+    `score_default` int(10)                                                 NOT NULL DEFAULT 10,
+    `created_by`    bigint(20)                                                       DEFAULT NULL,
+    `created_at`    datetime                                                NOT NULL,
+    `updated_at`    datetime                                                NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -172,11 +192,13 @@ CREATE TABLE `sto_question` (
 -- Table structure for table `sto_question_choice`
 --
 
-CREATE TABLE `sto_question_choice` (
-    `alpha` char(1) NOT NULL,
+CREATE TABLE `sto_question_choice`
+(
+    `alpha`       char(1)    NOT NULL,
     `question_id` bigint(20) NOT NULL,
-    `description` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `description` text       NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -184,16 +206,18 @@ CREATE TABLE `sto_question_choice` (
 -- Table structure for table `sto_question_task`
 --
 
-CREATE TABLE `sto_question_task` (
-    `site_id` bigint(20) DEFAULT 1,
-    `code` varchar(255) NOT NULL,
-    `name` varchar(255) NOT NULL,
-    `subject_code` varchar(60) NOT NULL,
-    `note` longtext DEFAULT NULL,
-    `created_by` bigint(20) NOT NULL,
-    `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-`updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_question_task`
+(
+    `site_id`      bigint(20)            DEFAULT 1,
+    `code`         varchar(255) NOT NULL,
+    `name`         varchar(255) NOT NULL,
+    `subject_code` varchar(60)  NOT NULL,
+    `note`         longtext              DEFAULT NULL,
+    `created_by`   bigint(20)   NOT NULL,
+    `created_at`   datetime     NOT NULL DEFAULT current_timestamp(),
+    `updated_at`   datetime     NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -201,24 +225,26 @@ CREATE TABLE `sto_question_task` (
 -- Table structure for table `sto_religion`
 --
 
-CREATE TABLE `sto_religion` (
+CREATE TABLE `sto_religion`
+(
     `site_id` bigint(20) DEFAULT 1,
-    `code` varchar(5) NOT NULL,
-    `name` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `code`    varchar(5)   NOT NULL,
+    `name`    varchar(255) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 --
 -- Dumping data for table `sto_religion`
 --
 
-INSERT INTO `sto_religion` (`site_id`, `code`, `name`) VALUES
-(1, 'BEL', 'Believers'),
-(1, 'BUD', 'Buddha'),
-(1, 'CAT', 'Catholic'),
-(1, 'CON', 'Confucianism'),
-(1, 'HIN', 'Hindu'),
-(1, 'ISL', 'Islam'),
-(1, 'PRO', 'Protestant');
+INSERT INTO `sto_religion` (`site_id`, `code`, `name`)
+VALUES (1, 'BEL', 'Believers'),
+       (1, 'BUD', 'Buddha'),
+       (1, 'CAT', 'Catholic'),
+       (1, 'CON', 'Confucianism'),
+       (1, 'HIN', 'Hindu'),
+       (1, 'ISL', 'Islam'),
+       (1, 'PRO', 'Protestant');
 
 -- --------------------------------------------------------
 
@@ -226,13 +252,15 @@ INSERT INTO `sto_religion` (`site_id`, `code`, `name`) VALUES
 -- Table structure for table `sto_room`
 --
 
-CREATE TABLE `sto_room` (
-    `id` bigint(20) NOT NULL,
+CREATE TABLE `sto_room`
+(
+    `id`      bigint(20)   NOT NULL,
     `site_id` bigint(20) DEFAULT NULL,
-    `code` varchar(128) NOT NULL,
-    `name` varchar(255) NOT NULL,
-    `note` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `code`    varchar(128) NOT NULL,
+    `name`    varchar(255) NOT NULL,
+    `note`    text       DEFAULT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -240,32 +268,37 @@ CREATE TABLE `sto_room` (
 -- Table structure for table `sto_sites`
 --
 
-CREATE TABLE `sto_sites` (
-    `id` bigint(20) NOT NULL,
-    `name` varchar(255) NOT NULL,
-    `host` varchar(255) DEFAULT NULL,
-    `additional_host` varchar(255) DEFAULT NULL,
-    `token` varchar(255) DEFAULT NULL,
-    `status` varchar(60) DEFAULT 'active' COMMENT 'active, delete, banned, pending',
-    `metadata` longtext DEFAULT NULL,
-    `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-    `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_sites`
+(
+    `id`              bigint(20)   NOT NULL,
+    `name`            varchar(255) NOT NULL,
+    `host`            varchar(255)          DEFAULT NULL,
+    `additional_host` varchar(255)          DEFAULT NULL,
+    `token`           varchar(255)          DEFAULT NULL,
+    `status`          varchar(60)           DEFAULT 'active' COMMENT 'active, delete, banned, pending',
+    `metadata`        longtext              DEFAULT NULL,
+    `created_at`      datetime     NOT NULL DEFAULT current_timestamp(),
+    `updated_at`      datetime     NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 
 --
 -- Dumping data for table `sto_sites`
 --
-INSERT INTO `sto_sites` (`id`, `name`, `host`, `additional_host`, `token`, `status`, `metadata`) VALUES
-(1, 'Default System Wide', NULL, NULL, NULL, 'active', NULL);
+INSERT INTO `sto_sites` (`id`, `name`, `host`, `additional_host`, `token`, `status`, `metadata`)
+VALUES (1, 'Default System Wide', NULL, NULL, NULL, 'active', NULL);
 
 --
 -- Triggers `sto_sites`
 --
 DELIMITER $$
-CREATE TRIGGER `PREVENT_DELETE_DEFAULT_SITE` BEFORE DELETE ON `sto_sites` FOR EACH ROW BEGIN
-    IF old.id = 1
-    THEN
+CREATE TRIGGER `PREVENT_DELETE_DEFAULT_SITE`
+    BEFORE DELETE
+    ON `sto_sites`
+    FOR EACH ROW
+BEGIN
+    IF old.id = 1 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Could not delete default site record with id = 1';
     END IF;
 END
@@ -273,20 +306,17 @@ $$
 DELIMITER ;
 
 DELIMITER $$
-CREATE TRIGGER `PREVENT_UPDATE_STATUS_DEFAULT_SITE` BEFORE UPDATE ON `sto_sites` FOR EACH ROW BEGIN
+CREATE TRIGGER `PREVENT_UPDATE_STATUS_DEFAULT_SITE`
+    BEFORE UPDATE
+    ON `sto_sites`
+    FOR EACH ROW
+BEGIN
     IF (old.id = 1) THEN
-        IF (new.id != 1)
-        THEN
+        IF (new.id != 1) THEN
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Could not update default site id record with id = 1';
         END IF;
-        IF (new.status != 'active') OR (new.status IS NULL)
-        THEN
-            SET new.status = 'active';
-        END IF;
-        IF (TRIM(new.name) = '') OR (new.name IS NULL)
-        THEN
-            SET new.name = 'Default System Wide';
-        END IF;
+        IF (new.status != 'active') OR (new.status IS NULL) THEN SET new.status = 'active'; END IF;
+        IF (TRIM(new.name) = '') OR (new.name IS NULL) THEN SET new.name = 'Default System Wide'; END IF;
     END IF;
 END
 $$
@@ -298,23 +328,25 @@ DELIMITER ;
 -- Table structure for table `sto_student`
 --
 
-CREATE TABLE `sto_student` (
-    `id` bigint(20) NOT NULL,
-    `site_id` bigint(20) DEFAULT 1,
-    `username` varchar(255) NOT NULL,
-    `email` varchar(255) NOT NULL,
-    `password` varchar(255) NOT NULL COMMENT 'password_hash(\r\n    sha1(string $plain_text)\r\n)',
-    `dissalow_admin` tinyint(1) NOT NULL DEFAULT 0,
-    `generation` year(4) DEFAULT NULL,
-    `registration_date` date DEFAULT NULL,
-    `full_name` varchar(255) NOT NULL,
-    `gender` enum('M','F') NOT NULL,
-    `status` varchar(255) DEFAULT 'active' COMMENT 'active, delete, banned, pending',
-    `religion` varchar(5) DEFAULT NULL,
-    `avatar` varchar(255) DEFAULT NULL COMMENT 'User Avatar',
-    `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-    `updated_at` datetime DEFAULT '0000-00-00 00:00:00'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_student`
+(
+    `id`                bigint(20)     NOT NULL,
+    `site_id`           bigint(20)              DEFAULT 1,
+    `username`          varchar(255)   NOT NULL,
+    `email`             varchar(255)   NOT NULL,
+    `password`          varchar(255)   NOT NULL COMMENT 'password_hash(\r\n    sha1(string $plain_text)\r\n)',
+    `dissalow_admin`    tinyint(1)     NOT NULL DEFAULT 0,
+    `generation`        year(4)                 DEFAULT NULL,
+    `registration_date` date                    DEFAULT NULL,
+    `full_name`         varchar(255)   NOT NULL,
+    `gender`            enum ('M','F') NOT NULL,
+    `status`            varchar(255)            DEFAULT 'active' COMMENT 'active, delete, banned, pending',
+    `religion`          varchar(5)              DEFAULT NULL,
+    `avatar`            varchar(255)            DEFAULT NULL COMMENT 'User Avatar',
+    `created_at`        datetime       NOT NULL DEFAULT current_timestamp(),
+    `updated_at`        datetime                DEFAULT '0000-00-00 00:00:00'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -322,15 +354,17 @@ CREATE TABLE `sto_student` (
 -- Table structure for table `sto_student_answer`
 --
 
-CREATE TABLE `sto_student_answer` (
-    `id` bigint(20) NOT NULL,
-    `student_id` bigint(20) NOT NULL,
-    `question_id` bigint(20) NOT NULL,
+CREATE TABLE `sto_student_answer`
+(
+    `id`              bigint(20) NOT NULL,
+    `student_id`      bigint(20) NOT NULL,
+    `question_id`     bigint(20) NOT NULL,
     `student_exam_id` bigint(20) NOT NULL,
-    `answer_alpha` char(1) DEFAULT NULL,
-    `answer_essay` longtext DEFAULT NULL,
-    `score` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `answer_alpha`    char(1)  DEFAULT NULL,
+    `answer_essay`    longtext DEFAULT NULL,
+    `score`           int(10)    NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -338,17 +372,19 @@ CREATE TABLE `sto_student_answer` (
 -- Table structure for table `sto_student_exam`
 --
 
-CREATE TABLE `sto_student_exam` (
-    `id` bigint(20) NOT NULL,
-    `exam_id` bigint(20) NOT NULL COMMENT 'This Must Be as `exam.id` but does not have relations for history record',
-    `score` varchar(10) DEFAULT NULL COMMENT 'For Score Of Task & Test',
-    `evaluator` bigint(20) DEFAULT NULL,
-    `note` text DEFAULT NULL,
-    `started_at` datetime DEFAULT NULL,
-    `finished_at` datetime DEFAULT NULL,
-    `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-    `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_student_exam`
+(
+    `id`          bigint(20) NOT NULL,
+    `exam_id`     bigint(20) NOT NULL COMMENT 'This Must Be as `exam.id` but does not have relations for history record',
+    `score`       varchar(10)         DEFAULT NULL COMMENT 'For Score Of Task & Test',
+    `evaluator`   bigint(20)          DEFAULT NULL,
+    `note`        text                DEFAULT NULL,
+    `started_at`  datetime            DEFAULT NULL,
+    `finished_at` datetime            DEFAULT NULL,
+    `created_at`  datetime   NOT NULL DEFAULT current_timestamp(),
+    `updated_at`  datetime   NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -356,13 +392,15 @@ CREATE TABLE `sto_student_exam` (
 -- Table structure for table `sto_student_logs`
 --
 
-CREATE TABLE `sto_student_logs` (
-    `id` bigint(20) NOT NULL,
-    `student_id` bigint(10) DEFAULT NULL,
-    `type` varchar(255) NOT NULL COMMENT 'log type: login, logout, change_password, etc..',
-    `note` text DEFAULT NULL,
-    `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_student_logs`
+(
+    `id`         bigint(20)   NOT NULL,
+    `student_id` bigint(10)            DEFAULT NULL,
+    `type`       varchar(255) NOT NULL COMMENT 'log type: login, logout, change_password, etc..',
+    `note`       text                  DEFAULT NULL,
+    `created_at` datetime     NOT NULL DEFAULT current_timestamp()
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -370,12 +408,14 @@ CREATE TABLE `sto_student_logs` (
 -- Table structure for table `sto_student_meta`
 --
 
-CREATE TABLE `sto_student_meta` (
-    `meta_id` bigint(20) NOT NULL,
-    `student_id` bigint(10) NOT NULL,
-    `meta_name` varchar(255) NOT NULL,
+CREATE TABLE `sto_student_meta`
+(
+    `meta_id`    bigint(20)   NOT NULL,
+    `student_id` bigint(10)   NOT NULL,
+    `meta_name`  varchar(255) NOT NULL,
     `meta_value` longtext DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -383,12 +423,14 @@ CREATE TABLE `sto_student_meta` (
 -- Table structure for table `sto_student_online`
 --
 
-CREATE TABLE `sto_student_online` (
-    `id` bigint(10) NOT NULL DEFAULT 0 COMMENT 'student.id',
-    `online` tinyint(1) DEFAULT NULL,
-    `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-    `last_online_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_student_online`
+(
+    `id`             bigint(10) NOT NULL DEFAULT 0 COMMENT 'student.id',
+    `online`         tinyint(1)          DEFAULT NULL,
+    `created_at`     datetime   NOT NULL DEFAULT current_timestamp(),
+    `last_online_at` datetime   NOT NULL DEFAULT current_timestamp()
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -396,12 +438,14 @@ CREATE TABLE `sto_student_online` (
 -- Table structure for table `sto_subject`
 --
 
-CREATE TABLE `sto_subject` (
+CREATE TABLE `sto_subject`
+(
     `site_id` bigint(20) DEFAULT 1,
-    `code` varchar(60) NOT NULL,
-    `name` varchar(255) NOT NULL,
-    `note` longtext DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `code`    varchar(60)  NOT NULL,
+    `name`    varchar(255) NOT NULL,
+    `note`    longtext   DEFAULT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -409,24 +453,26 @@ CREATE TABLE `sto_subject` (
 -- Table structure for table `sto_supervisor`
 --
 
-CREATE TABLE `sto_supervisor` (
-    `id` bigint(20) NOT NULL,
-    `site_id` bigint(20) DEFAULT 1,
-    `username` varchar(255) NOT NULL,
-    `email` varchar(255) NOT NULL,
-    `password` varchar(255) NOT NULL,
-    `position_code` varchar(40) NOT NULL,
-    `disallow_admin` tinyint(1) NOT NULL DEFAULT 0,
-    `join_date` date DEFAULT NULL,
-    `full_name` varchar(255) NOT NULL,
-    `gender` enum('M','F') NOT NULL,
-    `role` varchar(255) DEFAULT NULL COMMENT 'superadmin, admin, teacher, invigilator, contributor, editor',
-    `status` varchar(255) NOT NULL DEFAULT 'active' COMMENT 'active, deleted, banned, pending',
-    `religion` varchar(5) DEFAULT NULL,
-    `avatar` varchar(255) DEFAULT NULL COMMENT 'User Avatar',
-    `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-    `updated_at` datetime DEFAULT '0000-00-00 00:00:00'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_supervisor`
+(
+    `id`             bigint(20)     NOT NULL,
+    `site_id`        bigint(20)              DEFAULT 1,
+    `username`       varchar(255)   NOT NULL,
+    `email`          varchar(255)   NOT NULL,
+    `password`       varchar(255)   NOT NULL,
+    `position_code`  varchar(40)    NOT NULL,
+    `disallow_admin` tinyint(1)     NOT NULL DEFAULT 0,
+    `join_date`      date                    DEFAULT NULL,
+    `full_name`      varchar(255)   NOT NULL,
+    `gender`         enum ('M','F') NOT NULL,
+    `role`           varchar(255)            DEFAULT NULL COMMENT 'superadmin, admin, teacher, invigilator, contributor, editor',
+    `status`         varchar(255)   NOT NULL DEFAULT 'active' COMMENT 'active, deleted, banned, pending',
+    `religion`       varchar(5)              DEFAULT NULL,
+    `avatar`         varchar(255)            DEFAULT NULL COMMENT 'User Avatar',
+    `created_at`     datetime       NOT NULL DEFAULT current_timestamp(),
+    `updated_at`     datetime                DEFAULT '0000-00-00 00:00:00'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -434,13 +480,15 @@ CREATE TABLE `sto_supervisor` (
 -- Table structure for table `sto_supervisor_logs`
 --
 
-CREATE TABLE `sto_supervisor_logs` (
-    `id` bigint(20) NOT NULL,
-    `supervisor_id` bigint(20) NOT NULL,
-    `type` varchar(255) NOT NULL COMMENT 'log type: login, logout, change_password, etc..',
-    `note` text DEFAULT NULL,
-    `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_supervisor_logs`
+(
+    `id`            bigint(20)   NOT NULL,
+    `supervisor_id` bigint(20)   NOT NULL,
+    `type`          varchar(255) NOT NULL COMMENT 'log type: login, logout, change_password, etc..',
+    `note`          text                  DEFAULT NULL,
+    `created_at`    datetime     NOT NULL DEFAULT current_timestamp()
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -448,12 +496,14 @@ CREATE TABLE `sto_supervisor_logs` (
 -- Table structure for table `sto_supervisor_meta`
 --
 
-CREATE TABLE `sto_supervisor_meta` (
-    `meta_id` bigint(20) NOT NULL,
-    `supervisor_id` bigint(10) NOT NULL,
-    `meta_name` varchar(255) NOT NULL,
-    `meta_value` longtext DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_supervisor_meta`
+(
+    `meta_id`       bigint(20)   NOT NULL,
+    `supervisor_id` bigint(10)   NOT NULL,
+    `meta_name`     varchar(255) NOT NULL,
+    `meta_value`    longtext DEFAULT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -461,12 +511,14 @@ CREATE TABLE `sto_supervisor_meta` (
 -- Table structure for table `sto_supervisor_online`
 --
 
-CREATE TABLE `sto_supervisor_online` (
-    `id` bigint(10) NOT NULL DEFAULT 0 COMMENT 'supervisor.id',
-    `online` tinyint(1) DEFAULT NULL,
-    `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-    `last_online_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_supervisor_online`
+(
+    `id`             bigint(10) NOT NULL DEFAULT 0 COMMENT 'supervisor.id',
+    `online`         tinyint(1)          DEFAULT NULL,
+    `created_at`     datetime   NOT NULL DEFAULT current_timestamp(),
+    `last_online_at` datetime   NOT NULL DEFAULT current_timestamp()
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -474,12 +526,14 @@ CREATE TABLE `sto_supervisor_online` (
 -- Table structure for table `sto_supervisor_position`
 --
 
-CREATE TABLE `sto_supervisor_position` (
+CREATE TABLE `sto_supervisor_position`
+(
     `site_id` bigint(20) DEFAULT 1,
-    `code` varchar(40) NOT NULL,
-    `name` varchar(255) NOT NULL,
-    `note` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `code`    varchar(40)  NOT NULL,
+    `name`    varchar(255) NOT NULL,
+    `note`    text       DEFAULT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -487,13 +541,15 @@ CREATE TABLE `sto_supervisor_position` (
 -- Table structure for table `sto_translations`
 --
 
-CREATE TABLE `sto_translations` (
+CREATE TABLE `sto_translations`
+(
     `dictionary_code` varchar(128) NOT NULL,
-    `iso_3` varchar(3) NOT NULL,
-    `translation` text NOT NULL,
-    `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-    `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `iso_3`           varchar(3)   NOT NULL,
+    `translation`     text         NOT NULL,
+    `created_at`      datetime     NOT NULL DEFAULT current_timestamp(),
+    `updated_at`      datetime     NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -501,10 +557,12 @@ CREATE TABLE `sto_translations` (
 -- Table structure for table `sto_translations_dictionary`
 --
 
-CREATE TABLE `sto_translations_dictionary` (
-    `code` varchar(128) NOT NULL,
-    `translate` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `sto_translations_dictionary`
+(
+    `code`      varchar(128) NOT NULL,
+    `translate` text         NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -512,201 +570,203 @@ CREATE TABLE `sto_translations_dictionary` (
 -- Table structure for table `sto_translations_language`
 --
 
-CREATE TABLE `sto_translations_language` (
-    `iso_3` varchar(3) NOT NULL,
-    `iso_2` varchar(2) NOT NULL,
+CREATE TABLE `sto_translations_language`
+(
+    `iso_3`         varchar(3)   NOT NULL,
+    `iso_2`         varchar(2)   NOT NULL,
     `language_name` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 --
 -- Dumping data for table `sto_translations_language`
 --
 
-INSERT INTO `sto_translations_language` (`iso_3`, `iso_2`, `language_name`) VALUES
-('abk', 'ab', 'Abkhazian'),
-('aar', 'aa', 'Afar'),
-('afr', 'af', 'Afrikaans'),
-('aka', 'ak', 'Akan'),
-('alb', 'sq', 'Albanian'),
-('amh', 'am', 'Amharic'),
-('ara', 'ar', 'Arabic'),
-('arg', 'an', 'Aragonese'),
-('arm', 'hy', 'Armenian'),
-('asm', 'as', 'Assamese'),
-('ava', 'av', 'Avaric'),
-('ave', 'ae', 'Avestan'),
-('aym', 'ay', 'Aymara'),
-('aze', 'az', 'Azerbaijani'),
-('bam', 'bm', 'Bambara'),
-('bak', 'ba', 'Bashkir'),
-('baq', 'eu', 'Basque'),
-('bel', 'be', 'Belarusian'),
-('ben', 'bn', 'Bengali'),
-('bih', 'bh', 'Bihari'),
-('bis', 'bi', 'Bislama'),
-('bos', 'bs', 'Bosnian'),
-('bre', 'br', 'Breton'),
-('bul', 'bg', 'Bulgarian'),
-('bur', 'my', 'Burmese'),
-('cat', 'ca', 'Catalan'),
-('khm', 'km', 'Central Khmer'),
-('cha', 'ch', 'Chamorro'),
-('che', 'ce', 'Chechen'),
-('nya', 'ny', 'Chichewa'),
-('chi', 'zh', 'Chinese'),
-('chu', 'cu', 'Church Slavic'),
-('chv', 'cv', 'Chuvash'),
-('cor', 'kw', 'Cornish'),
-('cos', 'co', 'Corsican'),
-('cre', 'cr', 'Cree'),
-('hrv', 'hr', 'Croatian'),
-('cze', 'cs', 'Czech'),
-('dan', 'da', 'Danish'),
-('dut', 'nl', 'Dutch'),
-('dzo', 'dz', 'Dzongkha'),
-('eng', 'en', 'English'),
-('epo', 'eo', 'Esperanto'),
-('est', 'et', 'Estonian'),
-('ewe', 'ee', 'Ewe'),
-('fao', 'fo', 'Faroese'),
-('fij', 'fj', 'Fijian'),
-('fin', 'fi', 'Finnish'),
-('fre', 'fr', 'French'),
-('ful', 'ff', 'Fulah'),
-('gla', 'gd', 'Gaelic'),
-('glg', 'gl', 'Galician'),
-('lug', 'lg', 'Ganda'),
-('geo', 'ka', 'Georgian'),
-('ger', 'de', 'German'),
-('gre', 'el', 'Greek'),
-('grn', 'gn', 'Guarani'),
-('guj', 'gu', 'Gujarati'),
-('hat', 'ht', 'Haitian'),
-('hau', 'ha', 'Hausa'),
-('heb', 'he', 'Hebrew'),
-('her', 'hz', 'Herero'),
-('hin', 'hi', 'Hindi'),
-('hmo', 'ho', 'Hiri Motu'),
-('hun', 'hu', 'Hungarian'),
-('ice', 'is', 'Icelandic'),
-('ido', 'io', 'Ido'),
-('ibo', 'ig', 'Igbo'),
-('ind', 'id', 'Indonesian'),
-('ina', 'ia', 'Interlingua (International Auxiliary Language Association)'),
-('ile', 'ie', 'Interlingue'),
-('iku', 'iu', 'Inuktitut'),
-('ipk', 'ik', 'Inupiaq'),
-('gle', 'ga', 'Irish'),
-('ita', 'it', 'Italian'),
-('jpn', 'ja', 'Japanese'),
-('jav', 'jv', 'Javanese'),
-('kal', 'kl', 'Kalaallisut'),
-('kan', 'kn', 'Kannada'),
-('kau', 'kr', 'Kanuri'),
-('kas', 'ks', 'Kashmiri'),
-('kaz', 'kk', 'Kazakh'),
-('kik', 'ki', 'Kikuyu'),
-('kin', 'rw', 'Kinyarwanda'),
-('kir', 'ky', 'Kirghiz'),
-('kom', 'kv', 'Komi'),
-('kon', 'kg', 'Kongo'),
-('kor', 'ko', 'Korean'),
-('kua', 'kj', 'Kuanyama'),
-('kur', 'ku', 'Kurdish'),
-('lao', 'lo', 'Lao'),
-('lat', 'la', 'Latin'),
-('lav', 'lv', 'Latvian'),
-('lim', 'li', 'Limburgan'),
-('lin', 'ln', 'Lingala'),
-('lit', 'lt', 'Lithuanian'),
-('lub', 'lu', 'Luba-Katanga'),
-('ltz', 'lb', 'Luxembourgish'),
-('mac', 'mk', 'Macedonian'),
-('mlg', 'mg', 'Malagasy'),
-('may', 'ms', 'Malay'),
-('mal', 'ml', 'Malayalam'),
-('div', 'dv', 'Maldivian'),
-('mlt', 'mt', 'Maltese'),
-('glv', 'gv', 'Manx'),
-('mao', 'mi', 'Maori'),
-('mar', 'mr', 'Marathi'),
-('mah', 'mh', 'Marshallese'),
-('mon', 'mn', 'Mongolian'),
-('nau', 'na', 'Nauru'),
-('nav', 'nv', 'Navajo'),
-('ndo', 'ng', 'Ndonga'),
-('nep', 'ne', 'Nepali'),
-('nde', 'nd', 'North Ndebele'),
-('sme', 'se', 'Northern Sami'),
-('nor', 'no', 'Norwegian'),
-('nob', 'nb', 'Norwegian Bokmål'),
-('nno', 'nn', 'Norwegian Nynorsk'),
-('iii', 'ii', 'Nuosu'),
-('oci', 'oc', 'Occitan'),
-('oji', 'oj', 'Ojibwa'),
-('ori', 'or', 'Oriya'),
-('orm', 'om', 'Oromo'),
-('oss', 'os', 'Ossetic'),
-('pli', 'pi', 'Pali'),
-('pus', 'ps', 'Pashto'),
-('per', 'fa', 'Persian'),
-('pol', 'pl', 'Polish'),
-('por', 'pt', 'Portuguese'),
-('pan', 'pa', 'Punjabi'),
-('que', 'qu', 'Quechua'),
-('rum', 'ro', 'Romanian'),
-('roh', 'rm', 'Romansh'),
-('run', 'rn', 'Rundi'),
-('rus', 'ru', 'Russian'),
-('smo', 'sm', 'Samoan'),
-('sag', 'sg', 'Sango'),
-('san', 'sa', 'Sanskrit'),
-('srd', 'sc', 'Sardinian'),
-('srp', 'sr', 'Serbian'),
-('sna', 'sn', 'Shona'),
-('snd', 'sd', 'Sindhi'),
-('sin', 'si', 'Sinhala'),
-('slo', 'sk', 'Slovak'),
-('slv', 'sl', 'Slovenian'),
-('som', 'so', 'Somali'),
-('sot', 'st', 'Sotho'),
-('nbl', 'nr', 'South Ndebele'),
-('spa', 'es', 'Spanish'),
-('sun', 'su', 'Sundanese'),
-('swa', 'sw', 'Swahili'),
-('ssw', 'ss', 'Swati'),
-('swe', 'sv', 'Swedish'),
-('tgl', 'tl', 'Tagalog'),
-('tah', 'ty', 'Tahitian'),
-('tgk', 'tg', 'Tajik'),
-('tam', 'ta', 'Tamil'),
-('tat', 'tt', 'Tatar'),
-('tel', 'te', 'Telugu'),
-('tha', 'th', 'Thai'),
-('tib', 'bo', 'Tibetan'),
-('tir', 'ti', 'Tigrinya'),
-('ton', 'to', 'Tonga (Tonga Islands)'),
-('tso', 'ts', 'Tsonga'),
-('tsn', 'tn', 'Tswana'),
-('tur', 'tr', 'Turkish'),
-('tuk', 'tk', 'Turkmen'),
-('twi', 'tw', 'Twi'),
-('uig', 'ug', 'Uighur'),
-('ukr', 'uk', 'Ukrainian'),
-('urd', 'ur', 'Urdu'),
-('uzb', 'uz', 'Uzbek'),
-('ven', 've', 'Venda'),
-('vie', 'vi', 'Vietnamese'),
-('vol', 'vo', 'Volapük'),
-('wln', 'wa', 'Walloon'),
-('wel', 'cy', 'Welsh'),
-('fry', 'fy', 'Western Frisian'),
-('wol', 'wo', 'Wolof'),
-('xho', 'xh', 'Xhosa'),
-('yid', 'yi', 'Yiddish'),
-('yor', 'yo', 'Yoruba'),
-('zha', 'za', 'Zhuang'),
-('zul', 'zu', 'Zulu');
+INSERT INTO `sto_translations_language` (`iso_3`, `iso_2`, `language_name`)
+VALUES ('abk', 'ab', 'Abkhazian'),
+       ('aar', 'aa', 'Afar'),
+       ('afr', 'af', 'Afrikaans'),
+       ('aka', 'ak', 'Akan'),
+       ('alb', 'sq', 'Albanian'),
+       ('amh', 'am', 'Amharic'),
+       ('ara', 'ar', 'Arabic'),
+       ('arg', 'an', 'Aragonese'),
+       ('arm', 'hy', 'Armenian'),
+       ('asm', 'as', 'Assamese'),
+       ('ava', 'av', 'Avaric'),
+       ('ave', 'ae', 'Avestan'),
+       ('aym', 'ay', 'Aymara'),
+       ('aze', 'az', 'Azerbaijani'),
+       ('bam', 'bm', 'Bambara'),
+       ('bak', 'ba', 'Bashkir'),
+       ('baq', 'eu', 'Basque'),
+       ('bel', 'be', 'Belarusian'),
+       ('ben', 'bn', 'Bengali'),
+       ('bih', 'bh', 'Bihari'),
+       ('bis', 'bi', 'Bislama'),
+       ('bos', 'bs', 'Bosnian'),
+       ('bre', 'br', 'Breton'),
+       ('bul', 'bg', 'Bulgarian'),
+       ('bur', 'my', 'Burmese'),
+       ('cat', 'ca', 'Catalan'),
+       ('khm', 'km', 'Central Khmer'),
+       ('cha', 'ch', 'Chamorro'),
+       ('che', 'ce', 'Chechen'),
+       ('nya', 'ny', 'Chichewa'),
+       ('chi', 'zh', 'Chinese'),
+       ('chu', 'cu', 'Church Slavic'),
+       ('chv', 'cv', 'Chuvash'),
+       ('cor', 'kw', 'Cornish'),
+       ('cos', 'co', 'Corsican'),
+       ('cre', 'cr', 'Cree'),
+       ('hrv', 'hr', 'Croatian'),
+       ('cze', 'cs', 'Czech'),
+       ('dan', 'da', 'Danish'),
+       ('dut', 'nl', 'Dutch'),
+       ('dzo', 'dz', 'Dzongkha'),
+       ('eng', 'en', 'English'),
+       ('epo', 'eo', 'Esperanto'),
+       ('est', 'et', 'Estonian'),
+       ('ewe', 'ee', 'Ewe'),
+       ('fao', 'fo', 'Faroese'),
+       ('fij', 'fj', 'Fijian'),
+       ('fin', 'fi', 'Finnish'),
+       ('fre', 'fr', 'French'),
+       ('ful', 'ff', 'Fulah'),
+       ('gla', 'gd', 'Gaelic'),
+       ('glg', 'gl', 'Galician'),
+       ('lug', 'lg', 'Ganda'),
+       ('geo', 'ka', 'Georgian'),
+       ('ger', 'de', 'German'),
+       ('gre', 'el', 'Greek'),
+       ('grn', 'gn', 'Guarani'),
+       ('guj', 'gu', 'Gujarati'),
+       ('hat', 'ht', 'Haitian'),
+       ('hau', 'ha', 'Hausa'),
+       ('heb', 'he', 'Hebrew'),
+       ('her', 'hz', 'Herero'),
+       ('hin', 'hi', 'Hindi'),
+       ('hmo', 'ho', 'Hiri Motu'),
+       ('hun', 'hu', 'Hungarian'),
+       ('ice', 'is', 'Icelandic'),
+       ('ido', 'io', 'Ido'),
+       ('ibo', 'ig', 'Igbo'),
+       ('ind', 'id', 'Indonesian'),
+       ('ina', 'ia', 'Interlingua (International Auxiliary Language Association)'),
+       ('ile', 'ie', 'Interlingue'),
+       ('iku', 'iu', 'Inuktitut'),
+       ('ipk', 'ik', 'Inupiaq'),
+       ('gle', 'ga', 'Irish'),
+       ('ita', 'it', 'Italian'),
+       ('jpn', 'ja', 'Japanese'),
+       ('jav', 'jv', 'Javanese'),
+       ('kal', 'kl', 'Kalaallisut'),
+       ('kan', 'kn', 'Kannada'),
+       ('kau', 'kr', 'Kanuri'),
+       ('kas', 'ks', 'Kashmiri'),
+       ('kaz', 'kk', 'Kazakh'),
+       ('kik', 'ki', 'Kikuyu'),
+       ('kin', 'rw', 'Kinyarwanda'),
+       ('kir', 'ky', 'Kirghiz'),
+       ('kom', 'kv', 'Komi'),
+       ('kon', 'kg', 'Kongo'),
+       ('kor', 'ko', 'Korean'),
+       ('kua', 'kj', 'Kuanyama'),
+       ('kur', 'ku', 'Kurdish'),
+       ('lao', 'lo', 'Lao'),
+       ('lat', 'la', 'Latin'),
+       ('lav', 'lv', 'Latvian'),
+       ('lim', 'li', 'Limburgan'),
+       ('lin', 'ln', 'Lingala'),
+       ('lit', 'lt', 'Lithuanian'),
+       ('lub', 'lu', 'Luba-Katanga'),
+       ('ltz', 'lb', 'Luxembourgish'),
+       ('mac', 'mk', 'Macedonian'),
+       ('mlg', 'mg', 'Malagasy'),
+       ('may', 'ms', 'Malay'),
+       ('mal', 'ml', 'Malayalam'),
+       ('div', 'dv', 'Maldivian'),
+       ('mlt', 'mt', 'Maltese'),
+       ('glv', 'gv', 'Manx'),
+       ('mao', 'mi', 'Maori'),
+       ('mar', 'mr', 'Marathi'),
+       ('mah', 'mh', 'Marshallese'),
+       ('mon', 'mn', 'Mongolian'),
+       ('nau', 'na', 'Nauru'),
+       ('nav', 'nv', 'Navajo'),
+       ('ndo', 'ng', 'Ndonga'),
+       ('nep', 'ne', 'Nepali'),
+       ('nde', 'nd', 'North Ndebele'),
+       ('sme', 'se', 'Northern Sami'),
+       ('nor', 'no', 'Norwegian'),
+       ('nob', 'nb', 'Norwegian Bokmål'),
+       ('nno', 'nn', 'Norwegian Nynorsk'),
+       ('iii', 'ii', 'Nuosu'),
+       ('oci', 'oc', 'Occitan'),
+       ('oji', 'oj', 'Ojibwa'),
+       ('ori', 'or', 'Oriya'),
+       ('orm', 'om', 'Oromo'),
+       ('oss', 'os', 'Ossetic'),
+       ('pli', 'pi', 'Pali'),
+       ('pus', 'ps', 'Pashto'),
+       ('per', 'fa', 'Persian'),
+       ('pol', 'pl', 'Polish'),
+       ('por', 'pt', 'Portuguese'),
+       ('pan', 'pa', 'Punjabi'),
+       ('que', 'qu', 'Quechua'),
+       ('rum', 'ro', 'Romanian'),
+       ('roh', 'rm', 'Romansh'),
+       ('run', 'rn', 'Rundi'),
+       ('rus', 'ru', 'Russian'),
+       ('smo', 'sm', 'Samoan'),
+       ('sag', 'sg', 'Sango'),
+       ('san', 'sa', 'Sanskrit'),
+       ('srd', 'sc', 'Sardinian'),
+       ('srp', 'sr', 'Serbian'),
+       ('sna', 'sn', 'Shona'),
+       ('snd', 'sd', 'Sindhi'),
+       ('sin', 'si', 'Sinhala'),
+       ('slo', 'sk', 'Slovak'),
+       ('slv', 'sl', 'Slovenian'),
+       ('som', 'so', 'Somali'),
+       ('sot', 'st', 'Sotho'),
+       ('nbl', 'nr', 'South Ndebele'),
+       ('spa', 'es', 'Spanish'),
+       ('sun', 'su', 'Sundanese'),
+       ('swa', 'sw', 'Swahili'),
+       ('ssw', 'ss', 'Swati'),
+       ('swe', 'sv', 'Swedish'),
+       ('tgl', 'tl', 'Tagalog'),
+       ('tah', 'ty', 'Tahitian'),
+       ('tgk', 'tg', 'Tajik'),
+       ('tam', 'ta', 'Tamil'),
+       ('tat', 'tt', 'Tatar'),
+       ('tel', 'te', 'Telugu'),
+       ('tha', 'th', 'Thai'),
+       ('tib', 'bo', 'Tibetan'),
+       ('tir', 'ti', 'Tigrinya'),
+       ('ton', 'to', 'Tonga (Tonga Islands)'),
+       ('tso', 'ts', 'Tsonga'),
+       ('tsn', 'tn', 'Tswana'),
+       ('tur', 'tr', 'Turkish'),
+       ('tuk', 'tk', 'Turkmen'),
+       ('twi', 'tw', 'Twi'),
+       ('uig', 'ug', 'Uighur'),
+       ('ukr', 'uk', 'Ukrainian'),
+       ('urd', 'ur', 'Urdu'),
+       ('uzb', 'uz', 'Uzbek'),
+       ('ven', 've', 'Venda'),
+       ('vie', 'vi', 'Vietnamese'),
+       ('vol', 'vo', 'Volapük'),
+       ('wln', 'wa', 'Walloon'),
+       ('wel', 'cy', 'Welsh'),
+       ('fry', 'fy', 'Western Frisian'),
+       ('wol', 'wo', 'Wolof'),
+       ('xho', 'xh', 'Xhosa'),
+       ('yid', 'yi', 'Yiddish'),
+       ('yor', 'yo', 'Yoruba'),
+       ('zha', 'za', 'Zhuang'),
+       ('zul', 'zu', 'Zulu');
 
 --
 -- Indexes for dumped tables
@@ -716,20 +776,20 @@ INSERT INTO `sto_translations_language` (`iso_3`, `iso_2`, `language_name`) VALU
 -- Indexes for table `sto_attachments`
 --
 ALTER TABLE `sto_attachments`
-    ADD PRIMARY KEY (`id`,`path`(255)),
+    ADD PRIMARY KEY (`id`, `path`(255)),
     ADD UNIQUE KEY `path_unique` (`path`) USING HASH,
     ADD KEY `name` (`name`),
     ADD KEY `created_by` (`created_by`),
     ADD KEY `attachment_to` (`attachment_to`),
     ADD KEY `attachment_to_id` (`attachment_to_id`),
-    ADD KEY `path` (`path`(255),`attachment_to`);
+    ADD KEY `path` (`path`(255), `attachment_to`);
 
 --
 -- Indexes for table `sto_classes`
 --
 ALTER TABLE `sto_classes`
-    ADD PRIMARY KEY (`id`,`code`) USING BTREE,
-    ADD UNIQUE KEY `code_site_id_unique` (`code`,`site_id`),
+    ADD PRIMARY KEY (`id`, `code`) USING BTREE,
+    ADD UNIQUE KEY `code_site_id_unique` (`code`, `site_id`),
     ADD KEY `name` (`name`),
     ADD KEY `site_id` (`site_id`);
 
@@ -738,7 +798,7 @@ ALTER TABLE `sto_classes`
 --
 ALTER TABLE `sto_classes_teacher`
     ADD PRIMARY KEY (`class_id`),
-    ADD UNIQUE KEY `class_id_year_unique` (`class_id`,`year`) USING BTREE,
+    ADD UNIQUE KEY `class_id_year_unique` (`class_id`, `year`) USING BTREE,
     ADD KEY `teacher` (`teacher`),
     ADD KEY `class_code` (`class_id`);
 
@@ -757,7 +817,7 @@ ALTER TABLE `sto_exam`
 -- Indexes for table `sto_exam_classes_id`
 --
 ALTER TABLE `sto_exam_classes_id`
-    ADD PRIMARY KEY (`exam_id`,`class_id`),
+    ADD PRIMARY KEY (`exam_id`, `class_id`),
     ADD KEY `exam_id` (`exam_id`),
     ADD KEY `class_id` (`class_id`) USING BTREE;
 
@@ -765,7 +825,7 @@ ALTER TABLE `sto_exam_classes_id`
 -- Indexes for table `sto_exam_room_id`
 --
 ALTER TABLE `sto_exam_room_id`
-    ADD PRIMARY KEY (`exam_id`,`room_id`),
+    ADD PRIMARY KEY (`exam_id`, `room_id`),
     ADD UNIQUE KEY `room_id` (`room_id`),
     ADD KEY `exam_id` (`exam_id`);
 
@@ -773,7 +833,7 @@ ALTER TABLE `sto_exam_room_id`
 -- Indexes for table `sto_exam_student_assign`
 --
 ALTER TABLE `sto_exam_student_assign`
-    ADD PRIMARY KEY (`exam_id`,`student_id`) USING BTREE,
+    ADD PRIMARY KEY (`exam_id`, `student_id`) USING BTREE,
     ADD UNIQUE KEY `student_id` (`student_id`),
     ADD KEY `exam_id` (`student_id`) USING BTREE;
 
@@ -781,9 +841,9 @@ ALTER TABLE `sto_exam_student_assign`
 -- Indexes for table `sto_options`
 --
 ALTER TABLE `sto_options`
-    ADD PRIMARY KEY (`id`,`site_id`) USING BTREE,
+    ADD PRIMARY KEY (`id`, `site_id`) USING BTREE,
     ADD UNIQUE KEY `option_name` (`option_name`),
-    ADD UNIQUE KEY `option_name_site_id` (`id`,`site_id`) USING BTREE,
+    ADD UNIQUE KEY `option_name_site_id` (`id`, `site_id`) USING BTREE,
     ADD KEY `sto_options_site_id` (`site_id`);
 
 --
@@ -791,7 +851,7 @@ ALTER TABLE `sto_options`
 --
 ALTER TABLE `sto_post`
     ADD PRIMARY KEY (`id`),
-    ADD UNIQUE KEY `slug` (`slug`,`site_id`) USING BTREE,
+    ADD UNIQUE KEY `slug` (`slug`, `site_id`) USING BTREE,
     ADD KEY `title` (`title`),
     ADD KEY `author` (`author`),
     ADD KEY `type` (`type`),
@@ -810,13 +870,13 @@ ALTER TABLE `sto_question`
     ADD KEY `answer_alpha` (`answer_alpha`),
     ADD KEY `question_type` (`question_type`),
     ADD KEY `status` (`status`),
-    ADD KEY `question_type_status` (`question_type`,`status`) USING BTREE;
+    ADD KEY `question_type_status` (`question_type`, `status`) USING BTREE;
 
 --
 -- Indexes for table `sto_question_choice`
 --
 ALTER TABLE `sto_question_choice`
-    ADD PRIMARY KEY (`alpha`,`question_id`),
+    ADD PRIMARY KEY (`alpha`, `question_id`),
     ADD KEY `question_id_index` (`question_id`) USING BTREE;
 
 --
@@ -824,11 +884,11 @@ ALTER TABLE `sto_question_choice`
 --
 ALTER TABLE `sto_question_task`
     ADD PRIMARY KEY (`code`) USING BTREE,
-    ADD UNIQUE KEY `code_subject_unique` (`code`,`subject_code`) USING BTREE,
-    ADD UNIQUE KEY `code_by_site_id` (`site_id`,`code`),
+    ADD UNIQUE KEY `code_subject_unique` (`code`, `subject_code`) USING BTREE,
+    ADD UNIQUE KEY `code_by_site_id` (`site_id`, `code`),
     ADD KEY `created_by` (`created_by`),
     ADD KEY `code` (`code`) USING BTREE,
-    ADD KEY `name_created_by` (`name`,`created_by`) USING BTREE,
+    ADD KEY `name_created_by` (`name`, `created_by`) USING BTREE,
     ADD KEY `name` (`name`) USING BTREE,
     ADD KEY `subject_code` (`subject_code`) USING BTREE,
     ADD KEY `site_id` (`site_id`);
@@ -838,15 +898,15 @@ ALTER TABLE `sto_question_task`
 --
 ALTER TABLE `sto_religion`
     ADD PRIMARY KEY (`code`) USING BTREE,
-    ADD UNIQUE KEY `name` (`name`,`site_id`) USING BTREE,
-    ADD UNIQUE KEY `code` (`code`,`site_id`) USING BTREE;
+    ADD UNIQUE KEY `name` (`name`, `site_id`) USING BTREE,
+    ADD UNIQUE KEY `code` (`code`, `site_id`) USING BTREE;
 
 --
 -- Indexes for table `sto_room`
 --
 ALTER TABLE `sto_room`
     ADD PRIMARY KEY (`id`),
-    ADD UNIQUE KEY `unique_room_per_site` (`site_id`,`code`),
+    ADD UNIQUE KEY `unique_room_per_site` (`site_id`, `code`),
     ADD KEY `site_id` (`site_id`),
     ADD KEY `code` (`code`),
     ADD KEY `name` (`name`);
@@ -859,7 +919,7 @@ ALTER TABLE `sto_sites`
     ADD UNIQUE KEY `host` (`host`) USING BTREE,
     ADD UNIQUE KEY `token` (`token`),
     ADD UNIQUE KEY `additional_host` (`additional_host`) USING BTREE,
-    ADD UNIQUE KEY `host_additional` (`host`,`additional_host`) USING BTREE,
+    ADD UNIQUE KEY `host_additional` (`host`, `additional_host`) USING BTREE,
     ADD KEY `name` (`name`);
 
 --
@@ -867,8 +927,8 @@ ALTER TABLE `sto_sites`
 --
 ALTER TABLE `sto_student`
     ADD PRIMARY KEY (`id`) USING BTREE,
-    ADD UNIQUE KEY `email` (`email`,`site_id`) USING BTREE,
-    ADD UNIQUE KEY `username` (`username`,`site_id`) USING BTREE,
+    ADD UNIQUE KEY `email` (`email`, `site_id`) USING BTREE,
+    ADD UNIQUE KEY `username` (`username`, `site_id`) USING BTREE,
     ADD KEY `name` (`full_name`),
     ADD KEY `religion` (`religion`),
     ADD KEY `gender` (`gender`),
@@ -909,7 +969,7 @@ ALTER TABLE `sto_student_logs`
 --
 ALTER TABLE `sto_student_meta`
     ADD PRIMARY KEY (`meta_id`),
-    ADD UNIQUE KEY `meta_student_unique` (`meta_name`,`student_id`);
+    ADD UNIQUE KEY `meta_student_unique` (`meta_name`, `student_id`);
 
 --
 -- Indexes for table `sto_student_online`
@@ -924,7 +984,7 @@ ALTER TABLE `sto_student_online`
 ALTER TABLE `sto_subject`
     ADD PRIMARY KEY (`code`) USING BTREE,
     ADD KEY `name` (`name`),
-    ADD KEY `code_site_id_unique` (`code`,`site_id`) USING BTREE,
+    ADD KEY `code_site_id_unique` (`code`, `site_id`) USING BTREE,
     ADD KEY `sto_subject_site_id` (`site_id`);
 
 --
@@ -932,8 +992,8 @@ ALTER TABLE `sto_subject`
 --
 ALTER TABLE `sto_supervisor`
     ADD PRIMARY KEY (`id`) USING BTREE,
-    ADD UNIQUE KEY `email` (`email`,`site_id`) USING BTREE,
-    ADD UNIQUE KEY `username` (`username`,`site_id`) USING BTREE,
+    ADD UNIQUE KEY `email` (`email`, `site_id`) USING BTREE,
+    ADD UNIQUE KEY `username` (`username`, `site_id`) USING BTREE,
     ADD KEY `role` (`role`),
     ADD KEY `name` (`full_name`),
     ADD KEY `religion` (`religion`),
@@ -956,7 +1016,7 @@ ALTER TABLE `sto_supervisor_logs`
 --
 ALTER TABLE `sto_supervisor_meta`
     ADD PRIMARY KEY (`meta_id`),
-    ADD UNIQUE KEY `supervisor_meta_name` (`supervisor_id`,`meta_name`) USING BTREE,
+    ADD UNIQUE KEY `supervisor_meta_name` (`supervisor_id`, `meta_name`) USING BTREE,
     ADD KEY `meta_name` (`meta_name`),
     ADD KEY `supervisor_id` (`supervisor_id`) USING BTREE;
 
@@ -971,15 +1031,15 @@ ALTER TABLE `sto_supervisor_online`
 -- Indexes for table `sto_supervisor_position`
 --
 ALTER TABLE `sto_supervisor_position`
-    ADD PRIMARY KEY (`code`,`name`) USING BTREE,
-    ADD UNIQUE KEY `code_site_id_unique` (`site_id`,`code`),
+    ADD PRIMARY KEY (`code`, `name`) USING BTREE,
+    ADD UNIQUE KEY `code_site_id_unique` (`site_id`, `code`),
     ADD KEY `name` (`name`);
 
 --
 -- Indexes for table `sto_translations`
 --
 ALTER TABLE `sto_translations`
-    ADD PRIMARY KEY (`iso_3`,`dictionary_code`) USING BTREE,
+    ADD PRIMARY KEY (`iso_3`, `dictionary_code`) USING BTREE,
     ADD KEY `language_code` (`dictionary_code`),
     ADD KEY `iso_3` (`iso_3`) USING BTREE;
 
@@ -994,7 +1054,7 @@ ALTER TABLE `sto_translations_dictionary`
 -- Indexes for table `sto_translations_language`
 --
 ALTER TABLE `sto_translations_language`
-    ADD PRIMARY KEY (`iso_3`,`iso_2`),
+    ADD PRIMARY KEY (`iso_3`, `iso_2`),
     ADD KEY `language_name` (`language_name`);
 
 --

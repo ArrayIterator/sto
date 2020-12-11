@@ -500,3 +500,11 @@ function get_error_string_by_code(int $code): string
     }
     return 'E_UNKNOWN';
 }
+
+/**
+ * Init
+ */
+function init()
+{
+    !hook_has_run('init') && hook_run('init');
+}

@@ -39,7 +39,7 @@ final class Hooks implements ArrayAccess
      * @param array $filters Filters to normalize.
      * @return Hook[] Array of normalized filters.
      */
-    public function preInitializedHooks(array $filters) : array
+    public function preInitializedHooks(array $filters): array
     {
         /** @var Hook[] $normalized */
         $normalized = [];
@@ -197,7 +197,7 @@ final class Hooks implements ArrayAccess
      * @param $tag
      * @return int
      */
-    public function hasRun($tag) : int
+    public function hasRun($tag): int
     {
         if (!isset($this->actions[$tag])) {
             return 0;
@@ -277,7 +277,7 @@ final class Hooks implements ArrayAccess
      * @param int|null $priority
      * @return bool
      */
-    public function removeAll(string $tag, int $priority = null) : bool
+    public function removeAll(string $tag, int $priority = null): bool
     {
         if (isset($this->filters[$tag])) {
             $this->filters[$tag]->removeAllFilters($priority);
@@ -342,7 +342,7 @@ final class Hooks implements ArrayAccess
      * @param mixed $offset
      * @return Hook|mixed
      */
-    public function offsetGet($offset) : Hook
+    public function offsetGet($offset): Hook
     {
         return $this->filters[$offset];
     }

@@ -181,7 +181,7 @@ class Site extends Model
     /**
      * @return bool
      */
-    public function delete() : bool
+    public function delete(): bool
     {
         // disallow delete site id =1
         $id = $this->userData['id'] ?? null;

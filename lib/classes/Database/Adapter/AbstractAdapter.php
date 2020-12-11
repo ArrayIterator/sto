@@ -171,7 +171,7 @@ abstract class AbstractAdapter implements AdapterConnectionInterface
     /**
      * @return bool
      */
-    public function hasConnection() : bool
+    public function hasConnection(): bool
     {
         return (bool)$this->connection;
     }

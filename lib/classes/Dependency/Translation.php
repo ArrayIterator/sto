@@ -123,7 +123,7 @@ class Translation implements QueryPrepareInterface
     /**
      * @return array
      */
-    public function getAvailableLanguages() : array
+    public function getAvailableLanguages(): array
     {
         if (is_array($this->availableLanguages)) {
             return $this->availableLanguages;
@@ -201,7 +201,7 @@ class Translation implements QueryPrepareInterface
         string $message,
         string $translation,
         string $languageCode
-    ) : bool {
+    ): bool {
         $translator = $this->getTranslator($languageCode);
         if (!$translator) {
             return false;

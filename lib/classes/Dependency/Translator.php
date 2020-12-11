@@ -65,7 +65,7 @@ class Translator
      * @param string $trans
      * @return array
      */
-    public function setRecord(string $code, string $trans) : array
+    public function setRecord(string $code, string $trans): array
     {
         $code = sha1($code);
         $this->records[$code] = [
@@ -89,6 +89,7 @@ class Translator
 
         return $this->setRecord($code, $translation);
     }
+
     /**
      * @return Translation
      */
@@ -199,7 +200,7 @@ class Translator
      * @param string $translation
      * @return bool
      */
-    public function set(string $message, string $translation) : bool
+    public function set(string $message, string $translation): bool
     {
         if ($this->getIso2() === Translation::ISO_2_NO_TRANSLATE) {
             return true;

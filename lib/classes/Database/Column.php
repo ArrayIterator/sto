@@ -79,7 +79,7 @@ class Column
     /**
      * @return string
      */
-    public function getTableName() : string
+    public function getTableName(): string
     {
         return $this->tableName;
     }
@@ -162,9 +162,9 @@ class Column
     /**
      * @return bool
      */
-    public function isPrimaryKey() : bool
+    public function isPrimaryKey(): bool
     {
-        return (bool) $this->isPrimaryKey;
+        return (bool)$this->isPrimaryKey;
     }
 
     /**

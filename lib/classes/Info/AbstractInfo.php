@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator\Info;
 
 /**
@@ -38,7 +39,7 @@ class AbstractInfo
         return false;
     }
 
-    public function getName() : string
+    public function getName(): string
     {
         return $this->info['name'] ?? '';
     }
@@ -87,7 +88,7 @@ class AbstractInfo
     /**
      * @return string
      */
-    public function __tostring() : string
+    public function __tostring(): string
     {
         return $this->getName();
     }

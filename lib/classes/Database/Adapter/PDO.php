@@ -25,7 +25,7 @@ class PDO extends AbstractAdapter
      * @return bool
      * @throws Exception
      */
-    public function connect() : bool
+    public function connect(): bool
     {
         if ($this->connection) {
             $this->connect_error = null;
@@ -75,7 +75,7 @@ class PDO extends AbstractAdapter
         return true;
     }
 
-    public function getDriver() : string
+    public function getDriver(): string
     {
         return 'pdo_mysql';
     }
@@ -83,7 +83,7 @@ class PDO extends AbstractAdapter
     /**
      * @return bool
      */
-    public function ping() : bool
+    public function ping(): bool
     {
         try {
             if (!$this->connection) {

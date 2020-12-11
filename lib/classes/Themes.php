@@ -1,4 +1,5 @@
 <?php
+
 namespace ArrayIterator;
 
 use ArrayIterator\Helper\Path;

@@ -22,7 +22,7 @@ class DatabaseConnectionException extends RuntimeException
     /**
      * @return array
      */
-    public function getErrorList() : array
+    public function getErrorList(): array
     {
         return $this->error_list;
     }

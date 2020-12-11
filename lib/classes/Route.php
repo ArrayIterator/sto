@@ -107,7 +107,7 @@ class Route
     /**
      * @return GroupDispatcher
      */
-    public function getDispatcher() : GroupDispatcher
+    public function getDispatcher(): GroupDispatcher
     {
         if (!$this->dispatcher) {
             $this->dispatcher = new GroupDispatcher(
@@ -182,7 +182,7 @@ class Route
         $httpMethod,
         string $uri = null,
         Hooks $hook = null
-    ) : array {
+    ): array {
         $this->dispatched = true;
         if (!$this->routeInfo) {
             $httpMethod = strtoupper($httpMethod);

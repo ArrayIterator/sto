@@ -3,7 +3,7 @@
  * Route Files
  */
 // DENY DIRECT ACCESS
-if (($_SERVER['SCRIPT_FILENAME']??null) === __FILE__) {
+if (($_SERVER['SCRIPT_FILENAME'] ?? null) === __FILE__) {
     !headers_sent() && header('Location: ../', true, 302);
     exit(0);
 }
