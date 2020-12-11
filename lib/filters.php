@@ -8,7 +8,7 @@ if (!function_exists('hook_add')) {
     return;
 }
 
-// use limit as last init on high priority
+// use limit as last init on lowest priority
 hook_add('admin_init', 'init', 99999);
 
 hook_add('assets_default_scripts', 'assets_default_scripts');
