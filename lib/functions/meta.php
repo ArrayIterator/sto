@@ -9,6 +9,7 @@ use ArrayIterator\Dependency\Translation;
 use ArrayIterator\Helper\Area\TimeZone;
 use ArrayIterator\Helper\TimeZoneConvert;
 use ArrayIterator\Hooks;
+use ArrayIterator\Menus;
 use ArrayIterator\Model\TranslationsDictionary;
 use ArrayIterator\Model\Option;
 use ArrayIterator\Model\Site;
@@ -123,6 +124,18 @@ function option(): Option
 function site(): Site
 {
     return application()->getSite();
+}
+
+/**
+ * @return Menus
+ */
+function menus() : Menus
+{
+    static $menus;
+    if (!$menus) {
+        $menus = new Menus(get_site_url());
+    }
+    return $menus;
 }
 
 /**

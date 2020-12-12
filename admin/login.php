@@ -6,4 +6,5 @@ require __DIR__ . '/init.php';
 // set no cache
 set_no_cache_header();
 
+// load templates
 load_admin_template('login');
