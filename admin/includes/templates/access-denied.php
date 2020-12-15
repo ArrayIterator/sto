@@ -2,8 +2,12 @@
 if (!defined('ADMIN_AREA')) {
     return;
 }
+set_admin_title(trans('Access Denied'));
 get_admin_header_template();
 ?>
-ACCESS DENIED
+    <div class="mt-5"></div>
+    <div class="alert alert-danger">
+        <?= trans('ACCESS DENIED');?>
+    </div>
 <?php
 get_admin_footer_template();

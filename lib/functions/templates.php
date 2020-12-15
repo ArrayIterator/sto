@@ -175,11 +175,34 @@ function get_admin_footer_template(bool $reLoad = false)
 /**
  * @return string
  */
+function &global_admin_title() : string
+{
+    static $admin_title = 'Dashboard';
+    if (!is_string($admin_title)) {
+        $admin_title = 'Dashboard';
+    }
+
+    return $admin_title;
+}
+
+/**
+ * @return string
+ */
 function get_admin_title(): string
 {
-    $title = is_admin_login() ? 'Dashboard' : get_admin_login_title();
-    $title = (string)hook_apply('admin_title', $title);
-    return $title;
+    $admin_title =& global_admin_title();
+    $title = is_admin_login() ? $admin_title : get_admin_login_title();
+    $admin_title = (string)hook_apply('admin_title', $title);
+    return $admin_title;
+}
+
+/**
+ * @param string $admin_title
+ */
+function set_admin_title(string $admin_title)
+{
+    $title =& global_admin_title();
+    $title = $admin_title;
 }
 
 /**
@@ -208,7 +231,7 @@ function get_admin_button_submit(): string
         'admin_button_submit',
         sprintf(
             '<button type="submit" class="btn-primary btn btn-block admin-submit-button">%s</button>',
-            trans('Sign in')
+            trans('Sign In')
         )
     );
 }
@@ -218,6 +241,7 @@ function get_admin_button_submit(): string
  */
 function admin_login_form()
 {
+    $interim_login = isset($_REQUEST['interim']);
     ?>
     <form<?= get_admin_login_form_attributes(); ?>>
         <?php hook_run('admin_login_form_before'); ?>
@@ -254,6 +278,9 @@ function admin_login_form()
                 </div>
             </div>
             <input type="hidden" name="token" class="hide" value="<?= get_token_hash();?>">
+            <?php if ($interim_login) : ?>
+                <input type="hidden" name="interim" class="hide" value="1">
+            <?php endif;?>
             <div class="form-check admin-checkbox-input">
                 <input type="checkbox" name="remember" id="remember" class="form-check-input"
                        value="yes"<?= hook_apply('remember_me',

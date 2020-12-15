@@ -213,6 +213,7 @@ class Menus implements Serializable
      * @param string $globalTag
      * @param callable|null $fallBack
      * @param string|null $currentUrl
+     * @param bool $sort
      * @return string
      */
     protected function buildMenu(
@@ -221,7 +222,8 @@ class Menus implements Serializable
         int $deep,
         string $globalTag,
         callable $fallBack = null,
-        string $currentUrl = null
+        string $currentUrl = null,
+        bool $sort = true
     ): string {
         if ($deep > $maxDepth) {
             return '';
@@ -322,7 +324,7 @@ class Menus implements Serializable
         $name = $parentMenu->getName();
         $menuStr = '';
         $ids = [];
-        foreach ($parentMenu->getMenus() as $menu) {
+        foreach (($sort ? $this->sortMenu($parentMenu->getMenus()) : $parentMenu->getMenus()) as $menu) {
             $item = $fallBack ? $fallBack(
                 $menu,
                 $maxDepth,
@@ -330,7 +332,8 @@ class Menus implements Serializable
                 $currentTag,
                 $currentUrl,
                 $parentMenu,
-                $this
+                $this,
+                $sort
             ) : ($menu->isShown() ? $menu : false);
             if (!$item instanceof Menu && $item !== true) {
                 continue;
@@ -343,7 +346,8 @@ class Menus implements Serializable
                 $subDeep,
                 $globalTag,
                 $fallBack,
-                $currentUrl
+                $currentUrl,
+                $sort
             );
 
             if ($menu) {
@@ -365,15 +369,28 @@ class Menus implements Serializable
 
         $classes = array_filter(array_unique($classes));
         $attrs['class'] = implode(' ', $classes);
+        $icon = $attrs['icon']??'';
+        if (!is_string($icon)) {
+            $icon = '';
+        }
+        $icon = trim($icon);
         $attr = '';
-        unset($attrs['href'], $attrs['id']);
+        unset($attrs['href'], $attrs['id'], $attrs['icon']);
         foreach ($attrs as $menu => $k) {
             $attr .= " {$menu}=\"{$k}\"";
         }
 
         unset($attrs, $classes);
         $html = "<{$currentTag}{$attr}>\n";
-        $html .= "<a{$linkAttrString}>{$name}</a>\n";
+        $icon = Normalizer::normalizeHtmlClass($icon);
+        if ($icon !== '') {
+            $icon = ! preg_match('~icofont[-]~', $icon)
+                ? 'icofont-'.$icon
+                : $icon;
+            $icon = "<span class=\"menu-icon\"><i class=\"{$icon}\"></i></span> ";
+        }
+
+        $html .= "<a{$linkAttrString}>{$icon}{$name}</a>\n";
         if ($menuStr !== '') {
             $classes = [
                 'nav-menu',
@@ -487,15 +504,17 @@ class Menus implements Serializable
             : $currentUrl;
         $depth = 0;
         $found = false;
-        foreach (($sort ? $this->sortMenu($this->menus) : $this->menus) as $menu) {
-            $item = $fallBack ?  $fallBack(
-                    $menu,
-                    $maxDepth,
-                    $depth,
-                    $tag,
-                    $currentUrl,
-                    $menu,
-                    $this
+        $menus = ($sort ? $this->sortMenu($this->menus) : $this->menus);
+        foreach ($menus as $menu) {
+            $item = $fallBack ? $fallBack(
+                $menu,
+                $maxDepth,
+                $depth,
+                $tag,
+                $currentUrl,
+                $menu,
+                $this,
+                $sort
             ) : ($menu->isShown() ? $menu : false);
             if (!$item instanceof Menu && $item !== true) {
                 continue;
@@ -507,7 +526,8 @@ class Menus implements Serializable
                 $depth,
                 $tag,
                 $fallBack,
-                $currentUrl
+                $currentUrl,
+                $sort
             );
             unset($this->matches);
             if ($menu) {
@@ -534,15 +554,19 @@ class Menus implements Serializable
     protected function sortMenu(array $menu): array
     {
         $menus = [];
-        foreach ($menu as $item) {
-            $menus[$item->getPosition()] = $menu;
-        }
-        ksort($menus, SORT_ASC);
         foreach ($menu as $k => $item) {
-            unset($menu[$k]);
-            $menu[$item->getId()] = $item;
+            $menus[$k] = $item->getPosition();
         }
-        return $menu;
+
+        asort($menus, SORT_ASC);
+        $newMenus = [];
+        foreach ($menus as $k => $item) {
+            unset($menus[$k]);
+            $item = $menu[$k];
+            $newMenus[$item->getId()] = $item;
+        }
+
+        return $newMenus;
     }
 
     public function serialize()
@@ -684,7 +708,10 @@ class Menus implements Serializable
             } elseif (isset($item['hidden']) && is_bool($item['hidden'])) {
                 $show = !$item['hidden'];
             }
-
+            $icon = isset($item['icon'])
+                ? $item['icon']
+                : null;
+            $attr['icon'] = $icon;
             $sub = $clones->addMenu(
                 $key,
                 $name,

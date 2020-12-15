@@ -37,3 +37,15 @@ if (is_supervisor()) {
 }
 
 hook_run('admin_init');
+
+if (!is_admin_login_page()) {
+    $is_interim = isset($_GET['interim']);
+    $is_success = query_param('login') === 'success';
+    $referer = get_referer()?:'';
+    $login_page = explode('?', get_admin_login_url())[0];
+    if ($is_interim && $is_success && preg_match('#'.preg_quote($login_page).'#', get_admin_login_url())) {
+        do_exit(trans('Login Success'));
+    }
+
+    unset($is_interim, $is_success, $referer, $login_page);
+}

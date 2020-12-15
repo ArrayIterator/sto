@@ -179,8 +179,10 @@ unset($loadedModules, $moduleName, $time);
 
 hook_run('modules_loaded');
 
-// set cookie token
-set_token_cookie();
+if (!defined('ADMIN_LOGOUT_PAGE') || !ADMIN_LOGOUT_PAGE) {
+    // set cookie token
+    set_token_cookie();
+}
 
 if (!is_admin_page()) {
     // LOAD THEME

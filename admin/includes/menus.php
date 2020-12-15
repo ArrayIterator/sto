@@ -10,16 +10,153 @@ function admin_menu_array() : array
             'name' => trans('Dashboard'),
             'link' => get_admin_url(),
             'hide' => !admin_is_allowed('index.php'),
+            'icon' => 'dashboard',
+            'position' => 1,
             'menus' => [
                 'dashboard' => [
                     'name' => trans('Dashboard'),
                     'link' => get_admin_url(),
                     'hide' => !admin_is_allowed('index.php'),
+                    'position' => 1,
                 ],
                 'about' => [
                     'name' => trans('About'),
                     'link' => get_admin_url('about.php'),
-                    'hide' => !admin_is_allowed('index.php'),
+                    'hide' => !admin_is_allowed('about.php'),
+                    'position' => 5,
+                ],
+                'report' => [
+                    'name' => trans('Report'),
+                    'link' => get_admin_url('report.php'),
+                    'hide' => !admin_is_allowed('report.php'),
+                    'position' => 25,
+                ],
+            ]
+        ],
+        'tasks' => [
+            'name' => trans('Tasks'),
+            'link' => get_admin_url('tasks.php'),
+            'hide' => !admin_is_allowed('tasks.php'),
+            'icon' => 'tasks',
+            'position' => 200,
+            'menus' => [
+                'tasks' => [
+                    'name' => trans('All Tasks'),
+                    'link' => get_admin_url('tasks.php'),
+                    'hide' => !admin_is_allowed('tasks.php'),
+                    'position' => 200,
+                ],
+                'new_task' => [
+                    'name' => trans('Add New Task'),
+                    'link' => get_admin_url('task-new.php'),
+                    'hide' => !admin_is_allowed('task-new.php'),
+                    'position' => 220,
+                ],
+            ]
+        ],
+        'questions' => [
+            'name' => trans('Questions'),
+            'link' => get_admin_url('questions.php'),
+            'hide' => !admin_is_allowed('questions.php'),
+            'icon' => 'question-circle',
+//            'icon' => 'ruler-pencil',
+            'position' => 300,
+            'menus' => [
+                'tasks' => [
+                    'name' => trans('All Questions'),
+                    'link' => get_admin_url('questions.php'),
+                    'hide' => !admin_is_allowed('questions.php'),
+                    'position' => 300,
+                ],
+                'new_task' => [
+                    'name' => trans('Add New Question'),
+                    'link' => get_admin_url('question-new.php'),
+                    'hide' => !admin_is_allowed('question-new.php'),
+                    'position' => 320,
+                ],
+            ]
+        ],
+        'exams' => [
+            'name' => trans('Exams'),
+            'link' => get_admin_url('exams.php'),
+            'hide' => !admin_is_allowed('exams.php'),
+            'icon' => 'ruler-pencil',
+            'position' => 350,
+            'menus' => [
+                'tasks' => [
+                    'name' => trans('All Exam Schedules'),
+                    'link' => get_admin_url('exams.php'),
+                    'hide' => !admin_is_allowed('exams.php'),
+                    'position' => 350,
+                ],
+                'new_task' => [
+                    'name' => trans('Add New Exam'),
+                    'link' => get_admin_url('exam-new.php'),
+                    'hide' => !admin_is_allowed('exam-new.php'),
+                    'position' => 370,
+                ],
+            ]
+        ],
+        'teachers' => [
+            'name' => trans('Teachers'),
+            'link' => get_admin_url('teachers.php'),
+            'hide' => !admin_is_allowed('teachers.php'),
+            'icon' => 'teacher',
+            'position' => 400,
+            'menus' => [
+                'teachers' => [
+                    'name' => trans('All Teachers'),
+                    'link' => get_admin_url('teachers.php'),
+                    'hide' => !admin_is_allowed('teachers.php'),
+                    'position' => 400,
+                ],
+                'new_teacher' => [
+                    'name' => trans('Add New Teacher'),
+                    'link' => get_admin_url('teacher-new.php'),
+                    'hide' => !admin_is_allowed('teacher-new.php'),
+                    'position' => 420,
+                ],
+            ],
+        ],
+        'students' => [
+            'name' => trans('Students'),
+            'link' => get_admin_url('students.php'),
+            'hide' => !admin_is_allowed('students.php'),
+            'icon' => 'group-students',
+            'position' => 450,
+            'menus' => [
+                'students' => [
+                    'name' => trans('All Students'),
+                    'link' => get_admin_url('students.php'),
+                    'hide' => !admin_is_allowed('students.php'),
+                    'position' => 450,
+                ],
+                'new_student' => [
+                    'name' => trans('Add New Student'),
+                    'link' => get_admin_url('student-new.php'),
+                    'hide' => !admin_is_allowed('student-new.php'),
+                    'position' => 470,
+                ],
+            ]
+        ],
+        'invigilator' => [
+            'name' => trans('Invigilators'),
+            'link' => get_admin_url('invigilators.php'),
+            'hide' => !admin_is_allowed('invigilators.php'),
+            'icon' => 'investigator',
+            'position' => 500,
+            'menus' => [
+                'students' => [
+                    'name' => trans('All Invigilators'),
+                    'link' => get_admin_url('invigilators.php'),
+                    'hide' => !admin_is_allowed('invigilators.php'),
+                    'position' => 500,
+                ],
+                'new_student' => [
+                    'name' => trans('Add New Invigilator'),
+                    'link' => get_admin_url('invigilator-new.php'),
+                    'hide' => !admin_is_allowed('invigilator-new.php'),
+                    'position' => 520,
                 ],
             ]
         ],
@@ -27,53 +164,92 @@ function admin_menu_array() : array
             'name' => trans('Modules'),
             'link' => get_admin_url('modules.php'),
             'hide' => !admin_is_allowed('modules.php'),
+            'icon' => 'addons',
+            'position' => 600,
             'menus' => [
                 'all_modules' => [
                     'name' => trans('All Modules'),
                     'link' => get_admin_url('modules.php'),
                     'hide' => !admin_is_allowed('modules.php'),
+                    'position' => 600,
                 ],
                 'active_modules' => [
                     'name' => trans('Active Modules'),
                     'link' => get_admin_url('modules.php?status=active'),
                     'hide' => !admin_is_allowed('modules.php'),
+                    'position' => 620,
                 ],
                 'inactive_modules' => [
                     'name' => trans('Inactive Modules'),
                     'link' => get_admin_url('modules.php?status=inactive'),
                     'hide' => !admin_is_allowed('modules.php'),
+                    'position' => 630,
                 ],
             ]
         ],
-        'users' => [
-            'name' => trans('Users'),
+        'themes' => [
+            'name' => trans('Themes'),
+            'link' => get_admin_url('themes.php'),
+            'hide' => !admin_is_allowed('themes.php'),
+            'icon' => 'paint',
+            'position' => 700,
+        ],
+        'settings' => [
+            'name' => trans('Settings'),
+            'link' => get_admin_url('settings.php'),
+            'hide' => !admin_is_allowed('settings.php'),
+            'icon' => 'gears',
+            'position' => 800,
+            'menus' => [
+                'settings' => [
+                    'name' => trans('General Settings'),
+                    'link' => get_admin_url('settings.php'),
+                    'hide' => !admin_is_allowed('settings.php'),
+                    'position' => 800,
+                ],
+                'admin-settings' => [
+                    'name' => trans('Global Settings'),
+                    'link' => get_admin_url('admin.php'),
+                    'hide' => !admin_is_allowed('admin.php'),
+                    'position' => 830,
+                ]
+            ]
+        ],
+        'tools' => [
+            'name' => trans('Tools'),
+            'link' => get_admin_url('tools.php'),
+            'hide' => !admin_is_allowed('tools.php'),
+            'icon' => 'tools-alt-2',
+            'position' => 900,
+            'menus' => [
+
+            ]
+        ],
+        'Profile' => [
+            'name' => trans('Accounts'),
             'link' => get_admin_url('profile.php'),
             'hide' => !admin_is_allowed('profile.php'),
+            'icon' => 'key',
+            'position' => 1000,
             'menus' => [
                 'profile' => [
                     'name' => trans('Profile'),
                     'link' => get_admin_url('profile.php'),
                     'hide' => !admin_is_allowed('profile.php'),
+                    'position' => 1000
                 ],
-                'supervisors' => [
-                    'name' => trans('Supervisors'),
-                    'link' => get_admin_url('supervisors.php'),
-                    'hide' => !admin_is_allowed('supervisors.php'),
-                ],
-                'students' => [
-                    'name' => trans('Students'),
-                    'link' => get_admin_url('students.php'),
-                    'hide' => !admin_is_allowed('students.php'),
+                'logout' => [
+                    'name' => trans('Logout'),
+                    'link' => get_admin_url('logout.php'),
+                    'hide' => false,
+                    'attr' => [
+                        'class' => 'logout color-red',
+                        'onclick' => 'return confirm('.json_encode(trans('Are You Sure ... ?')).');'
+                    ],
+                    'position' => 1100
                 ],
             ]
         ],
-        'settings' => [
-            'name' => trans('Settings'),
-            'link' => get_admin_url('settings.php'),
-            'hide' => !admin_is_allowed('settings'),
-            'menus' => [
-            ]
-        ]
     ];
 
     return hook_apply('admin_menu_array', $menus);

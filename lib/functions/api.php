@@ -19,16 +19,17 @@ function json_success($data, $options = JSON_UNESCAPED_SLASHES)
 }
 
 /**
- * @param string $message
+ * @param string|array $message
  * @param mixed $data
  * @param int $options
  * @return false|string
  */
-function json_error(string $message, $data = null, $options = JSON_UNESCAPED_SLASHES)
+function json_error($message, $data = null, $options = JSON_UNESCAPED_SLASHES)
 {
     if (!is_int($options)) {
         $options = JSON_UNESCAPED_SLASHES;
     }
+
     $response = [
         'error' => [
             'message' => $message

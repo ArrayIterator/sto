@@ -111,6 +111,7 @@ function get_selected_site_language(): string
         $update = true;
         $lang = \translation()->getSelectedLanguage();
     }
+    $lang = is_string($lang) ? trim($lang) : $lang;
     if ($update) {
         update_option('selected_language', $lang);
     }
@@ -146,8 +147,9 @@ function translator(): Translator
     $translator = translation()->getTranslator($selectedLanguage);
     if (!isset($required[$selectedLanguage])) {
         $required[$selectedLanguage] = true;
-        $languages = get_language_files()[$selectedLanguage];
-        if ($languages['path']
+        $languages = get_language_files()[$selectedLanguage]??(get_available_languages()[$selectedLanguage]??null);
+        if ($languages
+            && isset($languages['path'])
             && is_string($languages['path'])
             && is_file($languages['path'])
         ) {

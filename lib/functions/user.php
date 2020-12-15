@@ -463,3 +463,12 @@ function get_current_supervisor_status()
     $userData = get_current_supervisor();
     return $userData ? ($userData['status'] ?? false) : false;
 }
+
+/**
+ * @return false|string
+ */
+function get_current_supervisor_full_name()
+{
+    $userData = get_current_supervisor();
+    return $userData ? ($userData['full_name'] ?? false) : false;
+}

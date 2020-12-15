@@ -1,12 +1,11 @@
 <?php
 require __DIR__ . '/init.php';
 
-if (
-    is_teacher() && !teacher_can_see_supervisor()
-    || is_invigilator() && !invigilator_can_see_supervisor()
-) {
-    return load_admin_template('access-denied');
+if (!admin_is_allowed(__FILE__)) {
+    return load_admin_denied();
 }
 
-load_admin_template('header');
-load_admin_template('footer');
+set_admin_title(trans('All Supervisors'));
+
+get_admin_header_template();
+get_admin_footer_template();

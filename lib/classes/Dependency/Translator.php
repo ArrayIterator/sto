@@ -170,7 +170,7 @@ class Translator
                    l.translate as translate
             FROM {$tableName}
             INNER JOIN {$tableDictionary} l on {$tableName}.dictionary_code = l.code
-            WHERE l.translate = ? 
+            WHERE BINARY l.translate = ? 
             LIMIT 1
         ");
 
