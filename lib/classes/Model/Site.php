@@ -146,11 +146,12 @@ class Site extends Model
 
         while ($row = $stmt->fetch()) {
             if ($row['type'] === 'host') {
-                $stmt->closeCursor();
-                return $row;
+                break;
             }
         }
-
+        if ($row && isset($row['id'])) {
+            $row['id'] = abs(intval($row));
+        }
         $stmt->closeCursor();
         return $row;
     }

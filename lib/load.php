@@ -103,11 +103,11 @@ define('UPLOADS_DIR', get_uploads_dir());
 define('THEMES_DIR', get_themes_dir());
 define('MODULES_DIR', get_themes_dir());
 
-
 defined('ENABLE_MULTISITE') || define('ENABLE_MULTISITE', false);
 
 defined('COOKIE_STUDENT_NAME') || define('COOKIE_STUDENT_NAME', 'sto_student');
 defined('COOKIE_SUPERVISOR_NAME') || define('COOKIE_SUPERVISOR_NAME', 'sto_supervisor');
+defined('COOKIE_TOKEN_NAME') || define('COOKIE_TOKEN_NAME', 'sto_token');
 
 if (defined('COOKIE_MULTI_DOMAIN') && COOKIE_MULTI_DOMAIN) {
     session_set_cookie_params(['domain' => cookie_multi_domain(), 'path' => '/']);
@@ -178,6 +178,9 @@ if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
 unset($loadedModules, $moduleName, $time);
 
 hook_run('modules_loaded');
+
+// set cookie token
+set_token_cookie();
 
 if (!is_admin_page()) {
     // LOAD THEME

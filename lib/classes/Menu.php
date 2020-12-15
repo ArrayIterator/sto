@@ -48,6 +48,11 @@ class Menu implements Serializable
     protected $position = 10;
 
     /**
+     * @var bool
+     */
+    protected $shown;
+
+    /**
      * Menu constructor.
      * @param string $id
      * @param string $name
@@ -55,6 +60,7 @@ class Menu implements Serializable
      * @param array $attr
      * @param array $attrLink
      * @param int $position
+     * @param bool $show
      */
     public function __construct(
         string $id,
@@ -62,7 +68,8 @@ class Menu implements Serializable
         string $url = '',
         array $attr = [],
         array $attrLink = [],
-        int $position = 10
+        int $position = 10,
+        bool $show = true
     ) {
         $this->id = $id;
         $this->name = $name;
@@ -75,6 +82,31 @@ class Menu implements Serializable
         }
 
         $this->position = $position;
+        $this->shown = $show;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isShown(): bool
+    {
+        return $this->shown;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName(string $name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @param string $url
+     */
+    public function setUrl(string $url)
+    {
+        $this->url = $url;
     }
 
     /**

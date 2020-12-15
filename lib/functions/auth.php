@@ -1,10 +1,96 @@
 <?php
 
+use ArrayIterator\Helper\Random;
 use ArrayIterator\Helper\UuidV4;
 
 /* -------------------------------------------------
  *                 AUTH & VALIDATION
  * ------------------------------------------------*/
+
+function &get_token_cookie()
+{
+    static $called = 0;
+    static $token = null;
+    if ($called === 0) {
+        $called = 1;
+        $token = cookie(COOKIE_TOKEN_NAME);
+    }
+
+    return $token;
+}
+
+
+function get_token_hash() : string
+{
+    $token = get_token_to_be_hashed();
+    return create_form_token($token);
+}
+
+/**
+ * @return string
+ */
+function get_token_to_be_hashed() : string
+{
+    $token = get_token_cookie();
+    if (!is_string($token)) {
+        set_token_cookie();
+        $token = get_token_cookie();
+    }
+    return $token;
+}
+
+/**
+ * @param string $data
+ * @return string
+ */
+function create_form_token(string $data) : string
+{
+    return password_hash(create_security_hash($data), PASSWORD_BCRYPT);
+}
+
+/**
+ * @param string $token
+ * @param string|null $token_cookie
+ * @return bool
+ */
+function validate_form_token(string $token, $token_cookie = null) : bool
+{
+    if ($token_cookie !== null && !is_string($token_cookie)) {
+        return false;
+    }
+
+    $token_cookie = $token_cookie ?? get_token_to_be_hashed();
+    $token_cookie = create_security_hash($token_cookie);
+    return password_verify($token_cookie, $token);
+}
+
+/**
+ * @return string
+ */
+function create_token_cookie() : string
+{
+    return create_security_hash(Random::bytes(64));
+}
+
+/**
+ * @param bool $renew
+ * @return string
+ */
+function set_token_cookie(bool $renew = false) : string
+{
+    $token =& get_token_cookie();
+    if (!is_string($token)
+        || ! preg_match('~^[a-f0-9]{40}$~', $token)
+        || $renew
+    ) {
+        $token = create_token_cookie();
+        if (!headers_sent()) {
+            create_cookie(COOKIE_TOKEN_NAME, $token);
+        }
+    }
+
+    return $token;
+}
 
 /**
  * @param string $data
@@ -63,6 +149,15 @@ function create_auth_hash(int $userId, string $type)
 
     if (!$user) {
         return false;
+    }
+
+    if (hook_apply('allow_create_auth_hash_different_site_id', false) !== true) {
+        if ($user->getSiteId() !== get_current_site_id()) {
+            return false;
+        }
+        if (!enable_multisite() && $user->getSiteId() !== 1) {
+            return false;
+        }
     }
 
     $siteId = $user->getSiteId() ?? get_current_site_id();
@@ -172,4 +267,67 @@ function create_json_auth_user(int $userId, string $type, bool $recreate = false
 function create_json_auth_user_cookie_value(int $userId, string $type, bool $recreate = false): string
 {
     return base64_encode(create_json_auth_user($userId, $type, $recreate));
+}
+
+/**
+ * @param int $userId
+ * @param string $type
+ * @param bool $recreate
+ * @return string
+ * @see create_json_auth_user_cookie_value()
+ */
+function create_cookie_user(int $userId, string $type, bool $recreate = false) : string
+{
+    return create_json_auth_user_cookie_value($userId, $type, $recreate);
+}
+
+/**
+ * @param int $userId
+ * @param string $type
+ * @param bool $remember
+ * @return bool
+ */
+function send_user_cookie(int $userId, string $type, bool $remember = false) : bool
+{
+    $expire = $remember ? strtotime('+1 year') : null;
+    if (!in_array($type, [SUPERVISOR, STUDENT])) {
+        return false;
+    }
+
+    $cookie = create_json_auth_user_cookie_value(
+        $userId,
+        $type
+    );
+
+    if ($cookie == '') {
+        return false;
+    }
+    $name = $type === SUPERVISOR
+        ? COOKIE_SUPERVISOR_NAME
+        : COOKIE_STUDENT_NAME;
+    return create_cookie(
+        $name,
+        $cookie,
+        $expire
+    );
+}
+
+/**
+ * @param int $userId
+ * @param bool $remember
+ * @return bool
+ */
+function send_supervisor_cookie(int $userId, bool $remember = false) : bool
+{
+    return send_user_cookie($userId, SUPERVISOR, $remember);
+}
+
+/**
+ * @param int $userId student ID
+ * @param bool $remember
+ * @return bool
+ */
+function send_student_cookie(int $userId, bool $remember = false) : bool
+{
+    return send_user_cookie($userId, STUDENT, $remember);
 }

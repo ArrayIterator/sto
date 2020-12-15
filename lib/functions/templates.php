@@ -253,6 +253,7 @@ function admin_login_form()
                     </button>
                 </div>
             </div>
+            <input type="hidden" name="token" class="hide" value="<?= get_token_hash();?>">
             <div class="form-check admin-checkbox-input">
                 <input type="checkbox" name="remember" id="remember" class="form-check-input"
                        value="yes"<?= hook_apply('remember_me',
@@ -268,7 +269,6 @@ function admin_login_form()
     </form>
     <?php
 }
-
 
 function admin_html_head()
 {

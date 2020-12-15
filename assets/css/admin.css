@@ -124,3 +124,149 @@ body.login-page .login-form-wrap-col-right {
     margin-left: 15px;
     line-height: 1.8;
 }
+
+/*! SIDEBAR & CONTENT
+ ------------------------ */
+#left-area {
+    float: left;
+    width: 200px;
+    height: 100vh;
+    min-height: 300px;
+    left:0;
+    transition:all ease .1s;
+    overflow-y: auto;
+    overflow-x:hidden;
+}
+#admin-sidebar {
+    overflow-y: auto;
+    height:100%;
+    padding:0;
+    margin:0;
+    width: auto;
+    overflow-x: hidden;
+    margin-right: -40px;
+    padding-right: 40px;
+    position:relative;
+    z-index: 2;
+}
+#sidebar-switch {
+    position:absolute;
+    bottom: 0;
+    height: 40px;
+    background-color: #3076b1;
+    width:100%;
+    text-align: right;
+    line-height: 40px;
+    right:0;
+    transition:all ease .1s;
+    border-top: 1px solid rgba(0,0,0,.1);
+    z-index: 3;
+}
+#sidebar-switch i {
+    cursor: pointer;
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 50%;
+    background-color: rgba(0,0,0,.2);
+    margin: 1em;
+}
+
+#right-area {
+    float: right;
+    width: calc(100% - 200px);
+    display:block;
+    height: 100vh;
+    background-color: #f1f1f1;
+    overflow-y: auto;
+    transition:width ease .1s;
+    margin: 0;
+    padding: 0 15px;
+}
+.sidebar-menu {
+    margin-top: 1em;
+    margin-bottom: 60px;
+}
+.sidebar-menu,
+.sidebar-menu ul,
+.sidebar-menu li {
+    list-style: none;
+    margin-left: 0;
+    padding-left:0;
+}
+.sidebar-menu {
+    width:100%;
+    position:relative;
+}
+.sidebar-menu > li {
+    display: block;
+}
+.sidebar-menu > li > a {
+    padding: 10px;
+    display:block;
+}
+.sidebar-menu > li ul a {
+    padding: 10px 15px;
+    display:block;
+}
+
+.sidebar-menu > li > ul {
+    display:none;
+}
+
+.sidebar-menu > li > ul > li ul {
+    display:none;
+}
+
+.sidebar-menu > li.has-active-submenu > ul {
+    display:block;
+}
+#left-area.closed {
+    left: -200px;
+    overflow: visible;
+}
+#left-area.closed + #right-area {
+    margin-left:0;
+    width: 100%;
+}
+
+#left-area.closed #sidebar-switch {
+    right: -55px;
+}
+
+
+/*! SIDEBAR COLOR
+ ------------------------ */
+#left-area {
+    background-color: #3a85c5;
+    font-weight: lighter;
+    font-size: 14px;
+    position: absolute;
+    min-height: 100vh;
+    height:100%;
+}
+#left-area.closed #sidebar-switch {
+    /*     background-color: #3a85c5; */
+}
+#left-area,
+.sidebar-menu a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.sidebar-menu > li > ul {
+    background-color: #2b76b7;
+}
+
+.sidebar-menu > li > a:hover {
+    background-color: rgba(255, 255, 255, .1);
+}
+.sidebar-menu > li > ul > li a.active {
+    background-color: rgba(0,0,0, .1);
+}
+.sidebar-menu > li > ul > li a:hover {
+    background-color: rgba(0,0,0, .2);
+}
+.sidebar-menu > li.has-active-submenu > a {
+    background-color: rgba(255, 255, 255, .1);
+    border-right: 4px solid rgba(0,0,0,.3);
+}

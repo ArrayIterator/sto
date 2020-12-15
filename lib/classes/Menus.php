@@ -101,6 +101,7 @@ class Menus implements Serializable
      * @param array $attr
      * @param array $link_attr
      * @param int $position
+     * @param bool $show
      * @return Menu
      */
     public function createMenu(
@@ -109,9 +110,10 @@ class Menus implements Serializable
         string $url = '',
         array $attr = [],
         array $link_attr = [],
-        int $position = 10
+        int $position = 10,
+        bool $show = true
     ): Menu {
-        return new Menu($id, $name, $url, $attr, $link_attr, $position);
+        return new Menu($id, $name, $url, $attr, $link_attr, $position, $show);
     }
 
     /**
@@ -121,6 +123,7 @@ class Menus implements Serializable
      * @param array $attr
      * @param array $link_attr
      * @param int $position
+     * @param bool $show
      * @return Menu
      */
     public function addMenu(
@@ -129,9 +132,10 @@ class Menus implements Serializable
         string $url = '',
         array $attr = [],
         array $link_attr = [],
-        int $position = 10
+        int $position = 10,
+        bool $show = true
     ): Menu {
-        $menu = $this->createMenu($id, $name, $url, $attr, $link_attr, $position);
+        $menu = $this->createMenu($id, $name, $url, $attr, $link_attr, $position, $show);
         $this->add($menu);
         return $menu;
     }
@@ -203,7 +207,7 @@ class Menus implements Serializable
     }
 
     /**
-     * @param Menu $menu
+     * @param Menu $parentMenu
      * @param int $maxDepth
      * @param int $deep
      * @param string $globalTag
@@ -212,7 +216,7 @@ class Menus implements Serializable
      * @return string
      */
     protected function buildMenu(
-        Menu $menu,
+        Menu $parentMenu,
         int $maxDepth,
         int $deep,
         string $globalTag,
@@ -229,21 +233,21 @@ class Menus implements Serializable
         /*!
          * SANITIZE LINK ATTRIBUTES
          * ------------------------------------------------------*/
-        $url = $this->sanitizeUrl($menu->getUrl());
+        $url = $this->sanitizeUrl($parentMenu->getUrl());
         // if ($url === '') {
         //    $url = $this->getSiteUrl();
         // }
         $match = $url && $currentUrl && rtrim($currentUrl, '/') === rtrim($url, '/');
         if ($match) {
-            $this->matches[$deep][$menu->getId()] = [];
+            $this->matches[$deep][$parentMenu->getId()] = [];
         }
 
         /*!
          * SANITIZE TAG ATTRIBUTES
          * ------------------------------------------------------*/
         $currentTag = !in_array($globalTag, ['ol', 'ul']) ? $globalTag : 'li';
-        $menuId = Normalizer::normalizeHtmlClass($menu->getId());
-        $attrs = $this->sanitizeAttribute($menu->getAttributes());
+        $menuId = Normalizer::normalizeHtmlClass($parentMenu->getId());
+        $attrs = $this->sanitizeAttribute($parentMenu->getAttributes());
 
         if ($deep === 0) {
             $classes = ['parent-menu'];
@@ -256,14 +260,14 @@ class Menus implements Serializable
             $menuId
         );
 
-        if (count($menu->getMenus()) > 0 && $deep < $maxDepth) {
+        if (count($parentMenu->getMenus()) > 0 && $deep < $maxDepth) {
             $classes[] = 'has-submenu';
         }
 
         if (isset($attrs['class'])) {
             $array = explode(' ', $attrs['class'] ?? '');
-            foreach ($array as $item) {
-                $classes[] = Normalizer::normalizeHtmlClass($item);
+            foreach ($array as $menu) {
+                $classes[] = Normalizer::normalizeHtmlClass($menu);
             }
         }
 
@@ -271,7 +275,7 @@ class Menus implements Serializable
             $classes[] = 'has-active-submenu';
         }
 
-        $attrLinks = $menu->getLinkAttributes();
+        $attrLinks = $parentMenu->getLinkAttributes();
         $classesLink = ['menu-link'];
         if (isset($attrLinks['class'])) {
             if (is_string($attrLinks['class'])) {
@@ -280,11 +284,11 @@ class Menus implements Serializable
             if (!is_array($attrLinks['class'])) {
                 $attrLinks['class'] = (array)$attrLinks['class'];
             }
-            foreach ($attrLinks['class'] as $item) {
-                if (!is_string($item)) {
+            foreach ($attrLinks['class'] as $menu) {
+                if (!is_string($menu)) {
                     continue;
                 }
-                $classesLink[] = Normalizer::normalizeHtmlClass($item);
+                $classesLink[] = Normalizer::normalizeHtmlClass($menu);
             }
         }
 
@@ -300,13 +304,13 @@ class Menus implements Serializable
         ];
 
         unset($attrLinks['href'], $attrLinks['id'], $attrLinks['class']);
-        foreach ($attrLinks as $item => $v) {
-            $linkAttr[$item] = $v;
+        foreach ($attrLinks as $menu => $v) {
+            $linkAttr[$menu] = $v;
         }
 
         $linkAttr = $this->sanitizeAttribute($linkAttr);
-        foreach ($linkAttr as $k => $item) {
-            $linkAttrString .= " {$k}=\"{$item}\"";
+        foreach ($linkAttr as $k => $menu) {
+            $linkAttrString .= " {$k}=\"{$menu}\"";
         }
         unset($linkAttr);
 
@@ -315,18 +319,26 @@ class Menus implements Serializable
          * ------------------------------------------------------*/
         $subDeep = $deep + 1;
         // $name  = htmlentities($menu->getName());
-        $name = $menu->getName();
+        $name = $parentMenu->getName();
         $menuStr = '';
         $ids = [];
-        foreach ($menu->getMenus() as $item) {
-            if ($fallBack
-                && !($item = $fallBack($item, $maxDepth, $deep, $currentTag)) instanceof Menu
-            ) {
+        foreach ($parentMenu->getMenus() as $menu) {
+            $item = $fallBack ? $fallBack(
+                $menu,
+                $maxDepth,
+                $subDeep,
+                $currentTag,
+                $currentUrl,
+                $parentMenu,
+                $this
+            ) : ($menu->isShown() ? $menu : false);
+            if (!$item instanceof Menu && $item !== true) {
                 continue;
             }
-            $ids[] = $item->getId();
-            $item = $this->buildMenu(
-                $item,
+            $menu = $item instanceof Menu ? $item : $menu;
+            $ids[] = $menu->getId();
+            $menu = $this->buildMenu(
+                $menu,
                 $maxDepth,
                 $subDeep,
                 $globalTag,
@@ -334,8 +346,8 @@ class Menus implements Serializable
                 $currentUrl
             );
 
-            if ($item) {
-                $menuStr .= "{$item}\n";
+            if ($menu) {
+                $menuStr .= "{$menu}\n";
             }
         }
 
@@ -355,8 +367,8 @@ class Menus implements Serializable
         $attrs['class'] = implode(' ', $classes);
         $attr = '';
         unset($attrs['href'], $attrs['id']);
-        foreach ($attrs as $item => $k) {
-            $attr .= " {$item}=\"{$k}\"";
+        foreach ($attrs as $menu => $k) {
+            $attr .= " {$menu}=\"{$k}\"";
         }
 
         unset($attrs, $classes);
@@ -370,7 +382,7 @@ class Menus implements Serializable
                 "sub-nav-menu-level-{$subDeep}"
             ];
             $find = false;
-            foreach ($this->matches as $d => $item) {
+            foreach ($this->matches as $d => $menu) {
                 if ($find) {
                     break;
                 }
@@ -378,7 +390,7 @@ class Menus implements Serializable
                     continue;
                 }
                 foreach ($ids as $idx) {
-                    if (isset($item[$idx])) {
+                    if (isset($menu[$idx])) {
                         $classes[] = 'has-active-submenu';
                         $find = true;
                         break;
@@ -407,7 +419,7 @@ class Menus implements Serializable
      * @param bool $sort
      * @param callable|null $fallBack
      * @param string|null $currentUrl
-     * @return string
+     * @return array
      */
     public function build(
         string $tag = 'ul',
@@ -416,7 +428,7 @@ class Menus implements Serializable
         bool $sort = true,
         callable $fallBack = null,
         string $currentUrl = null
-    ): string {
+    ): array {
         $tag = strtolower(trim($tag));
         if (!$tag || !preg_match('#([uo]l|div)#i', $tag)) {
             $tag = 'ul';
@@ -462,8 +474,8 @@ class Menus implements Serializable
         if ($maxDepth > self::MAX_ALLOWED_DEPTH) {
             $maxDepth = self::MAX_ALLOWED_DEPTH;
         }
-
-        $html = sprintf(
+        $html = [];
+        $html[] = sprintf(
             '<%s%s>%s',
             $tag,
             $attr,
@@ -476,12 +488,19 @@ class Menus implements Serializable
         $depth = 0;
         $found = false;
         foreach (($sort ? $this->sortMenu($this->menus) : $this->menus) as $menu) {
-            if ($fallBack
-                && !($item = $fallBack($menu, $maxDepth, $depth, $tag, $currentUrl)) instanceof Menu
-            ) {
+            $item = $fallBack ?  $fallBack(
+                    $menu,
+                    $maxDepth,
+                    $depth,
+                    $tag,
+                    $currentUrl,
+                    $menu,
+                    $this
+            ) : ($menu->isShown() ? $menu : false);
+            if (!$item instanceof Menu && $item !== true) {
                 continue;
             }
-
+            $menu = $item instanceof Menu ? $item : $menu;
             $menu = $this->buildMenu(
                 $menu,
                 $maxDepth,
@@ -493,11 +512,13 @@ class Menus implements Serializable
             unset($this->matches);
             if ($menu) {
                 $found = true;
-                $html .= $menu . "\n";
+                $html[] = $menu;
             }
         }
 
-        $html .= sprintf(
+        // fallback found
+        // @todo
+        $html[] = sprintf(
             '</%s>',
             $tag
         );
@@ -580,11 +601,15 @@ class Menus implements Serializable
                 continue;
             }
 
-            if (!isset($item['name']) || !is_string($item['name'])) {
+            $name = $item['name']??(
+                    $item['menu_name']??(
+                        $item['title']??null
+                    )
+                );
+            if (!is_string($name)) {
                 continue;
             }
 
-            $name = $item['name'];
             $attr = $item['attributes'] ?? (
                     $item['attribute'] ?? (
                         $item['attribute'] ?? (
@@ -598,7 +623,11 @@ class Menus implements Serializable
             $linkAttr = $item['link_attributes'] ?? (
                     $item['link_attribute'] ?? (
                         $item['link_attrs'] ?? (
-                            $item['link_attr'] ?? []
+                            $item['link_attr'] ?? (
+                                $item['linkattributes']??(
+                                    $item['linkattribute']??[]
+                                )
+                            )
                         )
                     )
                 );
@@ -608,7 +637,11 @@ class Menus implements Serializable
             $link = $item['href'] ?? (
                     $item['link'] ?? (
                         $linkAttr['href'] ?? (
-                            $linkAttr['link'] ?? ''
+                            $linkAttr['link'] ?? (
+                                $link['url']??(
+                                    $link['uri']??''
+                                )
+                            )
                         )
                     )
                 );
@@ -626,18 +659,42 @@ class Menus implements Serializable
             if (!is_int($position)) {
                 $position = abs(intval($position));
             }
+            $subMenu = $item['menus'] ?? (
+                    $item['sub_menus'] ?? (
+                        $item['sub_menus'] ?? (
+                            $item['sub_menu']??(
+                                $item['submenus']??(
+                                    $item['submenu']??null
+                                )
+                            )
+                        )
+                    )
+                );
+            $show = true;
+            if (isset($item['shown']) && is_bool($item['shown'])) {
+                $show = $item['shown'];
+            } elseif (isset($item['show']) && is_bool($item['show'])) {
+                $show = $item['show'];
+            } elseif (isset($item['display']) && is_bool($item['display'])) {
+                $show = $item['display'];
+            }
+            // prior
+            if (isset($item['hide']) && is_bool($item['hide'])) {
+                $show = !$item['hide'];
+            } elseif (isset($item['hidden']) && is_bool($item['hidden'])) {
+                $show = !$item['hidden'];
+            }
+
             $sub = $clones->addMenu(
                 $key,
                 $name,
                 $link,
                 $attr,
                 $linkAttr,
-                $position
+                $position,
+                $show
             );
-            $subMenu = $item['menus'] ?? (
-                    $item['sub_menus'] ?? ($item['sub_menus'] ?? null)
-                );
-
+            unset($item);
             if (!is_array($subMenu)) {
                 continue;
             }

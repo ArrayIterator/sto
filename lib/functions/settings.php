@@ -1,4 +1,7 @@
 <?php
+
+use ArrayIterator\Model\Site;
+
 /**
  * @return int
  */
@@ -32,7 +35,11 @@ function get_current_site_meta()
     static $meta = [];
     $host = get_host();
     if (!isset($meta[$host])) {
+        /**
+         * @var Site $site
+         */
         $site = site()->getHostOrAdditionalMatch($host);
+        cache_set($site->getId(), $site, 'sites');
         $meta[$host] = $site
             ? $site->toArray()
             : false;
@@ -56,6 +63,34 @@ function get_current_site_meta()
 }
 
 /**
+ * @param int $siteId
+ * @return Site|false
+ */
+function get_site_by_id(int $siteId)
+{
+    $data= cache_get($siteId, 'sites', $found);
+    if (!$found && ($data instanceof Site || $found === false)) {
+        return $data;
+    }
+    $site = site()->findById($siteId);
+    cache_set($siteId, false, 'sites');
+    if ($site) {
+        $data = $site->fetch();
+        cache_set($siteId, $data, 'sites');
+        return $data;
+    }
+    return false;
+}
+
+/**
+ * @return bool
+ */
+function site_is_global() : bool
+{
+    return get_current_site_id() === 1;
+}
+
+/**
  * @return int|false
  */
 function determine_site_id()
@@ -72,3 +107,59 @@ function get_site_host_type()
     $meta = get_current_site_meta();
     return $meta ? ($meta['type'] ?? false) : false;
 }
+
+/**
+ * @return false|string
+ */
+function get_site_status()
+{
+    $meta = get_current_site_meta();
+    $status = $meta ? ($meta['status'] ?? false) : false;
+    if (!is_string($status)) {
+        return false;
+    }
+    return trim(strtolower($status));
+}
+
+/**
+ * @param string $status
+ * @return false|string
+ */
+function site_status_is(string $status)
+{
+    $status = get_site_status();
+    return $status === trim(strtolower($status));
+}
+
+/**
+ * @return bool
+ */
+function site_status_is_active() : bool
+{
+    return site_status_is('active');
+}
+
+/**
+ * @return bool
+ */
+function site_status_is_banned() : bool
+{
+    return site_status_is('banned');
+}
+
+/**
+ * @return bool
+ */
+function site_status_is_deleted() : bool
+{
+    return site_status_is('deleted') || site_status_is('delete');
+}
+
+/**
+ * @return bool
+ */
+function site_status_is_pending() : bool
+{
+    return site_status_is('pending');
+}
+

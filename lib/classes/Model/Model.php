@@ -372,10 +372,16 @@ abstract class Model implements QueryPrepareInterface, ArrayAccess
     }
 
     /**
-     * @return static|false
+     * @return static|false|mixed
      */
     public function get()
     {
+        $count = func_num_args();
+        $arg = $count > 0 ? func_get_arg(0) : null;
+        if ($this->fromStatement && is_string($arg)) {
+            return $this->__get($arg);
+        }
+
         if (!empty($this->userData)) {
             $currentSelector = null;
             $value = null;
@@ -393,7 +399,10 @@ abstract class Model implements QueryPrepareInterface, ArrayAccess
                     return false;
                 }
 
-                return $res->fetchClose() ?: false;
+                $data = $res->fetchClose() ?: false;
+                return is_string($arg)
+                    ? ($data ? ($data[$arg]??false) : false)
+                    : $data;
             }
         }
 

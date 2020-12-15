@@ -16,9 +16,9 @@ if ($data) {
 $data = get_current_supervisor_data();
 if ($data) {
     $loggedAs['supervisor'] = [
-        'id' => $data['user_id'],
-        'uuid' => $data['uuid'],
-        'username' => $data['user']->username,
+        'id' => $data->getUserId(),
+        'uuid' => $data->getUuid(),
+        'username' => $data->getUser()->get('username'),
     ];
 }
 

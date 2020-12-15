@@ -330,6 +330,11 @@ function get_question_uploads_dir(): string
     return get_uploads_dir() . DIRECTORY_SEPARATOR . 'questions';
 }
 
+function get_question_uploads_path(): string
+{
+    return slash_it(un_slash_it(get_uploads_path()) . '/questions/');
+}
+
 /**
  * @return string
  */
@@ -339,12 +344,59 @@ function get_avatar_uploads_dir(): string
 }
 
 /**
+ * @return string
+ */
+function get_avatar_uploads_path(): string
+{
+    return slash_it(un_slash_it(get_uploads_path()) . '/avatars/');
+}
+
+/**
+ * @return string
+ */
+function get_logo_uploads_dir(): string
+{
+    return get_uploads_dir() . DIRECTORY_SEPARATOR . 'logos';
+}
+/**
+ * @return string
+ */
+function get_logo_uploads_path(): string
+{
+    return slash_it(un_slash_it(get_uploads_path()) . '/logos/');
+}
+
+/**
  * @param string $name
  * @return string
  */
-function get_avatar_uri(string $name = ''): string
+function get_avatar_url(string $name = ''): string
 {
-    $path = un_slash_it(get_uploads_path()) . '/avatars/';
+    $path = get_avatar_uploads_path();
+    $name = ltrim($name, '/');
+    $path = sprintf('%s%s', $path, $name);
+    return get_site_url($path);
+}
+
+/**
+ * @param string $name
+ * @return string
+ */
+function get_logo_url(string $name = ''): string
+{
+    $path = get_logo_uploads_path();
+    $name = ltrim($name, '/');
+    $path = sprintf('%s%s', $path, $name);
+    return get_site_url($path);
+}
+
+/**
+ * @param string $name
+ * @return string
+ */
+function get_question_upload_url(string $name = ''): string
+{
+    $path = get_question_uploads_path();
     $name = ltrim($name, '/');
     $path = sprintf('%s%s', $path, $name);
     return get_site_url($path);

@@ -1,11 +1,13 @@
 <?php
 
 use ArrayIterator\Helper\StringFilter;
+use ArrayIterator\Model\AbstractUserModel;
 use ArrayIterator\Model\Student;
 use ArrayIterator\Model\Supervisor;
+use ArrayIterator\User;
 
 /**
- * @return mixed|array
+ * @return mixed|User
  * @noinspection PhpMissingReturnTypeInspection
  */
 function &student_global()
@@ -16,7 +18,7 @@ function &student_global()
 }
 
 /**
- * @return mixed|array
+ * @return mixed|User
  * @noinspection PhpMissingReturnTypeInspection
  */
 function &supervisor_global()
@@ -56,12 +58,12 @@ function get_cookie_supervisor_data()
 }
 
 /**
- * @return array|false
+ * @return User|false
  */
 function get_current_student_data()
 {
     $student =& student_global();
-    if ($student !== null) {
+    if ($student === false || $student instanceof User) {
         return $student;
     }
 
@@ -90,10 +92,33 @@ function get_current_student_data()
             return false;
         }
 
+        if (hook_apply('allow_get_current_student_data_different_site_id', false) !== true) {
+            // check if site id is not 1
+            if ($data->getSiteId() !== 1) {
+                if (!enable_multisite()) {
+                    return false;
+                }
+            }
+
+            if ($data->getSiteId() !== get_current_site_id()) {
+                return false;
+            }
+        }
+
         if (hook_apply('set_student_online', true) === true) {
             student_online()->setOnline($data);
         }
 
+        $student = new User(
+            $cookies['user_id'],
+            $cookies['site_id'],
+            $cookies['uuid'],
+            $cookies['type'],
+            $cookies['hash'],
+            $cookies['hash_type'],
+            $data
+        );
+        /*
         $student = [
             'user_id' => $cookies['user_id'],
             'site_id' => $cookies['site_id'],
@@ -102,20 +127,19 @@ function get_current_student_data()
             'hash' => $cookies['hash'],
             'hash_type' => $cookies['hash_type'],
             'user' => $data,
-        ];
+        ];*/
     }
 
     return $student;
 }
 
 /**
- * @return array|false
+ * @return User|false
  */
 function get_current_supervisor_data()
 {
-
     $supervisor =& supervisor_global();
-    if ($supervisor !== null) {
+    if ($supervisor === false || $supervisor instanceof User) {
         return $supervisor;
     }
 
@@ -142,9 +166,32 @@ function get_current_supervisor_data()
         ) {
             return false;
         }
+        if (hook_apply('allow_get_current_supervisor_data_different_site_id', false) !== true) {
+            // check if site id is not 1
+            if ($data->getSiteId() !== 1) {
+                if (!enable_multisite()) {
+                    return false;
+                }
+            }
+
+            if ($data->getSiteId() !== get_current_site_id()) {
+                return false;
+            }
+        }
+
         if (hook_apply('set_supervisor_online', true) === true) {
             supervisor_online()->setOnline($data);
         }
+        $supervisor = new User(
+            $cookies['user_id'],
+            $cookies['site_id'],
+            $cookies['uuid'],
+            $cookies['type'],
+            $cookies['hash'],
+            $cookies['hash_type'],
+            $data
+        );
+        /*
         $supervisor = [
             'user_id' => $cookies['user_id'],
             'site_id' => $cookies['site_id'],
@@ -153,7 +200,7 @@ function get_current_supervisor_data()
             'hash' => $cookies['hash'],
             'hash_type' => $cookies['hash_type'],
             'user' => $data,
-        ];
+        ];*/
     }
 
     return $supervisor;
@@ -165,16 +212,16 @@ function get_current_supervisor_data()
 function get_current_supervisor()
 {
     $supervisor = get_current_supervisor_data();
-    return $supervisor ? ($supervisor['user'] ?? false) : false;
+    return $supervisor ? $supervisor->getUser() : false;
 }
 
 /**
- * @return array|false
+ * @return Student|false
  */
 function get_current_student()
 {
     $student = get_current_student_data();
-    return $student ? ($student['user'] ?? false) : false;
+    return $student ? $student->getUser() : false;
 }
 
 /**
@@ -183,10 +230,24 @@ function get_current_student()
  */
 function get_student_by_id(int $id)
 {
+    $key = 'student('.$id.')';
+    $user = cache_get($key, 'users', $found);
+    if ($found && ($user === false || $found instanceof Student)) {
+        return $user;
+    }
+    cache_set($key, false, 'users');
     $res = student()->findById($id);
     if ($res) {
+        /**
+         * @var Student
+         */
         $user = $res->fetch();
         $res->closeCursor();
+        cache_set($key, $user, 'users');
+        if ($user) {
+            $key = 'student('.strtolower($user->get('username')).')';
+            cache_set($key, $user, 'users');
+        }
         return $user;
     }
 
@@ -199,12 +260,83 @@ function get_student_by_id(int $id)
  */
 function get_supervisor_by_id(int $id)
 {
+    $key = 'supervisor('.$id.')';
+    $user = cache_get($key, 'users', $found);
+    if ($found && ($user === false || $found instanceof Supervisor)) {
+        return $user;
+    }
+    cache_set($key, false, 'users');
     $res = supervisor()->findById($id);
     if ($res) {
         $user = $res->fetch();
         $res->closeCursor();
+        cache_set($key, $user, 'users');
+        if ($user) {
+            $key = 'supervisor('.strtolower($user->get('username')).')';
+            cache_set($key, $user, 'users');
+        }
         return $user;
     }
+    return false;
+}
+
+/**
+ * @param string $username
+ * @return false|AbstractUserModel
+ */
+function get_supervisor_by_username(string $username)
+{
+    if (trim($username) === '') {
+        return false;
+    }
+    $key = 'supervisor('.strtolower($username).')';
+    $user = cache_get($key, 'users', $found);
+    if ($found && ($user === false || $found instanceof Student)) {
+        return $user;
+    }
+    cache_set($key, false, 'users');
+    $res = supervisor()->findOneByUsername($username);
+    if ($res) {
+        $user = $res->fetch();
+        cache_set($key, $user, 'users');
+        if ($user) {
+            $key = 'supervisor('.$user->getId().')';
+            cache_set($key, $user, 'users');
+        }
+        $res->closeCursor();
+        return $user;
+    }
+
+    return false;
+}
+
+/**
+ * @param string $username
+ * @return false|AbstractUserModel
+ */
+function get_student_by_username(string $username)
+{
+    if (trim($username) === '') {
+        return false;
+    }
+    $key = 'student('.strtolower($username).')';
+    $user = cache_get($key, 'users', $found);
+    if ($found && ($user === false || $found instanceof Student)) {
+        return $user;
+    }
+    cache_set($key, false, 'users');
+    $res = supervisor()->findOneByUsername($username);
+    if ($res) {
+        $user = $res->fetch();
+        cache_set($key, $user, 'users');
+        if ($user) {
+            $key = 'student('.$user->getId().')';
+            cache_set($key, $user, 'users');
+        }
+        $res->closeCursor();
+        return $user;
+    }
+
     return false;
 }
 
@@ -321,4 +453,13 @@ function get_current_supervisor_role()
 {
     $userData = get_current_supervisor();
     return $userData ? ($userData['role'] ?? false) : false;
+}
+
+/**
+ * @return false|string
+ */
+function get_current_supervisor_status()
+{
+    $userData = get_current_supervisor();
+    return $userData ? ($userData['status'] ?? false) : false;
 }
