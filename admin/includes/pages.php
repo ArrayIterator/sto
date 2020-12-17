@@ -4,7 +4,7 @@
  * @param string|null $file
  * @return bool
  */
-function admin_is_allowed(string $file = null, bool $default = false) : bool
+function admin_is_allowed(string $file = null, bool $default = false): bool
 {
     // always allowed super admin
     if (is_super_admin()) {
@@ -12,7 +12,7 @@ function admin_is_allowed(string $file = null, bool $default = false) : bool
     }
     $grants = admin_page_grants();
     $base = $file ? basename($file) : get_admin_base_name_file();
-    $result = $grants[$base]??$default;
+    $result = $grants[$base] ?? $default;
     return is_bool($result) ? $result : $default;
 }
 
@@ -21,8 +21,8 @@ function admin_is_allowed(string $file = null, bool $default = false) : bool
  */
 function admin_page_grants()
 {
-    $is_admin       = is_admin();
-    $is_teacher     = is_teacher();
+    $is_admin = is_admin();
+    $is_teacher = is_teacher();
     $is_invigilator = is_invigilator();
     $teacher_can_see_supervisor = $is_teacher && teacher_can_see_supervisor();
     $invigilator_can_see_supervisor = $is_invigilator && invigilator_can_see_supervisor();
@@ -36,19 +36,19 @@ function admin_page_grants()
         'settings.php' => $is_admin,
         'themes.php' => $is_admin,
         'report.php' => $is_admin || $is_teacher || $is_invigilator,
-        'supervisors.php'  => $is_admin || $teacher_can_see_supervisor || $invigilator_can_see_supervisor,
+        'supervisors.php' => $is_admin || $teacher_can_see_supervisor || $invigilator_can_see_supervisor,
         'invigilators.php' => $teacher_admin_grant || $invigilator_can_see_supervisor,
-        'students.php'  => $teacher_admin_grant || $is_invigilator,
-        'teachers.php'  => $teacher_admin_grant || $invigilator_can_see_supervisor,
-        'tasks.php'      => $teacher_admin_grant || $is_invigilator,
-        'exams.php'      => $teacher_admin_grant || $is_invigilator,
-        'tools.php'      => $teacher_admin_grant,
-        'questions.php'  => $teacher_admin_grant || $is_invigilator,
-        'teacher-new.php'  => $is_admin,
-        'invigilator-new.php'  => $is_admin,
-        'student-new.php'  => $teacher_admin_grant,
-        'exam-new.php'     => $teacher_admin_grant,
-        'task-new.php'     => $teacher_admin_grant,
+        'students.php' => $teacher_admin_grant || $is_invigilator,
+        'teachers.php' => $teacher_admin_grant || $invigilator_can_see_supervisor,
+        'tasks.php' => $teacher_admin_grant || $is_invigilator,
+        'exams.php' => $teacher_admin_grant || $is_invigilator,
+        'tools.php' => $teacher_admin_grant,
+        'questions.php' => $teacher_admin_grant || $is_invigilator,
+        'teacher-new.php' => $is_admin,
+        'invigilator-new.php' => $is_admin,
+        'student-new.php' => $teacher_admin_grant,
+        'exam-new.php' => $teacher_admin_grant,
+        'task-new.php' => $teacher_admin_grant,
         'question-new.php' => $teacher_admin_grant,
     ];
 
@@ -58,7 +58,7 @@ function admin_page_grants()
 /**
  * @return bool
  */
-function load_admin_denied() : bool
+function load_admin_denied(): bool
 {
     return load_admin_template('access-denied');
 }

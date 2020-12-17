@@ -369,6 +369,7 @@ function get_active_theme(): Theme
         if ($theme) {
             update_option('active_theme', $theme, get_current_site_id());
         }
+
         $theme = $themes[$theme];
     }
 
@@ -381,4 +382,22 @@ function get_active_theme(): Theme
 function get_current_theme(): Theme
 {
     return get_active_theme();
+}
+
+/**
+ * @return bool
+ */
+function allow_student_reset_password() : bool
+{
+    $allowed = cache_get('allow_student_forgot_password', 'site_options', $found);
+    if (!$found) {
+        $allowed = get_site_option('allow_student_forgot_password');
+        $allowed = $allowed === null ? 'no' : $allowed;
+    }
+
+    $applied = hook_apply('allow_student_forgot_password', $allowed);
+    $applied = is_string($applied) ? strtolower(trim($applied)) : $applied;
+    return $applied === null || $applied === false
+        ? false
+        : in_array($applied, ['yes', 'y', 'true', '1', true, 1], true);
 }

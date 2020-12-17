@@ -433,8 +433,16 @@ function get_current_user_id(): int
  */
 function get_current_user_type()
 {
-    $userData = get_current_student_data();
-    return $userData ? $userData['type'] : false;
+    $userData = get_current_user_data();
+    return $userData ? $userData->getType() : false;
+}
+/**
+ * @return false|string
+ */
+function get_current_user_role()
+{
+    $userData = get_current_user_data();
+    return $userData ? ($userData->getUser()->get('role')??false) : false;
 }
 
 /**
@@ -443,7 +451,7 @@ function get_current_user_type()
 function get_current_user_status()
 {
     $userData = get_current_user_data();
-    return $userData ? ($userData['status'] ?? false) : false;
+    return $userData ? ($userData->getUser()->get('status')??false) : false;
 }
 
 /**

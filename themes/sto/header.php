@@ -9,4 +9,6 @@ if (!defined('ROOT_DIR')) {
 
 </head>
 <body<?=get_body_attributes();?>>
-<?php body_open();?>
+    <?php body_open();?>
+    <div id="page" class="flex-wrap">
+

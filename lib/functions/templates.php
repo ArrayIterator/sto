@@ -84,7 +84,7 @@ function get_admin_body_attributes(): string
         $body_class[] = sprintf('user-status-%s', get_current_user_status());
         if (is_admin_page()) {
             $body_class[] = 'admin-page';
-            $body_class[] = sprintf('user-status-%s', get_current_supervisor_role());
+            $body_class[] = sprintf('user-role-%s', get_current_supervisor_role());
         }
     } else {
         $body_class[] = 'guess';
@@ -177,12 +177,30 @@ function get_admin_footer_template(bool $reLoad = false)
  */
 function &global_admin_title() : string
 {
-    static $admin_title = 'Dashboard';
+    static $admin_title = null;
     if (!is_string($admin_title)) {
         $admin_title = 'Dashboard';
     }
 
     return $admin_title;
+}
+
+function &global_title() : string
+{
+    static $title;
+    if (!is_string($title)) {
+        $title = get_option('site_title', null, get_current_site_id(), $found);
+        if (!$found || !is_string($title)) {
+            $title = '';
+        }
+        if (is_404()) {
+            $title = hook_apply('title_404', ('404 Page Not Found'));
+        } elseif (is_405()) {
+            $title = hook_apply('title_405', ('405 Method Not Allowed'));
+        }
+    }
+
+    return $title;
 }
 
 /**
@@ -237,6 +255,20 @@ function get_admin_button_submit(): string
 }
 
 /**
+ * @return string
+ */
+function get_button_submit(): string
+{
+    return hook_apply(
+        'button_submit',
+        sprintf(
+            '<button type="submit" class="btn-primary btn btn-block admin-submit-button">%s</button>',
+            trans('Sign In')
+        )
+    );
+}
+
+/**
  *
  */
 function admin_login_form()
@@ -281,10 +313,12 @@ function admin_login_form()
             <?php if ($interim_login) : ?>
                 <input type="hidden" name="interim" class="hide" value="1">
             <?php endif;?>
-            <div class="form-check admin-checkbox-input">
+            <div class="form-check checkbox-input admin-checkbox-input">
                 <input type="checkbox" name="remember" id="remember" class="form-check-input"
-                       value="yes"<?= hook_apply('remember_me',
-                    post('remember') === 'yes') === true ? ' checked' : ''; ?>>
+                       value="yes"<?= hook_apply(
+                            'remember_me',
+                            post('remember') === 'yes') === true ? ' checked' : '';
+                       ?>>
                 <label class="form-check-label" for="remember"><?php trans_e('Remember Me'); ?></label>
             </div>
         </div>
@@ -294,6 +328,117 @@ function admin_login_form()
             <?= get_admin_button_submit(); ?>
         </div>
     </form>
+    <script type="text/javascript">
+        ;(function () {
+            try {
+                var $switch = document.querySelector('[data-switch]');
+                var $target = document.querySelector('input' + $switch.getAttribute('data-target')),
+                    sq = JSON.parse($switch.getAttribute('data-switch')),
+                    $current = 0;
+                if (!$target) {
+                    return;
+                }
+                $switch.parentElement.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    $target.setAttribute('type', $current === 0 ? 'text' : 'password');
+                    $switch.classList.replace(
+                        sq[$current],
+                        sq[$current ? 0 : 1]
+                    );
+                    $current = $current ? 0 : 1;
+                });
+            } catch (e) {
+                // pass
+            }
+        })(window);
+    </script>
+    <?php
+}
+
+/**
+ * Login Form
+ */
+function login_form()
+{
+    $interim_login = isset($_REQUEST['interim']);
+    ?>
+    <form<?= get_login_form_attributes(); ?>>
+        <?php hook_run('login_form_before'); ?>
+        <div class="form-group">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label for="username" class="input-group-text col-form-label"
+                           title="<?php esc_attr_trans_e('Username'); ?>">
+                        <i class="icofont icofont-user-alt-3"></i>
+                    </label>
+                </div>
+                <input class="form-control" name="username" placeholder="<?php esc_attr_trans_e('Username'); ?>"
+                       type="text" id="username" value="<?=
+                htmlspecialchars(
+                    (string)hook_apply('input_username', (string)post('username')),
+                    ENT_QUOTES | ENT_COMPAT
+                );
+                ?>" required>
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label for="password" class="input-group-text col-form-label"
+                           title="<?php esc_attr_trans_e('Password'); ?>">
+                        <i class="icofont icofont-lock"></i>
+                    </label>
+                </div>
+                <input class="form-control" name="password" placeholder="<?php esc_attr_trans_e('Password'); ?>"
+                       type="password" id="password" value="" required>
+                <div class="input-group-append">
+                    <button type="button" class="input-group-text no-outline btn no-shadow">
+                        <i class="icofont icofont-eye" data-target="#password"
+                           data-switch='["icofont-eye", "icofont-eye-blocked"]'></i>
+                    </button>
+                </div>
+            </div>
+            <input type="hidden" name="token" class="hide" value="<?= get_token_hash();?>">
+            <?php if ($interim_login) : ?>
+                <input type="hidden" name="interim" class="hide" value="1">
+            <?php endif;?>
+            <div class="form-check checkbox-input">
+                <input type="checkbox" name="remember" id="remember" class="form-check-input"
+                       value="yes"<?= hook_apply(
+                           'remember_me',
+                            post('remember') === 'yes') === true ? ' checked' : '';
+                       ?>>
+                <label class="form-check-label" for="remember"><?php trans_e('Remember Me'); ?></label>
+            </div>
+        </div>
+        <?php hook_run('login_form_after'); ?>
+
+        <div class="form-group">
+            <?= get_button_submit(); ?>
+        </div>
+    </form>
+    <script type="text/javascript">
+        ;(function () {
+            try {
+                var $switch = document.querySelector('[data-switch]');
+                var $target = document.querySelector('input' + $switch.getAttribute('data-target')),
+                    sq = JSON.parse($switch.getAttribute('data-switch')),
+                    $current = 0;
+                if (!$target) {
+                    return;
+                }
+                $switch.parentElement.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    $target.setAttribute('type', $current === 0 ? 'text' : 'password');
+                    $switch.classList.replace(
+                        sq[$current],
+                        sq[$current ? 0 : 1]
+                    );
+                    $current = $current ? 0 : 1;
+                });
+            } catch (e) {
+                // pass
+            }
+        })(window);
+    </script>
     <?php
 }
 
@@ -476,18 +621,24 @@ function get_template_footer(): bool
  */
 function get_title(): string
 {
-    $title = get_option('site_title', null, get_current_site_id(), $found);
-    if (!$found || !is_string($title)) {
-        $title = '';
-    }
+    $title =& global_title();
     if (is_404()) {
-        $title = hook_apply('title_404', '404 Page Not Found');
+        $title = hook_apply('title_404', ('404 Page Not Found'));
     } elseif (is_405()) {
-        $title = hook_apply('title_405', '405 Method Not Allowed');
+        $title = hook_apply('title_405', ('405 Method Not Allowed'));
     }
 
     $title = hook_apply('title', (string)$title);
     return $title;
+}
+
+/**
+ * @param string $the_title
+ */
+function set_title(string $the_title)
+{
+    $title =& global_title();
+    $title = $the_title;
 }
 
 /**
@@ -496,7 +647,7 @@ function get_title(): string
 function render_title_tag()
 {
     $title = get_title();
-    echo '<title>' . esc_html_trans($title) . '</title>';
+    echo '<title>' . esc_html_trans($title) . "</title>\n";
 }
 
 /* -------------------------------------------------

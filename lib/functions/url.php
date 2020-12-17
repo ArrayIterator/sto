@@ -240,6 +240,17 @@ function get_login_url(): string
 /**
  * @return string
  */
+function get_reset_password_url(): string
+{
+    return hook_apply(
+        'forgot_url',
+        get_site_url(get_reset_password_path())
+    );
+}
+
+/**
+ * @return string
+ */
 function current_login_url(): string
 {
     return is_admin_page()

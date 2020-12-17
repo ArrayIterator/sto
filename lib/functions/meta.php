@@ -223,7 +223,7 @@ function route_public(): RouteApi
         $api = preg_quote(get_admin_path(), '#');
         $route_api = new RouteApi(
             \route(),
-            "{path: (?!{$api})}",
+            "{__not_admin: (?!{$api})}",
             true
         );
     }

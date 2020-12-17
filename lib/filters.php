@@ -20,11 +20,14 @@ hook_add('admin_html_head', 'render_admin_title_tag', 1);
 hook_add('html_head', 'assets_enqueue_scripts', 1);
 hook_add('html_head', 'assets_print_styles', 8);
 hook_add('html_head', 'assets_print_head_scripts', 9);
+hook_add('assets_print_styles', 'do_assets_print_styles', 9);
+// hook_add('assets_print_styles', 'do_assets_print_styles', 9);
 
 hook_add('admin_html_head', 'assets_admin_enqueue_scripts', 1);
 hook_add('admin_html_head', 'assets_admin_print_styles', 8);
 hook_add('admin_html_head', 'assets_print_head_scripts', 9);
 hook_add('assets_admin_print_styles', 'do_assets_admin_print_styles', 9);
+
 
 hook_add('html_footer', 'assets_print_footer_scripts', 20);
 hook_add('html_footer', 'assets_print_footer_scripts', 20);

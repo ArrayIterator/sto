@@ -69,4 +69,9 @@ return [
     'Reconnecting...' => 'Menghubungkan ulang...',
     'Access Denied' => 'Akses Dibatasi',
     'ACCESS DENIED' => 'AKSES DIBATASI',
+
+    // PUBLIC
+    'Login To Dashboard' => 'Masuk Ke Dasbor',
+    '404 Page Not Found' => '404 Halaman Tidak Ditemukan',
+    '405 Method Not Allowed' => '405 Metode Tidak Diijinkan',
 ];

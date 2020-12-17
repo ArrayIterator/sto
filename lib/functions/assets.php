@@ -390,6 +390,20 @@ function do_assets_admin_print_styles(): array
 }
 
 /**
+ * @return array
+ */
+function do_assets_print_styles(): array
+{
+    if (is_admin_page()) {
+        return [];
+    }
+
+    $styles = assets_styles();
+    $styles->doItems(false);
+    return $styles->done;
+}
+
+/**
  * Default Assets
  */
 function admin_default_assets()

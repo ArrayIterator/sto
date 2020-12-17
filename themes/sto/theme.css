@@ -1,12 +1,168 @@
 /*!
- * Name: Example Theme
- * Author: STO
+ * Name: Default Theme
+ * Author: ArrayIterator
  * Version: 1.0.0
- * Author URI: https://www.example.com
+ * Author URI:
  * SiteWide: true
- * URI: https://www.example.com/plugin
+ * URI:
  * @version: 1.0.0
- * @link http://www.example.com/plugin
+ * @link
  * @license MIT
+ * @require bootstrap@4
  * @todo add theme completion
  */
+
+.form-control,
+.btn,
+.login-text {
+    font-weight: lighter;
+    letter-spacing: 1px;
+}
+.form-control:focus,
+.btn:focus {
+    box-shadow: none;
+}
+.form-control:focus {
+    border-color: #aaa
+}
+
+/*! CHECKBOX
+---------------------------------- */
+.checkbox-input {
+    line-height: 1.4;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    box-shadow: none;
+    z-index: 1;
+    display: block;
+    font-size: 13px;
+    margin-bottom: 2em;
+}
+.checkbox-input input[type=checkbox] {
+    height: 0;
+    width: 0;
+    border: 0;
+    cursor: pointer;
+}
+.checkbox-input input[type=checkbox]:focus {
+    outline: none;
+}
+.checkbox-input input[type=checkbox]::before {
+    content: '';
+    background-color: #fff;
+    width: 30px;
+    height: 15px;
+    border: 1px solid #ddd;
+    display: block;
+    position: absolute;
+    border-radius: 15px;
+    z-index: 2;
+    box-shadow: inset -2px 0 0 rgba(0,0,0,0);
+}
+.checkbox-input input[type=checkbox]:checked::before {
+    box-shadow: inset 2px 0 2px rgba(0,0,0,.1);
+}
+.checkbox-input input[type=checkbox]:focus::after {
+    box-shadow: 0 0 2px rgba(0,0,0,.2);
+}
+.checkbox-input input[type=checkbox]::after {
+    content: '';
+    border: 1px solid #aaa;
+    background-color: #ccc;
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    margin-right: 16px;
+    position: relative;
+    display: inline-block;
+    z-index: 3;
+    left: 0;
+    transition: all ease .1s;
+}
+.checkbox-input input[type=checkbox]:checked::after {
+    border-color: #007bff;
+    background-color: #007bff;
+    left: 16px;
+}
+.checkbox-input label {
+    cursor: pointer;
+    position: relative;
+    margin-left: 15px;
+    line-height: 1.8;
+}
+.login-page {
+    background-color: #f9f9f9;
+}
+.login-page .login-form-wrap {
+    margin-top: 20vh;
+    font-weight: lighter;
+    margin-bottom: 2em;
+}
+.login-page .login-form-wrapper {
+    position: relative;
+    z-index: 20;
+    padding: 30px;
+}
+.login-page .login-form-wrap {
+    border: 0;
+    position: relative;
+    background-color: #fff;
+    z-index: 10;
+    box-shadow: 1px 1px 4px 0 #ccc;
+}
+
+.login-page .login-form-wrap::before,
+.login-page .login-form-wrap::after {
+    content: "";
+    z-index: 5;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fff;
+
+    box-shadow: 1px 4px 8px 0 #ccc;
+    -webkit-transform: rotate(3deg);
+    -moz-transform: rotate(3deg);
+    -o-transform: rotate(3deg);
+    -ms-transform: rotate(3deg);
+    transform: rotate(3deg);
+}
+.login-page .login-form-wrap::after {
+    box-shadow: 1px 4px 8px 0 #ccc;
+    -webkit-transform: rotate(-3deg);
+    -moz-transform: rotate(-3deg);
+    -o-transform: rotate(-3deg);
+    -ms-transform: rotate(-3deg);
+    transform: rotate(-3deg);
+}
+.login-page .login-form-wrapper .form-control,
+.login-page .login-form-wrapper .input-group * {
+    border:0;
+    background-color: #fff;
+    border-radius:0;
+}
+.login-page .login-form-wrapper .input-group {
+    overflow: hidden;
+}
+.login-page .login-form-wrapper .input-group > *,
+.login-page .login-form-wrapper .form-control {
+    border-bottom: 1px solid #ddd;
+}
+.login-page .login-form-wrapper .form-control + .input-group-append > .btn {
+    transition: all ease .2s;
+    position: relative;
+}
+.login-page .login-form-wrapper .form-control:focus + .input-group-append > .btn {
+    margin-left:100%;
+}
+.login-page .forgot-password {
+    font-size: 75%;
+    text-align: center;
+    margin: 3em 0 2em;
+}
+a.forgot-password-link {
+    color: #444;
+}

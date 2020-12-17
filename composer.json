@@ -6,7 +6,7 @@
     "GPL-3.0-or-later",
     "proprietary"
   ],
-  "homepage": "",
+  "homepage": "https://www.arrayiterator.com",
   "authors": [
     {
       "name": "arrayiterator",
@@ -34,10 +34,12 @@
   },
   "autoload": {
     "psr-0": {
-      "ArrayIterator\\": "lib/classes"
+      "ArrayIterator\\": "lib/classes",
+      "ArrayIterator\\Controller\\": "lib/Controller"
     },
     "psr-4": {
-      "ArrayIterator\\": "lib/classes"
+      "ArrayIterator\\": "lib/classes",
+      "ArrayIterator\\Controller\\": "lib/Controller"
     },
     "classmap": [
       "lib/classes"

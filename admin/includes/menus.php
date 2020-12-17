@@ -3,7 +3,7 @@
 use ArrayIterator\Menu;
 use ArrayIterator\Menus;
 
-function admin_menu_array() : array
+function admin_sidebar_menu_array(): array
 {
     $menus = [
         'dashboard' => [
@@ -24,12 +24,6 @@ function admin_menu_array() : array
                     'link' => get_admin_url('about.php'),
                     'hide' => !admin_is_allowed('about.php'),
                     'position' => 5,
-                ],
-                'report' => [
-                    'name' => trans('Report'),
-                    'link' => get_admin_url('report.php'),
-                    'hide' => !admin_is_allowed('report.php'),
-                    'position' => 25,
                 ],
             ]
         ],
@@ -215,28 +209,36 @@ function admin_menu_array() : array
                 ]
             ]
         ],
+        'report' => [
+            'name' => trans('Report'),
+            'link' => get_admin_url('report.php'),
+            'hide' => !admin_is_allowed('report.php'),
+            'icon' => 'chart-line',
+            'position' => 900,
+            'menus' => [],
+        ],
         'tools' => [
             'name' => trans('Tools'),
             'link' => get_admin_url('tools.php'),
             'hide' => !admin_is_allowed('tools.php'),
             'icon' => 'tools-alt-2',
-            'position' => 900,
+            'position' => 1000,
             'menus' => [
 
             ]
         ],
-        'Profile' => [
+        'profile' => [
             'name' => trans('Accounts'),
             'link' => get_admin_url('profile.php'),
             'hide' => !admin_is_allowed('profile.php'),
             'icon' => 'key',
-            'position' => 1000,
+            'position' => 1100,
             'menus' => [
                 'profile' => [
                     'name' => trans('Profile'),
                     'link' => get_admin_url('profile.php'),
                     'hide' => !admin_is_allowed('profile.php'),
-                    'position' => 1000
+                    'position' => 1100
                 ],
                 'logout' => [
                     'name' => trans('Logout'),
@@ -244,7 +246,7 @@ function admin_menu_array() : array
                     'hide' => false,
                     'attr' => [
                         'class' => 'logout color-red',
-                        'onclick' => 'return confirm('.json_encode(trans('Are You Sure ... ?')).');'
+                        'onclick' => 'return confirm(' . json_encode(trans('Are You Sure ... ?')) . ');'
                     ],
                     'position' => 1100
                 ],
@@ -252,20 +254,41 @@ function admin_menu_array() : array
         ],
     ];
 
-    return hook_apply('admin_menu_array', $menus);
+    return hook_apply('admin_sidebar_menu_array', $menus);
+}
+
+/**
+ * @return array
+ */
+function admin_top_bar_menu_array(): array
+{
+    return hook_apply('admin_top_bar_menu_array', []);
 }
 
 /**
  * @return Menus
  */
-function admin_sidebar_menu() : Menus
+function admin_sidebar_menu(): Menus
 {
     /**
      * @var Menus $menu
      */
     $menu = hook_apply(
         'admin_sidebar_menu',
-        \menus()->fromArray(admin_menu_array())
+        menus()->fromArray(admin_sidebar_menu_array())
+    );
+    $menu->setSiteUrl(get_admin_url());
+    return $menu;
+}
+
+/**
+ * @return Menus
+ */
+function admin_top_bar_menu(): Menus
+{
+    $menu = hook_apply(
+        'admin_top_bar_menu',
+        menus()->fromArray(admin_top_bar_menu_array())
     );
     $menu->setSiteUrl(get_admin_url());
     return $menu;
@@ -294,8 +317,8 @@ function admin_sidebar_menu_callback(
         return false;
     }
 
-    if (rtrim($menu->getUrl(), '/').'/index.php' === $currentUrl) {
-        $classes = $menu->getLinkAttributes()['class']??'';
+    if (rtrim($menu->getUrl(), '/') . '/index.php' === $currentUrl) {
+        $classes = $menu->getLinkAttributes()['class'] ?? '';
         $classes .= ' active current-menu';
         $menu->setLinkAttribute('class', $classes);
     }
@@ -339,21 +362,21 @@ function admin_sidebar_menu_callback(
         $url = get_admin_url('index.php');
     }
     if (preg_match(
-        '#/'.preg_quote(get_admin_base_name_file()).'$#',
+        '#/' . preg_quote(get_admin_base_name_file()) . '$#',
         explode('?', $url)[0]
     )) {
-        $classes = $parentMenu->getAttributes()['class']??'';
+        $classes = $parentMenu->getAttributes()['class'] ?? '';
         $classes .= ' has-active-submenu';
         $parentMenu->setAttributes('class', $classes);
         if (get_admin_base_name_file() === 'modules.php') {
-            $classes = $menu->getLinkAttributes()['class']??'';
+            $classes = $menu->getLinkAttributes()['class'] ?? '';
             $args = explode('?', $menu->getUrl());
             array_shift($args);
             $args = implode('?', $args);
             parse_str($args, $q);
             if ($q === query_param('status')) {
                 $menu->setLinkAttribute('class', $classes);
-                $classes = $menu->getAttributes()['class']??'';
+                $classes = $menu->getAttributes()['class'] ?? '';
                 $classes .= ' has-active-submenu';
                 $menu->setAttributes('class', $classes);
             } else {
@@ -361,11 +384,11 @@ function admin_sidebar_menu_callback(
             }
         } else {
 
-            $classes = $menu->getLinkAttributes()['class']??'';
-            $classes.= ' current-menu active';
+            $classes = $menu->getLinkAttributes()['class'] ?? '';
+            $classes .= ' current-menu active';
             $menu->setLinkAttribute('class', $classes);
 
-            $classes = $menu->getAttributes()['class']??'';
+            $classes = $menu->getAttributes()['class'] ?? '';
             $classes .= ' has-active-submenu';
             $menu->setAttributes('class', $classes);
         }
@@ -375,15 +398,16 @@ function admin_sidebar_menu_callback(
 }
 
 /**
+ * @param callable|null $callback
  * @return string
  */
-function admin_sidebar_menu_navigation(callable $callback = null) : string
+function admin_sidebar_menu_navigation(callable $callback = null): string
 {
     $menu = admin_sidebar_menu()->build(
         'ul',
         [
             'id' => 'navigation-sidebar',
-            'class'=> 'sidebar-menu nav-menu admin-sidebar-menu'
+            'class' => 'sidebar-menu nav-menu admin-sidebar-menu'
         ],
         1,
         true,
@@ -394,6 +418,34 @@ function admin_sidebar_menu_navigation(callable $callback = null) : string
     if (!is_array($newMenu)) {
         $newMenu = $menu;
     }
+
+    unset($menu);
+    return implode("\n", $newMenu);
+}
+
+/**
+ * @param callable|null $callback
+ * @return string
+ */
+function admin_top_bar_menu_navigation(callable $callback = null): string
+{
+    $menu = admin_top_bar_menu()->build(
+        'ul',
+        [
+            'id' => 'navigation-top',
+            'class' => 'top-menu nav-menu admin-top-menu'
+        ],
+        4,
+        true,
+        'admin_sidebar_menu_callback',
+        get_current_url()
+    );
+
+    $newMenu = $callback ? $callback($menu) : $menu;
+    if (!is_array($newMenu)) {
+        $newMenu = $menu;
+    }
+
     unset($menu);
     return implode("\n", $newMenu);
 }

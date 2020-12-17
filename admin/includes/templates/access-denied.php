@@ -7,7 +7,10 @@ get_admin_header_template();
 ?>
     <div class="mt-5"></div>
     <div class="alert alert-danger">
-        <?= trans('ACCESS DENIED');?>
+        <?=
+        // @todo completion templates
+        trans('ACCESS DENIED');
+        ?>
     </div>
 <?php
 get_admin_footer_template();

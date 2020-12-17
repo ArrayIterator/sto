@@ -298,6 +298,7 @@ class Menus implements Serializable
             $classesLink[] = 'current-menu';
             $classesLink[] = 'active';
         }
+
         $classesLink = array_filter(array_unique($classesLink));
         $linkAttrString = '';
         $linkAttr = [
@@ -358,6 +359,11 @@ class Menus implements Serializable
         if (!empty($this->matches) && $deep === 0) {
             $classes[] = 'has-active-submenu';
         }
+
+        if ($deep === 0 && in_array('has-active-submenu', $classes)) {
+            $classes[] = 'current-has-active-submenu';
+        }
+
         if ($deep > 0) {
             foreach ($ids as $idx) {
                 if (isset($this->matches[$deep + 1][$idx])) {
@@ -383,6 +389,7 @@ class Menus implements Serializable
         unset($attrs, $classes);
         $html = "<{$currentTag}{$attr}>\n";
         $icon = Normalizer::normalizeHtmlClass($icon);
+        $nameText = "<span class=\"link-text\">{$name}</span>";
         if ($icon !== '') {
             $icon = ! preg_match('~icofont[-]~', $icon)
                 ? 'icofont-'.$icon
@@ -390,11 +397,11 @@ class Menus implements Serializable
             $icon = "<span class=\"menu-icon\"><i class=\"{$icon}\"></i></span> ";
         }
 
-        $html .= "<a{$linkAttrString}>{$icon}{$name}</a>\n";
+        $html .= "<a{$linkAttrString}>{$icon}{$nameText}</a>\n";
         if ($menuStr !== '') {
             $classes = [
                 'nav-menu',
-                "sub-menu-id-{$menuId}",
+                "sub-menu-id-".strtolower($menuId),
                 "sub-nav-menu",
                 "sub-nav-menu-level-{$subDeep}"
             ];

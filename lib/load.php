@@ -130,8 +130,6 @@ cache_add_global_groups([
 
 // REQUIRE FILTERS BEFORE MODULE LOAD
 require_once __DIR__ . '/filters.php';
-// LOAD ROUTES
-require_once __DIR__ . '/routes.php';
 
 if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
     $loadedModules = [];
@@ -183,6 +181,9 @@ if (!defined('ADMIN_LOGOUT_PAGE') || !ADMIN_LOGOUT_PAGE) {
     // set cookie token
     set_token_cookie();
 }
+
+// LOAD ROUTES AFTER MODULE LOADED
+require_once __DIR__ . '/routes.php';
 
 if (!is_admin_page()) {
     // LOAD THEME

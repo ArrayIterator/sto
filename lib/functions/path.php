@@ -146,6 +146,13 @@ function get_login_path(): string
 /**
  * @return string
  */
+function get_reset_password_path() : string
+{
+    return '/'.trim((string) hook_apply('reset_password_path', 'reset-password'), '/');
+}
+/**
+ * @return string
+ */
 function get_themes_path(): string
 {
     static $loginPath = null;

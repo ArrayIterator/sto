@@ -6,12 +6,14 @@ body {
     /*min-height: 100vh;*/
     /*font-family: -apple-system,BlinkMacSystemFont,Roboto,"Helvetica Neue",Helvetica,"Segoe UI",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";*/
 }
+
 .no-outline,
 .no-outline:focus,
 .no-outline:hover,
 .no-outline:visited {
     outline: none !important;
 }
+
 .no-shadow,
 .no-shadow:focus,
 .no-shadow:hover,
@@ -26,9 +28,11 @@ body.login-page .login-wrap-row {
     margin-left: 0;
     margin-right: 0;
 }
+
 .login-form-wrap-col-left {
     background-color: #f1f1f1;
 }
+
 body.login-page .login-form-wrap-col-right {
     min-height: 100vh;
     display: block;
@@ -36,9 +40,11 @@ body.login-page .login-form-wrap-col-right {
     border: 0;
     border-left: 1px solid #ddd;
 }
+
 body.login-page .alert {
     font-weight: lighter;
 }
+
 .login-form-wrap-col-right .login-form-wrap {
     margin-top: calc(50% - 5%);
     padding-bottom: 2em;
@@ -48,21 +54,26 @@ body.login-page .alert {
     font-weight: lighter;
     letter-spacing: 1px;
 }
+
 body.login-page .interim .login-form-wrap-col-right,
 body.login-page .login-wrap-row.interim {
     min-height: auto;
 }
+
 body.login-page .interim .login-form-wrap-col-right {
     border: 0;
     margin: 10px auto;
 }
+
 body.login-page .interim .login-form-wrap-col-right .login-form-wrap {
     margin: 20px 10px;
-    padding:10px;
+    padding: 10px;
 }
+
 body.login-page .interim .admin-login-text {
     text-align: center;
 }
+
 .admin-submit-button,
 .admin-login-form input[type=text],
 .admin-login-form input[type=password] {
@@ -70,16 +81,19 @@ body.login-page .interim .admin-login-text {
     letter-spacing: 1px;
     outline: none;
 }
+
 .admin-login-form input[type=text]:focus,
 .admin-login-form input[type=password]:focus {
     box-shadow: none;
     border-color: #999;
     outline: none;
 }
+
 .admin-submit-button:focus {
     box-shadow: none;
     outline: none;
 }
+
 .admin-checkbox-input {
     line-height: 1.4;
     cursor: pointer;
@@ -91,15 +105,18 @@ body.login-page .interim .admin-login-text {
     font-size: 13px;
     margin-bottom: 2em;
 }
+
 .admin-checkbox-input input[type=checkbox] {
     height: 0;
     width: 0;
     border: 0;
     cursor: pointer;
 }
+
 .admin-checkbox-input input[type=checkbox]:focus {
     outline: none;
 }
+
 .admin-checkbox-input input[type=checkbox]::before {
     content: '';
     background-color: #fff;
@@ -110,14 +127,17 @@ body.login-page .interim .admin-login-text {
     position: absolute;
     border-radius: 15px;
     z-index: 2;
-    box-shadow: inset -2px 0 0 rgba(0,0,0,0);
+    box-shadow: inset -2px 0 0 rgba(0, 0, 0, 0);
 }
+
 .admin-checkbox-input input[type=checkbox]:checked::before {
-    box-shadow: inset 2px 0 2px rgba(0,0,0,.1);
+    box-shadow: inset 2px 0 2px rgba(0, 0, 0, .1);
 }
+
 .admin-checkbox-input input[type=checkbox]:focus::after {
-    box-shadow: 0 0 2px rgba(0,0,0,.2);
+    box-shadow: 0 0 2px rgba(0, 0, 0, .2);
 }
+
 .admin-checkbox-input input[type=checkbox]::after {
     content: '';
     border: 1px solid #aaa;
@@ -132,11 +152,13 @@ body.login-page .interim .admin-login-text {
     left: 0;
     transition: all ease .1s;
 }
+
 .admin-checkbox-input input[type=checkbox]:checked::after {
     border-color: #007bff;
     background-color: #007bff;
     left: 16px;
 }
+
 .admin-checkbox-input label {
     cursor: pointer;
     position: relative;
@@ -149,111 +171,132 @@ body.login-page .interim .admin-login-text {
 #interim-login {
     position: fixed;
     z-index: 9999;
-    left:0;
-    right:0;
-    top:0;
-    bottom:0;
-    background-color: rgba(0,0,0,.3);
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, .3);
     width: 100%;
 }
+
 #interim-login iframe {
     width: 350px;
     height: 350px;
     margin: auto;
     position: absolute;
-    display:block;
+    display: block;
     top: 50%;
     background-color: #fff;
     left: 50%;
     margin-top: -175px;
     margin-left: -175px;
-    border:1px solid #999;
-    overflow:hidden;
+    border: 1px solid #999;
+    overflow: hidden;
     border-radius: 5px;
 }
 
 /*! SIDEBAR & CONTENT
  ------------------------ */
 #left-area {
-    float: left;
     width: 200px;
     height: 100vh;
     min-height: 300px;
-    left:0;
-    transition:all ease .1s;
+    left: 0;
+    transition: all ease .1s;
     overflow-y: auto;
-    overflow-x:hidden;
+    overflow-x: hidden;
+    position: fixed;
 }
+
 #admin-sidebar {
     overflow-y: auto;
-    height:100%;
-    padding:0;
-    margin:0;
+    height: 100%;
+    padding: 0;
+    margin: 0;
     width: auto;
     overflow-x: hidden;
     margin-right: -40px;
     padding-right: 40px;
-    position:relative;
+    position: relative;
     z-index: 2;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
 }
+
+#admin-sidebar::-webkit-scrollbar {
+    display: none;
+}
+
 #sidebar-switch {
-    position:absolute;
+    position: absolute;
     bottom: 0;
     height: 40px;
     background-color: #3076b1;
-    width:100%;
+    width: 100%;
     text-align: right;
     line-height: 40px;
-    right:0;
-    transition:all ease .1s;
-    border-top: 1px solid rgba(0,0,0,.1);
+    right: 0;
+    transition: all ease .1s;
+    border-top: 1px solid rgba(0, 0, 0, .1);
     z-index: 3;
 }
+
 #sidebar-switch i {
     cursor: pointer;
     padding: 8px;
     font-size: 14px;
     border-radius: 50%;
-    background-color: rgba(0,0,0,.2);
+    background-color: rgba(0, 0, 0, .2);
     margin: 1em;
 }
 
 #right-area {
     float: right;
     width: calc(100% - 200px);
-    display:block;
+    display: block;
     height: 100vh;
     background-color: #f1f1f1;
     overflow-y: auto;
-    transition:width ease .1s;
+    transition: width ease .1s;
     margin: 0;
     padding: 0 15px;
-    position:relative;
+    position: relative;
 }
+
 .sidebar-menu {
     margin-top: 1em;
     margin-bottom: 60px;
 }
+
 .sidebar-menu,
 .sidebar-menu ul,
 .sidebar-menu li {
     list-style: none;
     margin-left: 0;
-    padding-left:0;
+    padding-left: 0;
 }
+
 .sidebar-menu {
-    width:100%;
-    position:relative;
+    width: 100%;
+    position: relative;
 }
+
 .sidebar-menu > li {
     display: block;
 }
+
 .sidebar-menu > li > a {
     padding: 12px 10px;
-    display:block;
+    display: block;
     border: 0;
+    vertical-align: middle;
 }
-.sidebar-menu > li > a span.menu-icon {
+
+.sidebar-menu > li > a .link-text {
+    /*pass*/
+}
+
+.sidebar-menu > li > a span.menu-icon > ::before {
     padding: 0;
     text-align: center;
     font-size: 16px;
@@ -262,44 +305,54 @@ body.login-page .interim .admin-login-text {
     display: inline-block;
     line-height: 28px;
     border-radius: 50%;
-    background-color:rgba(0,0,0, .2);
+    background-color: rgba(0, 0, 0, .2);
     margin: 0 10px 0 0;
-    border: 1px solid rgba(0,0,0,.1);
+    border: 1px solid rgba(0, 0, 0, .1);
 }
 
-.sidebar-menu > li.has-active-submenu > a span.menu-icon {
+.sidebar-menu > li.has-active-submenu > a span.menu-icon > ::before {
     background-color: #133654;
     color: #fff;
 }
+
+.sidebar-menu > li.current-has-active-submenu > a span.menu-icon > ::before {
+    background-color: #f1f1f1;
+    color: #333;
+    border-color: #f9f9f9;
+}
+
 .sidebar-menu > li ul a {
     padding: 10px 15px;
-    display:block;
+    display: block;
 }
 
 .sidebar-menu > li ul li.color-red a {
     background-color: #c75b66;
 }
+
 .sidebar-menu > li ul li.color-red a:hover {
     background-color: #af4550;
 }
 
 .sidebar-menu > li > ul {
-    display:none;
+    display: none;
 }
 
 .sidebar-menu > li > ul > li ul {
-    display:none;
+    display: none;
 }
 
 .sidebar-menu > li.has-active-submenu > ul {
-    display:block;
+    display: block;
 }
+
 #left-area.closed {
     left: -200px;
     overflow: visible;
 }
+
 #left-area.closed + #right-area {
-    margin-left:0;
+    margin-left: 0;
     width: 100%;
 }
 
@@ -316,11 +369,13 @@ body.login-page .interim .admin-login-text {
     font-size: 14px;
     position: absolute;
     min-height: 100vh;
-    height:100%;
+    height: 100%;
 }
+
 #left-area.closed #sidebar-switch {
     /*     background-color: #3a85c5; */
 }
+
 #left-area,
 .sidebar-menu a {
     color: #fff;
@@ -334,69 +389,95 @@ body.login-page .interim .admin-login-text {
 .sidebar-menu > li > a:hover {
     background-color: rgba(255, 255, 255, .1);
 }
+
 .sidebar-menu > li > ul > li a.active {
-    background-color: rgba(0,0,0, .1);
+    background-color: rgba(0, 0, 0, .1);
 }
+
 .sidebar-menu > li > ul > li a:hover {
-    background-color: rgba(0,0,0, .2);
+    background-color: rgba(0, 0, 0, .2);
 }
+
+.sidebar-menu > li.current-has-active-submenu > a,
 .sidebar-menu > li.has-active-submenu > a {
     background-color: rgba(255, 255, 255, .1);
-    border-right: 4px solid rgba(0,0,0,.3);
+    border-right: 4px solid rgba(0, 0, 0, .3);
+}
+
+.sidebar-menu > li.current-has-active-submenu > a {
+    border-color: #333;
 }
 
 /*! TOP BAR
  ------------------------ */
 .admin-top-bar {
-    list-style:none;
+    list-style: none;
     margin-left: -15px;
     margin-right: -15px;
     background-color: #3076b1;
     color: #fff;
-    text-decoration:none;
+    text-decoration: none;
     position: relative;
     z-index: 998;
 }
 
 .admin-top-bar input {
-    display:none;
+    display: none;
 }
+
 .admin-top-bar label {
-    user-select:none;
+    user-select: none;
 }
+
 .admin-top-bar label,
 .admin-top-bar a {
     text-decoration: none;
     color: #fff;
     font-weight: lighter;
-    cursor:pointer;
+    cursor: pointer;
     margin: 0;
 }
 
 .admin-top-bar ul,
 .admin-top-bar ul li {
-    list-style:none;
-    padding:0;
+    list-style: none;
+    padding: 0;
     margin: 0;
 }
-.admin-top-bar ul.navbar-nav {
-    display:block;
-    /*     float: right; */
-    text-align: right;
-    padding: 10px 20px;
-    position: relative;
+
+.top-bar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
 }
 
-.admin-top-bar ul.navbar-nav > li > a {
+.top-bar > ul {
+    order: 1;
+    align-self: flex-start;
+    flex-grow: 19;
+}
+
+.top-bar > ul.navbar-account {
+    order: 2;
+    padding: 12px 20px;
+    position: relative;
+    text-align: center;
+    align-self: flex-end;
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, .2);
+    font-size: 13px;
+}
+
+.top-bar > ul.navbar-account > li > a {
     letter-spacing: 1px;
     font-size: 15px;
     line-height: 20px;
     text-transform: uppercase;
 }
 
-.admin-top-bar ul.navbar-nav > li ul {
+.top-bar > ul.navbar-account > li ul {
     position: absolute;
-    display:none;
+    display: none;
     right: 10px;
     top: 44px;
     padding: 20px 20px 0px;
@@ -409,39 +490,135 @@ body.login-page .interim .admin-login-text {
     border-radius: 0 0 5px 5px;
 }
 
-.admin-top-bar ul.navbar-nav > li ul li {
+.top-bar > ul.navbar-account > li ul li {
     color: #444;
     padding: 5px 10px;
     font-size: 13px;
 }
 
-.admin-top-bar ul.navbar-nav > li ul a {
+.top-bar > ul.navbar-account > li ul a {
     color: #444;
     padding: 10px;
     border-top: 1px solid #eee;
-    display:block;
-}
-.admin-top-bar ul.navbar-nav > li > *:checked + ul {
     display: block;
 }
 
-.admin-top-bar ul.navbar-nav > li ul li .img-avatar {
+.top-bar > ul.navbar-account > li > input:checked + ul {
+    display: block;
+}
+
+.top-bar > ul.navbar-account > li ul li.profile-picture {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.top-bar > ul.navbar-account > li ul li .img-avatar {
     height: 140px;
     width: 140px;
-    border: 1px solid rgba(0,0,0,.1);
+    border: 1px solid rgba(0, 0, 0, .1);
     padding: 10px;
     overflow: hidden;
     text-align: center;
-    margin: 0 auto;
+    margin: 0;
+    font-size: 0;
+    line-height: 140px;
     display: block;
     border-radius: 50%;
+    position: relative;
 }
-.admin-top-bar ul.navbar-nav > li ul img {
-    height: 200px;
-    display:inline-block;
+
+.top-bar > ul.navbar-account > li ul img {
+    z-index: 1;
+    height: 140px;
     width: auto;
-    margin: auto;
+    /*display:block;*/
     text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.top-bar ul.top-menu {
+    /*     overflow-x:auto;
+        overflow-y: visible;
+        white-space: nowrap; */
+    padding: 0 10px;
+    touch-action: pan-x;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    margin-right: 30px;
+    margin-left: 30px;
+}
+
+.top-bar ul.top-menu::-webkit-scrollbar {
+    display: none;
+}
+
+.top-bar ul.top-menu > li {
+    position: relative;
+    flex-wrap: nowrap;
+    display: inline-flex;
+    font-size: 13px;
+}
+
+.top-bar ul.top-menu > li .menu-icon > ::before {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    line-height: 20px;
+    text-align: center;
+    display: inline-block;
+    border-radius: 10%;
+    background-color: rgba(0, 0, 0, .2);
+    margin-right: .5em;
+}
+
+.top-bar ul.top-menu > li a {
+    padding: 12px 5px 12px 0;
+    margin: 0 5px;
+}
+
+.top-bar ul.top-menu > li.has-submenu > a::after {
+    font-family: 'IcoFont' !important;
+    content: '\eac8';
+    vertical-align: middle;
+    margin-left: 5px;
+}
+
+.top-bar ul.top-menu > li.has-submenu.open > a::after {
+    content: '\eacb';
+}
+
+.top-bar ul.top-menu > li > ul {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    padding: 10px;
+    background-color: #fff;
+    color: #333;
+    white-space: nowrap;
+    min-width: 200px;
+    border: 1px solid #ddd;
+    border-top: 0;
+    border-radius: 0 0 5px 5px;
+    z-index: 10;
+}
+
+.top-bar ul.top-menu > li > ul a {
+    color: #555;
+    padding: 5px 10px 5px 5px;
+    margin: 3px 0;
+    display: block;
+}
+
+.top-bar ul.top-menu > li > ul a:hover {
+    color: #222;
+}
+
+.top-bar ul.top-menu > li.open > ul {
+    display: block;
 }
 
 /*! CONTENT PAGE
@@ -452,10 +629,12 @@ body.login-page .interim .admin-login-text {
     border-bottom: 3px solid #999;
     font-weight: lighter;
 }
+
 .admin-title .page-title {
     font-weight: lighter;
     font-size: 1.7em;
 }
+
 .admin-title::before,
 .admin-title::after {
     clear: both;
