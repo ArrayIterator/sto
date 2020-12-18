@@ -41,7 +41,14 @@ get_admin_header_template();
                         case 'invalid_password':
                             $message_error = trans('Invalid Password');
                             break;
+                        case 'fail_login':
+                            $message_error = trans('Unknown Error');
+                            break;
+                        case 'cookie_disabled':
+                            $message_error = count(cookies()) === 0 ? trans('Please Enable Cookie') : trans('Could Not Authenticated Cookie');
+                            break;
                     }
+
                     if ($message_error !== null) {
                         $message_err = hook_apply('login_message_error', $message_error, query_param('error'));
                         $message_err = !is_string($message_err) ? $message_error : $message_err;

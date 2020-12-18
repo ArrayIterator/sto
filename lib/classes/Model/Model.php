@@ -9,6 +9,7 @@ use ArrayIterator\Database\AbstractResult;
 use ArrayIterator\Database\PdoResult;
 use ArrayIterator\Database\PrepareStatement;
 use ArrayIterator\Database\QueryPrepareInterface;
+use ArrayIterator\Helper\StringFilter;
 use BadMethodCallException;
 use Exception;
 use RuntimeException;
@@ -555,7 +556,7 @@ abstract class Model implements QueryPrepareInterface, ArrayAccess
 
         $arg = $this->prepare($sql);
         $arg->setFetchClass(static::class, [$this->getDatabase()]);
-        $arg->execute([$value]);
+        $arg->execute([$this->sanitizeDatabaseValue($selector, $value)]);
         return $arg;
     }
 
@@ -788,7 +789,10 @@ abstract class Model implements QueryPrepareInterface, ArrayAccess
         }
 
         $this->normalized = true;
-        $definition = $this->database->getTables()->getTableDefinition($this->getTableName());
+        $definition = $this
+            ->database
+            ->getTables()
+            ->getTableDefinition($this->getTableName());
         if (!$definition) {
             return;
         }
@@ -829,9 +833,14 @@ abstract class Model implements QueryPrepareInterface, ArrayAccess
     }
 
     /** @noinspection PhpUnusedParameterInspection */
+    /**
+     * @param $column
+     * @param $value
+     * @return int|float|string
+     */
     protected function sanitizeDatabaseValue($column, $value)
     {
-        return $value;
+        return StringFilter::serialize($value, false);
     }
 
     protected function sanitizeDatabaseWhereValue($column, $value)
@@ -842,7 +851,7 @@ abstract class Model implements QueryPrepareInterface, ArrayAccess
                 : $value;
         }
 
-        return $value;
+        return $this->sanitizeDatabaseValue($column, $value);
     }
 
     protected function sanitizeValue($column, $value)
@@ -865,7 +874,10 @@ abstract class Model implements QueryPrepareInterface, ArrayAccess
             return 0;
         }
 
-        $definition = $this->database->getTables()->getTableDefinition($this->getTableName());
+        $definition = $this
+            ->database
+            ->getTables()
+            ->getTableDefinition($this->getTableName());
         $increment = $definition->getAutoIncrement();
         unset($columns[$increment]);
 
@@ -915,20 +927,26 @@ abstract class Model implements QueryPrepareInterface, ArrayAccess
 
             }
         }
+        foreach ($currentData as $col => $item) {
+            if (!is_string($col)) {
+                unset($currentData[$col]);
+            }
+            $currentData[$col] = $this->sanitizeDatabaseValue($col, $item);
+        }
+
         if (empty($currentData)) {
             return 0;
         }
-
         if ($status === 'insert') {
             $sql = sprintf(
                 'INSERT INTO %s(%s) VALUES(%s)',
                 $this->getTableName(),
-                implode(', ', $currentData),
-                substr(str_repeat('?, ', count($currentData)), 0, -1)
+                implode(', ', array_keys($currentData)),
+                trim(str_repeat('?, ', count($currentData)), ' ,')
             );
 
             $stmt = $this->prepare($sql);
-            $stmt->execute($currentData);
+            $stmt->execute(array_values($currentData));
             $metaSelector = null;
             foreach ($currentData as $key => $item) {
                 if (isset($primary[$key])) {
@@ -1056,7 +1074,7 @@ abstract class Model implements QueryPrepareInterface, ArrayAccess
                 $sql .= ' AND ';
             }
             $sql .= sprintf(' %s=%s ', $key, $h);
-            $args[$h] = $item;
+            $args[$h] = $this->sanitizeDatabaseWhereValue($key, $item);
         }
 
         $stmt = $this->prepare($sql);

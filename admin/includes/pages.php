@@ -50,6 +50,7 @@ function admin_page_grants()
         'exam-new.php' => $teacher_admin_grant,
         'task-new.php' => $teacher_admin_grant,
         'question-new.php' => $teacher_admin_grant,
+        'status.php' => $is_admin || $is_teacher || $is_invigilator,
     ];
 
     return hook_apply('admin_page_grants', $page);

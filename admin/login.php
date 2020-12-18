@@ -7,11 +7,17 @@ require __DIR__ . '/init.php';
 set_no_cache_header();
 
 if (http_method() === 'POST') {
+    $cookie = cookies();
     $token = post('token');
     $username = post('username');
     $password = post('password');
     $remember = !!post('remember');
     $is_interim = isset($_REQUEST['interim']);
+    if (empty($cookie)) {
+        redirect(get_admin_login_url() . '?error=cookie_disabled' . ($is_interim ? '&interim=1' : ''));
+        do_exit(0);
+    }
+
     if (!is_string($username) || trim($username) === '') {
         redirect(get_admin_login_url() . '?error=empty_username' . ($is_interim ? '&interim=1' : ''));
         do_exit(0);
@@ -40,8 +46,21 @@ if (http_method() === 'POST') {
     }
 
     if (hook_apply('admin_login_success', true, $user) === true) {
-        send_user_cookie($user->getId(), SUPERVISOR, $remember);
-        redirect(get_admin_url('?login=success' . ($is_interim ? '&interim=1&user_id=' . $user->getId() : '')));
+        if (create_user_session($user, $remember)) {
+            $redirectLoginUrl = hook_apply(
+                'redirect_success_login_url',
+                get_admin_url(
+                    '?login=success'
+                    . ($is_interim ? '&interim=1&user_id=' . $user->getId() : '')
+                )
+            );
+
+            redirect($redirectLoginUrl);
+        } else {
+            redirect(get_admin_login_url() . '?error=fail_login' . ($is_interim ? '&interim=1' : ''));
+            do_exit(0);
+        }
+
         do_exit(0);
     }
 }

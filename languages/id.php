@@ -14,6 +14,13 @@ return [
     'Remember Me' => 'Ingat Saya',
     // MENUS
     'Dashboard' => 'Dasbor',
+    'Site Status' => 'Status Situs',
+    'Website' => 'Situs Web',
+
+    'Notifications' => 'Notifikasi',
+    'Notification' => 'Notifikasi',
+    'All Notifications' => 'Semua Notifikasi',
+
     'Report' => 'Laporan',
     'About' => 'Tentang',
 

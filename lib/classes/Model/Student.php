@@ -14,8 +14,16 @@ class Student extends AbstractUserModel
     /**
      * @return string
      */
+    public function objectUserLogClassName(): string
+    {
+        return StudentLogs::class;
+    }
+
+    /**
+     * @return string
+     */
     public function getUserRoleType(): string
     {
-        return 'student';
+        return STUDENT;
     }
 }

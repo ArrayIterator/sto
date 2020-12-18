@@ -202,6 +202,42 @@ function http_method(): string
 }
 
 /**
+ * @return string
+ */
+function get_remote_address() : string
+{
+    return get_server_environment('REMOTE_ADDR')?:'';
+}
+
+/**
+ * @return string
+ */
+function get_real_ip_address() : string
+{
+    static $ip = null;
+    if ($ip !== null) {
+        return $ip;
+    }
+    $server = server_environment();
+    if ( !empty($server['HTTP_CLIENT_IP']) ) {
+        // Check IP from internet.
+        $ip = $server['HTTP_CLIENT_IP'];
+    } elseif (!empty($server['HTTP_X_FORWARDED_FOR']) ) {
+        // Check IP is passed from proxy.
+        $ip = $server['HTTP_X_FORWARDED_FOR'];
+    } else {
+        // Get IP address from remote address.
+        $ip = get_remote_address();
+    }
+    if ($ip && strpos($ip, ',') !== false) {
+        $ip = array_filter(array_map('trim', explode(',', $ip)));
+        $ip = $ip[0]??false;
+    }
+
+    return $ip?:'';
+}
+
+/**
  * Get Cookie Multi Domain
  *
  * @return string

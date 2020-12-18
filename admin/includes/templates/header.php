@@ -25,41 +25,54 @@ if (!defined('ADMIN_AREA')) {
     <?php admin_html_head(); ?>
 </head>
 <body<?= get_admin_body_attributes(); ?>>
-<div id="page">
+<div id="page"<?php if (cookie('sidebar_closed') === 'true') {
+    echo ' class="sidebar-closed"';
+} ?>>
     <?php hook_run('admin_body_open'); ?>
     <?php if (!is_admin_login_page()) : ?>
-    <div id="left-area"<?php if (cookie('sidebar_closed') === 'true') {
-        echo ' class="closed"';
-    } ?>>
+    <div id="left-area">
         <div id="admin-sidebar">
+            <div class="admin-logo">
             <?php
+            $hasImage = false;
             if (hook_apply('enable_admin_sidebar_logo', true) === true) :
                 $logo = get_site_logo();
                 if (is_array($logo) && is_string(($logo['url'] ?? null))) :
+                    $hasImage = true;
                     ?>
-                    <div class="admin-logo">
-                        <img src="<?= htmlspecialchars($logo['url'], ENT_QUOTES | ENT_COMPAT); ?>" class="admin-logo"
-                             alt="logo">
-                    </div>
+                        <img src="<?= htmlspecialchars($logo['url'], ENT_QUOTES | ENT_COMPAT); ?>" class="admin-logo" alt="logo">
                 <?php
                 endif;
             endif;
-            ?>
-
+            if (!$hasImage) : ?>
+                <div class="logo-text"><a href="<?= get_admin_url();?>">STO</a></div>
+            <?php endif;?>
+            </div>
             <?= admin_sidebar_menu_navigation(); ?>
         </div>
-        <div id="sidebar-switch"><i class="icofont-listing-box"></i></div>
     </div>
     <div id="right-area">
         <div class="admin-top-bar">
+            <div id="sidebar-switch">
+                <div class="switcher" title="<?php esc_attr_trans_e('Toggle Sidebar');?>">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
             <div class="top-bar">
                 <?=
                 // admin top menu
                 admin_top_bar_menu_navigation();
                 ?>
                 <ul class="navbar-nav navbar-account">
-                    <li>
-                        <label for="account-top-bar"><?= trans('Account'); ?></label>
+                    <li class="notification-menu">
+                        <label for="account-notification-bar" title="<?php esc_attr_trans_e('Notifications');?>"><i class="icofont-alarm"></i></label>
+                        <input type="checkbox" id="account-notification-bar">
+                        <ul class="notification-menu-list"></ul>
+                    </li>
+                    <li class="account-info-menu">
+                        <label for="account-top-bar" title="<?php esc_attr_trans_e('Account');?>"><i class="icofont-user-alt-3"></i></label>
                         <input type="checkbox" id="account-top-bar" class="hide">
                         <ul>
                             <li class="profile-picture">

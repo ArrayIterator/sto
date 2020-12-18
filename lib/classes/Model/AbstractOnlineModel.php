@@ -79,7 +79,6 @@ abstract class AbstractOnlineModel extends Model
      */
     public function getUserOnline()
     {
-
         // fix offline
         $this->replaceOffline();
         $sql = sprintf(
@@ -186,5 +185,29 @@ abstract class AbstractOnlineModel extends Model
             $this->getTableName()
         ));
         return $stmt->execute([$id]);
+    }
+
+    /**
+     * @param int $id
+     * @return false|AbstractOnlineModel
+     */
+    public function userOnline(int $id)
+    {
+        $stmt = $this->prepare(sprintf(
+            'SELECT
+                `online`,
+                `created_at`,
+                `last_online_at` 
+                FROM %s WHERE id=?
+            ',
+            $this->getTableName()
+        ));
+
+        if (!$stmt->execute([$id])) {
+            return false;
+        }
+
+        $status = $stmt->fetchClose();
+        return $status;
     }
 }

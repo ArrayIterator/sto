@@ -14,9 +14,17 @@ class Supervisor extends AbstractUserModel
     /**
      * @return string
      */
+    public function objectUserLogClassName(): string
+    {
+        return SupervisorLogs::class;
+    }
+
+    /**
+     * @return string
+     */
     public function getUserRoleType(): string
     {
-        return 'supervisor';
+        return SUPERVISOR;
     }
 
     /**

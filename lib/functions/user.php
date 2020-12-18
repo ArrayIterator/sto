@@ -1,6 +1,7 @@
 <?php
 
 use ArrayIterator\Helper\StringFilter;
+use ArrayIterator\Model\AbstractOnlineModel;
 use ArrayIterator\Model\AbstractUserModel;
 use ArrayIterator\Model\Student;
 use ArrayIterator\Model\Supervisor;
@@ -406,7 +407,7 @@ function is_user_logged(): bool
 }
 
 /**
- * @return array|false
+ * @return User|false
  */
 function get_current_user_data()
 {
@@ -434,8 +435,9 @@ function get_current_user_id(): int
 function get_current_user_type()
 {
     $userData = get_current_user_data();
-    return $userData ? $userData->getType() : false;
+    return $userData ? $userData->getUser()->getUserRoleType() : false;
 }
+
 /**
  * @return false|string
  */
@@ -479,4 +481,79 @@ function get_current_supervisor_full_name()
 {
     $userData = get_current_supervisor();
     return $userData ? ($userData['full_name'] ?? false) : false;
+}
+
+/**
+ * @param AbstractUserModel $model
+ * @param string $type
+ * @param null $data
+ * @return bool
+ */
+function insert_user_log(AbstractUserModel $model, string $type, $data = null) : bool
+{
+    try {
+        $obj = $model->getObjectUserLog();
+        return $obj->insertData($model, $type, $data);
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+/**
+ * @param int $studentId
+ * @return AbstractOnlineModel|false|mixed
+ */
+function get_student_online_status(int $studentId)
+{
+    $key = sprintf('student(%d)', $studentId);
+    $cache = cache_get($key, 'users_online', $found);
+    if ($found) {
+        return $cache;
+    }
+
+    $data = student_online()->userOnline($studentId);
+    cache_set($key, $data, 'users_online');
+    return $data;
+}
+/**
+ * @param int $supervisor
+ * @return AbstractOnlineModel|false|mixed
+ */
+function get_supervisor_online_status(int $supervisor)
+{
+    $key = sprintf('supervisor(%d)', $supervisor);
+    $cache = cache_get($key, 'users_online', $found);
+    if ($found) {
+        return $cache;
+    }
+
+    $data = supervisor_online()->userOnline($supervisor);
+    cache_set($key, $data, 'users_online');
+    return $data;
+}
+
+/**
+ * @param int $studentId
+ * @return bool
+ */
+function is_student_online(int $studentId) : bool
+{
+    $status = get_student_online_status($studentId);
+    if (!$status) {
+        return false;
+    }
+    return (bool) ($status['online']??null);
+}
+
+/**
+ * @param int $supervisorId
+ * @return bool
+ */
+function is_supervisor_online(int $supervisorId) : bool
+{
+    $status = get_supervisor_online_status($supervisorId);
+    if (!$status) {
+        return false;
+    }
+    return (bool) ($status['online']??null);
 }

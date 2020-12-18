@@ -26,7 +26,8 @@
     "ext-calendar": "*",
     "nikic/fast-route": "v1.3.0",
     "guzzlehttp/guzzle": "^6",
-    "ext-openssl": "*"
+    "ext-openssl": "*",
+    "ua-parser/uap-php": "^3.9"
   },
   "config": {
     "vendor-dir": "lib/vendor",

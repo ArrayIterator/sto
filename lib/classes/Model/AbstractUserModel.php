@@ -3,6 +3,9 @@
 namespace ArrayIterator\Model;
 
 
+use ArrayIterator\Database\PrepareStatement;
+use PDOStatement;
+
 /**
  * Class AbstractUserModel
  * @package ArrayIterator\Model
@@ -191,5 +194,19 @@ abstract class AbstractUserModel extends Model
     public function findOneByEmail(string $username, int $siteId = null)
     {
         return $this->findOne($username, 'email', $siteId);
+    }
+
+    /**
+     * @return string
+     */
+    abstract public function objectUserLogClassName() : string;
+
+    /**
+     * @return AbstractUserLog|StudentLogs|SupervisorLogs
+     */
+    public function getObjectUserLog() : AbstractUserLog
+    {
+        $obj = $this->objectUserLogClassName();
+        return new $obj($this->database);
     }
 }

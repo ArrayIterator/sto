@@ -10,7 +10,8 @@ function admin_sidebar_menu_array(): array
             'name' => trans('Dashboard'),
             'link' => get_admin_url(),
             'hide' => !admin_is_allowed('index.php'),
-            'icon' => 'dashboard',
+//            'icon' => 'dashboard',
+            'icon' => 'speed-meter',
             'position' => 1,
             'menus' => [
                 'dashboard' => [
@@ -19,11 +20,17 @@ function admin_sidebar_menu_array(): array
                     'hide' => !admin_is_allowed('index.php'),
                     'position' => 1,
                 ],
+                'site-status' => [
+                    'name' => trans('Site Status'),
+                    'link' => get_admin_url('status.php'),
+                    'hide' => !admin_is_allowed('status.php'),
+                    'position' => 10,
+                ],
                 'about' => [
                     'name' => trans('About'),
                     'link' => get_admin_url('about.php'),
                     'hide' => !admin_is_allowed('about.php'),
-                    'position' => 5,
+                    'position' => 20,
                 ],
             ]
         ],
@@ -52,7 +59,9 @@ function admin_sidebar_menu_array(): array
             'name' => trans('Questions'),
             'link' => get_admin_url('questions.php'),
             'hide' => !admin_is_allowed('questions.php'),
-            'icon' => 'question-circle',
+            'icon' => 'unique-idea',
+//            'icon' => 'question',
+//            'icon' => 'question-circle',
 //            'icon' => 'ruler-pencil',
             'position' => 300,
             'menus' => [
@@ -158,7 +167,8 @@ function admin_sidebar_menu_array(): array
             'name' => trans('Modules'),
             'link' => get_admin_url('modules.php'),
             'hide' => !admin_is_allowed('modules.php'),
-            'icon' => 'addons',
+//            'icon' => 'addons',
+            'icon' => 'plugin',
             'position' => 600,
             'menus' => [
                 'all_modules' => [
@@ -192,7 +202,8 @@ function admin_sidebar_menu_array(): array
             'name' => trans('Settings'),
             'link' => get_admin_url('settings.php'),
             'hide' => !admin_is_allowed('settings.php'),
-            'icon' => 'gears',
+//            'icon' => 'gears',
+            'icon' => 'settings',
             'position' => 800,
             'menus' => [
                 'settings' => [
@@ -214,6 +225,7 @@ function admin_sidebar_menu_array(): array
             'link' => get_admin_url('report.php'),
             'hide' => !admin_is_allowed('report.php'),
             'icon' => 'chart-line',
+//            'icon' => 'signal',
             'position' => 900,
             'menus' => [],
         ],
@@ -222,6 +234,7 @@ function admin_sidebar_menu_array(): array
             'link' => get_admin_url('tools.php'),
             'hide' => !admin_is_allowed('tools.php'),
             'icon' => 'tools-alt-2',
+//            'icon' => 'tools',
             'position' => 1000,
             'menus' => [
 
@@ -244,6 +257,7 @@ function admin_sidebar_menu_array(): array
                     'name' => trans('Logout'),
                     'link' => get_admin_url('logout.php'),
                     'hide' => false,
+                    'icon' => 'power',
                     'attr' => [
                         'class' => 'logout color-red',
                         'onclick' => 'return confirm(' . json_encode(trans('Are You Sure ... ?')) . ');'

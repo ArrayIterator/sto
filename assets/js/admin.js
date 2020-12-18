@@ -35,7 +35,9 @@
     $(document).ready(function () {
         var $c = $('.navbar-account'); //' input[type=checkbox]');
         var $n = $('#navigation-top');
+        var $p = $('#page');
         $(document).on('click', function (event) {
+            var $c = $('.navbar-account input[type=checkbox]:checked').parent();
             if (!$(event.target).closest($c).length) {
                 $c.find('input[type=checkbox]').prop('checked', false);
             }
@@ -76,14 +78,14 @@
             }
         });*/
 
-        $('#sidebar-switch i').on('click', function (e) {
+        $('#sidebar-switch > .switcher').on('click', function (e) {
             e.preventDefault();
-            var $leftArea = $('#left-area');
-            if ($leftArea.hasClass('closed')) {
+            var $leftArea = $('#page');// $('#left-area');
+            if ($leftArea.hasClass('sidebar-closed')) {
                 deleteCookie('sidebar_closed');
-                $leftArea.removeClass('closed');
+                $leftArea.removeClass('sidebar-closed');
             } else {
-                $leftArea.addClass('closed');
+                $leftArea.addClass('sidebar-closed');
                 setCookie('sidebar_closed', 'true');
             }
         });
@@ -94,7 +96,8 @@
     if (typeof login_url === 'string' && typeof ping_url === 'string') {
         var checkFail = 3000,
             checkSucceed = 5000;
-
+        var $iframeInterim;
+        var $interimLayout;
         function check_loop_login() {
             var $global_message = $('#global-message');
             var $page = $('#page');
@@ -104,45 +107,67 @@
                 function (e) {
                     // console.log(e.data['as']['supervisor']);
                     if (e.data && (e.data['login'] === false || !e.data['as'] || typeof e.data['as']['supervisor'] === 'undefined')) {
-                        var log = login_url.replace(/\?.+/, '');
-                        var $inter = $('#interim-login');
-                        if ($inter.length) {
-                            $inter.html('');
-                        } else {
-                            $inter = $('<div id="interim-login"></div>');
-                        }
-                        var $iframe = $('<iframe id="iframe-interim-login" class="iframe-interim" src="' + log + '?interim=1"></iframe>');
-                        $inter.html($iframe);
-                        $page.append($inter);
-                        $iframe.on('load', function () {
-                            try {
-                                var href = this.contentWindow.location.href;
-                                if (!href) {
-                                    return;
-                                }
-                            } catch (e) {
-                                return;
+                        if (!$iframeInterim) {
+                            var log = login_url.replace(/\?.+/, '');
+                            $interimLayout = $('#interim-login');
+                            if ($interimLayout.length) {
+                                $interimLayout.html('');
+                            } else {
+                                $interimLayout = $('<div id="interim-login"></div>');
                             }
-
-                            if (href.match(/\?login=success(?:&.*|$)/)) {
-                                if (typeof user_id === "number") {
-                                    var $match = href.match(/user_id=([0-9]+)(?:&|$)/);
-                                    var id = parseInt($match[1]);
-                                    if (id !== user_id) {
-                                        window.location.reload();
+                            $iframeInterim = $('<iframe id="iframe-interim-login" class="iframe-interim" src="' + log + '?interim=1"></iframe>');
+                            $interimLayout.html($iframeInterim);
+                            $page.append($interimLayout);
+                            $iframeInterim.on('load', function () {
+                                try {
+                                    var href = this.contentWindow.location.href;
+                                    if (!href) {
                                         return;
                                     }
+                                } catch (e) {
+                                    return;
                                 }
 
-                                $inter.remove();
-                                $iframe.remove();
-                                setTimeout(function () {
-                                    check_loop_login();
-                                }, checkSucceed);
-                            }
-                        });
+                                if (href.match(/\?login=success(?:&.*|$)/)) {
+                                    $iframeInterim = null;
+                                    if (typeof user_id === "number") {
+                                        var $match = href.match(/user_id=([0-9]+)(?:&|$)/);
+                                        var id = parseInt($match[1]);
+                                        if (id !== user_id) {
+                                            window.location.reload();
+                                            return;
+                                        }
+                                    }
+
+                                    $interimLayout.remove();
+                                    $iframeInterim.remove();
+                                    setTimeout(function () {
+                                        check_loop_login();
+                                    }, checkSucceed);
+                                }
+                            });
+                        }
+                        setTimeout(function () {
+                            check_loop_login();
+                        }, checkFail);
+
                         return;
                     }
+
+                    if (user_id && e.data['as']['supervisor'].id && e.data['as']['supervisor'].id !== user_id) {
+                        window.location.reload();
+                        return;
+                    }
+
+                    if ($interimLayout) {
+                        $interimLayout.remove();
+                        $interimLayout = null;
+                    }
+                    if ($iframeInterim) {
+                        $iframeInterim.remove();
+                        $iframeInterim = null;
+                    }
+
                     $global_message.html('');
                     setTimeout(function () {
                         check_loop_login();

@@ -10,6 +10,8 @@ use ArrayIterator\Helper\Area\TimeZone;
 use ArrayIterator\Helper\TimeZoneConvert;
 use ArrayIterator\Hooks;
 use ArrayIterator\Menus;
+use ArrayIterator\Model\StudentLogs;
+use ArrayIterator\Model\SupervisorLogs;
 use ArrayIterator\Model\TranslationsDictionary;
 use ArrayIterator\Model\Option;
 use ArrayIterator\Model\Site;
@@ -24,6 +26,12 @@ use ArrayIterator\Themes;
 use FastRoute\RouteCollector;
 use GuzzleHttp\Psr7\ServerRequest;
 use Psr\Http\Message\UriInterface;
+use UAParser\DeviceParser;
+use UAParser\OperatingSystemParser;
+use UAParser\Parser;
+use UAParser\Result;
+use UAParser\Result\Client;
+use UAParser\UserAgentParser;
 
 /**
  * @return Application
@@ -84,6 +92,33 @@ function timezone_convert(): TimeZoneConvert
 function timezone(): TimeZone
 {
     return application()->getTimezone();
+}
+
+/**
+ * @return Result\Client
+ */
+function user_agent_parsed() : Result\Client
+{
+    static $client;
+    if ($client) {
+        return $client;
+    }
+    /**
+     * @var Parser $ua
+     */
+    $userAgent = get_user_agent();
+    try {
+        $ua = Parser::create();
+        $client = $ua->parse(get_user_agent());
+    } catch (Exception $e) {
+        $regexes = require __DIR__.'/../includes/user_agent_regexes.php';
+        $client = new Client($userAgent);
+        $client->ua = (new UserAgentParser($regexes))->parseUserAgent($userAgent, []);
+        $client->os = (new OperatingSystemParser($regexes))->parseOperatingSystem($userAgent);
+        $client->device = (new DeviceParser($regexes))->parseDevice($userAgent);
+    }
+
+    return $client;
 }
 
 /**
@@ -171,11 +206,27 @@ function student(): Student
 }
 
 /**
+ * @return StudentLogs
+ */
+function student_log() : StudentLogs
+{
+    return student()->getObjectUserLog();
+}
+
+/**
  * @return Supervisor
  */
 function supervisor(): Supervisor
 {
     return supervisor_online()->getUserObject();
+}
+
+/**
+ * @return SupervisorLogs
+ */
+function supervisor_log() : SupervisorLogs
+{
+    return supervisor()->getObjectUserLog();
 }
 
 /**

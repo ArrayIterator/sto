@@ -2,6 +2,7 @@
 
 use ArrayIterator\Helper\Random;
 use ArrayIterator\Helper\UuidV4;
+use ArrayIterator\Model\AbstractUserModel;
 
 /* -------------------------------------------------
  *                 AUTH & VALIDATION
@@ -298,7 +299,6 @@ function send_user_cookie(int $userId, string $type, bool $remember = false) : b
         $userId,
         $type
     );
-
     if ($cookie == '') {
         return false;
     }
@@ -330,4 +330,85 @@ function send_supervisor_cookie(int $userId, bool $remember = false) : bool
 function send_student_cookie(int $userId, bool $remember = false) : bool
 {
     return send_user_cookie($userId, STUDENT, $remember);
+}
+
+/**
+ * @param AbstractUserModel $model
+ * @param bool $remember
+ * @return bool
+ */
+function create_user_session(AbstractUserModel $model, bool $remember = false) : bool
+{
+    $userId = $model->getId();
+    if (!$userId) {
+        return false;
+    }
+    $data = send_user_cookie($userId, $model->getUserRoleType(), $remember);
+    if ($data) {
+        $data = create_json_auth_user($userId, STUDENT);
+        $data = json_decode($data, true);
+        $model = [
+            $model,
+            'login'
+        ];
+
+        if (is_array($data) && isset($data[0]) && is_array($data[0]) && isset($data[0]['u'])) {
+            $model[] = hook_apply(
+                'create_user_session_log_value',
+                [
+                    'uuid'       => $data[0]['u'],
+                    'ip'         => get_real_ip_address(),
+                    'user_agent' => get_user_agent(),
+                    'hash' => $data[0]['h']??null,
+                    'token' => get_token_cookie(),
+                ]
+            );
+        }
+
+        insert_user_log(...$model);
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @return bool
+ */
+function delete_user_session() : bool
+{
+    $user = get_current_user_data();
+    $uuid = $user ? $user->getUuid() : null;
+    $hash = $user ? $user->getHash() : null;
+    $user = $user ? $user->getUser() : null;
+    if (!$user) {
+        return false;
+    }
+    $sessionName = null;
+    switch ($user->getUserRoleType()) {
+        case SUPERVISOR:
+            $sessionName = COOKIE_SUPERVISOR_NAME;
+            break;
+        case STUDENT:
+            $sessionName = COOKIE_STUDENT_NAME;
+            break;
+    }
+
+    if (!$sessionName) {
+        return false;
+    }
+
+    delete_cookie($sessionName);
+    insert_user_log($user, 'logout', hook_apply(
+        'create_user_session_log_value',
+        [
+            'uuid' => $uuid,
+            'ip'    => get_real_ip_address(),
+            'user_agent' => get_user_agent(),
+            'hash' => $hash,
+            'token' => get_token_cookie(),
+        ]
+    ));
+
+    return true;
 }
