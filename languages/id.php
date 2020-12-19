@@ -7,11 +7,18 @@ return [
     'Sign in' => 'Masuk',
     'Signin' => 'Masuk',
     'SignIn' => 'Masuk',
+
+    // TITLE
+    'Login To Admin Area' => 'Masuk Ke Area Admin',
+
     // LOGOUT
     'Are You Sure ... ?' => 'Apakah Anda Yakin ... ?',
+
+    // INPUT
     'Username' => 'Nama Pengguna',
     'Password' => 'Kata Sandi',
     'Remember Me' => 'Ingat Saya',
+
     // MENUS
     'Dashboard' => 'Dasbor',
     'Site Status' => 'Status Situs',
@@ -81,4 +88,5 @@ return [
     'Login To Dashboard' => 'Masuk Ke Dasbor',
     '404 Page Not Found' => '404 Halaman Tidak Ditemukan',
     '405 Method Not Allowed' => '405 Metode Tidak Diijinkan',
+    'Method Not Allowed' => 'Metode Tidak Diijinkan',
 ];

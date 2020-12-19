@@ -3,6 +3,6 @@ if (!defined('ROOT_DIR')) {
     return;
 }
 ?>
-<?php get_template_header(); ?>
+<?php get_header_template(); ?>
 <?php
-get_template_footer();
+get_footer_template();

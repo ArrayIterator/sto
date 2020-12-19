@@ -388,7 +388,8 @@ function admin_sidebar_menu_callback(
             array_shift($args);
             $args = implode('?', $args);
             parse_str($args, $q);
-            if ($q === query_param('status')) {
+            if (($q['status']??null) === query_param('status')) {
+                $classes .= ' current-menu active';
                 $menu->setLinkAttribute('class', $classes);
                 $classes = $menu->getAttributes()['class'] ?? '';
                 $classes .= ' has-active-submenu';
@@ -397,7 +398,6 @@ function admin_sidebar_menu_callback(
                 $parentMenu->setLinkAttribute('class', $classes);
             }
         } else {
-
             $classes = $menu->getLinkAttributes()['class'] ?? '';
             $classes .= ' current-menu active';
             $menu->setLinkAttribute('class', $classes);
@@ -408,7 +408,16 @@ function admin_sidebar_menu_callback(
         }
     }
 
-    return $menu;
+    return hook_apply(
+        'admin_sidebar_menu_callback',
+        $menu,
+        $maxDepth,
+        $deep,
+        $currentTag,
+        $currentUrl,
+        $parentMenu,
+        $menus
+    );
 }
 
 /**
@@ -428,6 +437,7 @@ function admin_sidebar_menu_navigation(callable $callback = null): string
         'admin_sidebar_menu_callback',
         get_current_url()
     );
+
     $newMenu = $callback ? $callback($menu) : $menu;
     if (!is_array($newMenu)) {
         $newMenu = $menu;

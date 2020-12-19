@@ -81,7 +81,10 @@ body.login-page .interim .admin-login-text {
     letter-spacing: 1px;
     outline: none;
 }
-
+input.form-control {
+    font-weight: 200;
+}
+input.form-control:focus,
 .admin-login-form input[type=text]:focus,
 .admin-login-form input[type=password]:focus {
     box-shadow: none;
@@ -733,9 +736,9 @@ body.login-page .interim .admin-login-text {
 
 .top-bar ul.top-menu > li.has-submenu > a::after {
     content: '\eac8';
+    font-family: 'IcoFont' !important;
     vertical-align: middle;
     margin-left: 5px;
-    font-family: 'IcoFont' !important;
 }
 
 .top-bar ul.top-menu > li.has-submenu.open > a::after {
@@ -791,4 +794,34 @@ body.login-page .interim .admin-login-text {
 .admin-title::after {
     clear: both;
     display: table;
+}
+
+label.custom-label-radio {
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: lighter;
+}
+
+label.custom-label-radio input[type=radio] {
+    display:none;
+}
+
+label.custom-label-radio input[type=radio] + span {
+    display: inline-block;
+    padding: 5px 8px;
+    margin: 5px 3px;
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 3px;
+    background-color: #e0e0e0;
+}
+
+label.custom-label-radio:first-child input[type=radio] + span {
+    margin-left:0;
+}
+label.custom-label-radio:last-child input[type=radio] + span {
+    margin-right:0;
+}
+label.custom-label-radio input[type=radio]:checked + span {
+    background-color: #28a745;
+    color: #fff;
 }

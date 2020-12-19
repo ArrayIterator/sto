@@ -4,7 +4,7 @@ if (!defined('ROOT_DIR')) {
 }
 $is_interim = isset($_REQUEST['interim']);
 ?>
-<?php get_template_header(); ?>
+<?php get_header_template(); ?>
     <div class="container">
         <div class="row login-wrap-row<?= $is_interim ? ' interim' : ''; ?>">
             <div class="offset-lg-4 col-lg-4 col-md-6 offset-md-3 col-sm-8 offset-sm-2 col-xs-12">
@@ -29,4 +29,4 @@ $is_interim = isset($_REQUEST['interim']);
         </div>
     </div>
 <?php
-get_template_footer();
+get_footer_template();

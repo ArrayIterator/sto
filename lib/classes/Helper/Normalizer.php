@@ -166,6 +166,10 @@ final class Normalizer
      */
     public static function addQueryArgs(...$args): string
     {
+        if (!isset($args[0])) {
+            return '';
+        }
+
         if (is_array($args[0])) {
             if (count($args) < 2 || false === $args[1]) {
                 $uri = $_SERVER['REQUEST_URI'];
@@ -175,6 +179,15 @@ final class Normalizer
         } else {
             if (count($args) < 3 || false === $args[2]) {
                 $uri = $_SERVER['REQUEST_URI'];
+                if (is_string($args[0]) && preg_match('#https?://#i', $args[0])) {
+                    $uri = $args[0];
+                    unset($args[0]);
+                    $args = array_values($args);
+                } elseif (is_string($args[1]) && preg_match('#https?://#i', $args[1])) {
+                    $uri = $args[1];
+                    unset($args[1]);
+                    $args = array_values($args);
+                }
             } else {
                 $uri = $args[2];
             }

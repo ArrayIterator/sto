@@ -1,5 +1,6 @@
 <?php
 define('APP_NAME', 'STO');
+define('APP_SHORT_NAME', 'STO');
 define('VERSION', '1.0.0');
 define('RELEASE', '1');
 

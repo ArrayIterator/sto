@@ -40,12 +40,14 @@ if (!defined('ADMIN_AREA')) {
                 if (is_array($logo) && is_string(($logo['url'] ?? null))) :
                     $hasImage = true;
                     ?>
-                        <img src="<?= htmlspecialchars($logo['url'], ENT_QUOTES | ENT_COMPAT); ?>" class="admin-logo" alt="logo">
+                        <img src="<?= esc_attr($logo['url']); ?>" class="admin-logo" alt="logo">
                 <?php
                 endif;
             endif;
             if (!$hasImage) : ?>
-                <div class="logo-text"><a href="<?= get_admin_url();?>">STO</a></div>
+                <div class="logo-text">
+                    <a href="<?= get_admin_url();?>"><?php esc_html_e(APP_SHORT_NAME);?></a>
+                </div>
             <?php endif;?>
             </div>
             <?= admin_sidebar_menu_navigation(); ?>
@@ -82,12 +84,11 @@ if (!defined('ADMIN_AREA')) {
                                 </div>
                             </li>
                             <li>
-                                <?= htmlentities(get_current_supervisor_full_name()); ?>
+                                <?= esc_html(get_current_supervisor_full_name()); ?>
                             </li>
                             <li>
                                 <a class="logout-link" href="<?= get_admin_url('logout.php'); ?>"
-                                   onclick="return confirm(<?= htmlspecialchars(json_encode(trans('Are You Sure ... ?')),
-                                       ENT_QUOTES | ENT_COMPAT); ?>)"><?= trans('Logout'); ?></a>
+                                   onclick="return confirm(<?= esc_attr(json_encode(trans('Are You Sure ... ?'))); ?>)"><?= trans('Logout'); ?></a>
                             </li>
                         </ul>
                     </li>
@@ -96,6 +97,6 @@ if (!defined('ADMIN_AREA')) {
         </div>
         <div id="global-message"></div>
         <div class="admin-title">
-            <h2 class="page-title"><?= htmlentities(get_admin_title()); ?></h2>
+            <h2 class="page-title"><?= esc_html(get_admin_title()); ?></h2>
         </div>
         <?php endif; ?>

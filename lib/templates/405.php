@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= htmlentities(trans('405 Method Not Allowed')); ?></title>
+    <title><?php esc_attr_trans_e('405 Method Not Allowed'); ?></title>
 </head>
 <body<?= get_body_attributes(); ?>>
 <div class="wrap" id="page">

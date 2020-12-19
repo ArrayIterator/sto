@@ -28,8 +28,8 @@ function get_admin_html_attributes(): string
         }
         $attr .= sprintf(
             ' %s="%s"',
-            htmlspecialchars($key, ENT_QUOTES | ENT_COMPAT),
-            htmlspecialchars($item, ENT_QUOTES | ENT_COMPAT)
+            esc_attr($key),
+            esc_attr($item)
         );
     }
     return $attr;
@@ -62,8 +62,8 @@ function get_admin_login_form_attributes(): string
         }
         $attr .= sprintf(
             ' %s="%s"',
-            htmlspecialchars($key, ENT_QUOTES | ENT_COMPAT),
-            htmlspecialchars($item, ENT_QUOTES | ENT_COMPAT)
+            esc_attr($key),
+            esc_attr($item)
         );
     }
 
@@ -113,8 +113,8 @@ function get_admin_body_attributes(): string
         }
         $attr .= sprintf(
             ' %s="%s"',
-            htmlspecialchars($key, ENT_QUOTES | ENT_COMPAT),
-            htmlspecialchars($item, ENT_QUOTES | ENT_COMPAT)
+            esc_attr($key),
+            esc_attr($item)
         );
     }
     return $attr;
@@ -168,8 +168,10 @@ function get_admin_footer_template(bool $reLoad = false)
     if (!$reLoad && $loaded) {
         return;
     }
-    $loaded = true;
+    hook_run('before_admin_footer_template', $loaded);
     load_admin_template('footer');
+    hook_run('after_admin_footer_template', $loaded);
+    $loaded = true;
 }
 
 /**
@@ -287,10 +289,7 @@ function admin_login_form()
                 </div>
                 <input class="form-control" name="username" placeholder="<?php esc_attr_trans_e('Username'); ?>"
                        type="text" id="username" value="<?=
-                htmlspecialchars(
-                    (string)hook_apply('admin_input_username', (string)post('username')),
-                    ENT_QUOTES | ENT_COMPAT
-                );
+                    esc_attr((string)hook_apply('admin_input_username', (string)post('username')));
                 ?>" required>
             </div>
             <div class="input-group mb-3">
@@ -374,10 +373,7 @@ function login_form()
                 </div>
                 <input class="form-control" name="username" placeholder="<?php esc_attr_trans_e('Username'); ?>"
                        type="text" id="username" value="<?=
-                htmlspecialchars(
-                    (string)hook_apply('input_username', (string)post('username')),
-                    ENT_QUOTES | ENT_COMPAT
-                );
+                esc_attr((string)hook_apply('input_username', (string)post('username')));
                 ?>" required>
             </div>
             <div class="input-group mb-3">
@@ -484,8 +480,8 @@ function get_html_attributes(): string
         }
         $attr .= sprintf(
             ' %s="%s"',
-            htmlspecialchars($key, ENT_QUOTES | ENT_COMPAT),
-            htmlspecialchars($item, ENT_QUOTES | ENT_COMPAT)
+            esc_attr($key),
+            esc_attr($item)
         );
     }
     return $attr;
@@ -532,8 +528,8 @@ function get_body_attributes(): string
         }
         $attr .= sprintf(
             ' %s="%s"',
-            htmlspecialchars($key, ENT_QUOTES | ENT_COMPAT),
-            htmlspecialchars($item, ENT_QUOTES | ENT_COMPAT)
+            esc_attr($key),
+            esc_attr($item)
         );
     }
     return $attr;
@@ -567,8 +563,8 @@ function get_login_form_attributes(): string
         }
         $attr .= sprintf(
             ' %s="%s"',
-            htmlspecialchars($key, ENT_QUOTES | ENT_COMPAT),
-            htmlspecialchars($item, ENT_QUOTES | ENT_COMPAT)
+            esc_attr($key),
+            esc_attr($item)
         );
     }
     return $attr;
@@ -603,17 +599,23 @@ function load_template(string $file): bool
 /**
  * @return bool
  */
-function get_template_header(): bool
+function get_header_template(): bool
 {
-    return load_template('header');
+    hook_run('before_header_template');
+    $res = load_template('header');
+    hook_run('after_header_template');
+    return $res;
 }
 
 /**
  * @return bool
  */
-function get_template_footer(): bool
+function get_footer_template(): bool
 {
-    return load_template('footer');
+    hook_run('before_footer_template');
+    $res = load_template('footer');
+    hook_run('after_footer_template', $res);
+    return $res;
 }
 
 /**

@@ -183,30 +183,32 @@ function translate(string $code): string
 }
 
 /**
- * @param string $code
+ * @param string $message
+ * @param $found
  * @return string
  */
-function trans(string $code): string
+function trans(string $message, &$found = null): string
 {
-    return \translator()->trans($code);
+    return \translator()->trans($message, null, $found);
 }
 
 /**
- * @param string $code
+ * @param string $message
+ * @param $found
  */
-function trans_e(string $code)
+function trans_e(string $message, &$found = null)
 {
-    echo trans($code);
+    echo trans($message, $found);
 }
 
 /**
- * @param string $code
+ * @param string $message
  * @param mixed ...$args
  * @return string
  */
-function trans_sprintf(string $code, ...$args): string
+function trans_sprintf(string $message, ...$args): string
 {
-    return sprintf(trans($code), ...$args);
+    return sprintf(trans($message), ...$args);
 }
 
 /**
@@ -219,35 +221,36 @@ function trans_printf(string $code, ...$args)
 }
 
 /**
- * @param string $code
+ * @param string $message
  * @param null $flags
+ * @param $found
  * @return string
  */
-function esc_html_trans(string $code, $flags = null): string
+function esc_html_trans(string $message, &$found = null): string
 {
-    return htmlentities(trans($code), $flags);
+    return esc_html(trans($message, $found));
 }
 
-function esc_html_trans_e(string $code, $flags = null)
+function esc_html_trans_e(string $code, &$found = null)
 {
-    echo esc_html_trans($code, $flags);
+    echo esc_html_trans($code, $found);
 }
 
 /**
  * @param string $code
- * @param int|string $entity
+ * @param $found
  * @return string
  */
-function esc_attr_trans(string $code, int $entity = ENT_QUOTES | ENT_COMPAT): string
+function esc_attr_trans(string $code, &$found = null): string
 {
-    return htmlspecialchars(trans($code), $entity);
+    return esc_attr(trans($code, $found));
 }
 
 /**
  * @param string $code
- * @param int|string $entity
+ * @param $found
  */
-function esc_attr_trans_e(string $code, int $entity = ENT_QUOTES | ENT_COMPAT)
+function esc_attr_trans_e(string $code, &$found = null)
 {
-    echo esc_attr_trans($code, $entity);
+    echo esc_attr_trans($code, $found);
 }

@@ -112,3 +112,36 @@ function un_slash_it(string $path): string
 {
     return Path::unSlashIt($path);
 }
+
+/**
+ * @param string $message
+ * @return string
+ */
+function esc_attr(string $message) : string
+{
+    return htmlspecialchars($message, ENT_QUOTES|ENT_COMPAT);
+}
+
+/**
+ * @param string $message
+ */
+function esc_attr_e(string $message)
+{
+    echo htmlspecialchars($message, ENT_QUOTES|ENT_COMPAT);
+}
+
+/**
+ * @param string $message
+ * @return string
+ */
+function esc_html(string $message) : string
+{
+    $message = StringFilter::sanitizeInvalidUtf8FromString( $message );
+    $message = esc_attr( $message );
+    return $message;
+}
+
+function esc_html_e(string $message)
+{
+    echo esc_html($message);
+}

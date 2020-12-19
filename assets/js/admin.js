@@ -2,6 +2,7 @@
     if (!$) {
         return;
     }
+
     /*! META
      * ----------------------*/
     var currentHref = window.location.href;
@@ -190,7 +191,6 @@
                     }, checkFail);
                 });
         }
-
         $(document).ready(function () {
             setTimeout(function () {
                 check_loop_login();

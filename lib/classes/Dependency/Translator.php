@@ -10,10 +10,19 @@ use PDO;
  */
 class Translator
 {
+    const TRANSLATION_FOUND = true;
+    const TRANSLATION_DEFAULT = 1;
+    const TRANSLATION_NOT_FOUND = false;
+
     protected $tableName = 'sto_translations';
     protected $translation;
     protected $info;
     protected $records = [];
+
+    /**
+     * @var array
+     */
+    protected $untranslated = [];
 
     /**
      * Translator constructor.
@@ -142,20 +151,26 @@ class Translator
 
     /**
      * @param string $message
+     * @param $found
      * @return array|false
      */
-    public function get(string $message)
+    public function get(string $message, &$found = null)
     {
         $code = sha1($message);
         if ($this->getIso2() === Translation::ISO_2_NO_TRANSLATE) {
+            $found = self::TRANSLATION_DEFAULT;
             return [
                 'code' => $code,
                 'translation' => $message
             ];
         }
+
+        $found = self::TRANSLATION_NOT_FOUND;
         if (isset($this->records[$code])) {
+            $found = self::TRANSLATION_FOUND;
             return $this->records[$code];
         }
+
         $tableName = $this->getTableName();
         $tableDictionary = $this
             ->getTranslation()
@@ -181,10 +196,16 @@ class Translator
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         $stmt->closeCursor();
-        return $result ? [
-            'code' => $result['code'],
-            'translation' => $result['translation']
-        ] : false;
+        if ($result) {
+            $found = self::TRANSLATION_FOUND;
+            return [
+                'code' => $result['code'],
+                'translation' => $result['translation']
+            ];
+        }
+
+        $this->untranslated[$code] = $message;
+        return false;
     }
 
     /**
@@ -193,6 +214,14 @@ class Translator
     public function getTableName(): string
     {
         return $this->tableName;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getUntranslated(): array
+    {
+        return $this->untranslated;
     }
 
     /**
@@ -207,6 +236,10 @@ class Translator
         }
 
         $hash = sha1($message);
+        if (isset($this->untranslated[$hash])) {
+            unset($this->untranslated[$hash]);
+        }
+
         if (!empty($this->records[$hash])) {
             if ($this->records[$hash]['translation'] !== $translation
                 && $this->records[$hash]['code'] === $hash
@@ -253,46 +286,56 @@ class Translator
         ]);
     }
 
-    public function trans($message, $fallback = null)
+    public function trans(string $message, $fallback = null, &$found = null)
     {
+        $found = self::TRANSLATION_NOT_FOUND;
         $selector = sha1($message);
         if ($this->getIso2() === Translation::ISO_2_NO_TRANSLATE) {
             if (isset($this->records[$selector])) {
+                $found = self::TRANSLATION_FOUND;
                 return $this->records[$selector]['translation'];
             }
+
+            $found = self::TRANSLATION_DEFAULT;
             return $message;
         }
 
         if (!isset($this->records[$selector])) {
-            $this->records[$selector] = $this->get($message);
+            $this->records[$selector] = $this->get($message, $found);
         }
 
         $record = $this->records[$selector];
         if ($record === false) {
+            $this->untranslated[$selector] = $message;
             return $fallback === null ? $message : $fallback;
         }
+        if ($record['translation']) {
+            unset($this->untranslated[$selector]);
+            $found = self::TRANSLATION_FOUND;
+            return $record['translation'];
+        }
 
-        return $record['translation'] ?? ($fallback === null ? $message : $fallback);
+        $this->untranslated[$selector] = $message;
+        return ($fallback === null ? $message : $fallback);
     }
 
-    /**
-     * @param string $message
-     * @param mixed $translation
-     * @return mixed
-     */
-    public function transOrSet(string $message, $translation = null)
+    public function transOrSet(string $message, $translation = null, &$found = null)
     {
         if ($this->getIso2() === Translation::ISO_2_NO_TRANSLATE) {
+            $found = self::TRANSLATION_DEFAULT;
             return $message;
         }
+
+        $found = self::TRANSLATION_NOT_FOUND;
         $selector = sha1($message);
         if (!isset($this->records[$selector])) {
-            $this->records[$selector] = $this->get($message);
+            $this->records[$selector] = $this->get($message, $found);
         }
 
         $record = $this->records[$selector];
         if ($record === false) {
             if ($translation !== null) {
+                unset($this->untranslated[$selector]);
                 $this->set($message, $translation);
                 return $translation;
             }

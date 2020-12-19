@@ -411,3 +411,31 @@ function admin_default_assets()
     assets_style_enqueue('admin');
     assets_script_enqueue(is_admin_login_page() ? 'admin-login' : 'admin');
 }
+
+/* -------------------------------------------------
+ *                     JS
+ * ------------------------------------------------*/
+
+/**
+ * @param string $name
+ * @return false|string
+ */
+function get_js_core_by_name(string $name)
+{
+    $js_dir = dirname(__DIR__).'/includes/js/';
+    $name .= '.php';
+    if (file_exists($js_dir . $name)) {
+        /** @noinspection PhpIncludeInspection */
+        return require $js_dir . $name;
+    }
+
+    return false;
+}
+
+/**
+ * @return string
+ */
+function get_js_ping() : string
+{
+    return get_js_core_by_name('ping')?:'';
+}
