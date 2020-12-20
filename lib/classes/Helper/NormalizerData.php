@@ -3,10 +3,10 @@
 namespace ArrayIterator\Helper;
 
 /**
- * Class Normalizer
+ * Class NormalizerData
  * @package ArrayIterator\Helper
  */
-final class Normalizer
+final class NormalizerData
 {
     protected static $conversionTables = [
         'À' => 'A',
@@ -169,7 +169,7 @@ final class Normalizer
         if (!isset($args[0])) {
             return '';
         }
-
+        $uri_ = $args[0];
         if (is_array($args[0])) {
             if (count($args) < 2 || false === $args[1]) {
                 $uri = $_SERVER['REQUEST_URI'];
@@ -222,12 +222,14 @@ final class Normalizer
         }
 
         self::parseStr($query, $qs);
-        $qs = self::mapDeep($qs, 'urlencode');
+
+        $qs = self::mapDeep($qs, 'urldecode');
+        // $qs = self::mapDeep($qs, 'urlencode');
         if (is_array($args[0])) {
             foreach ($args[0] as $k => $v) {
                 $qs[$k] = $v;
             }
-        } else {
+        } elseif (isset($args[1])) {
             $qs[$args[0]] = $args[1];
         }
 
@@ -553,6 +555,11 @@ final class Normalizer
      */
     public static function normalizeSlug(string $slug): string
     {
+        $slug = str_replace(
+            array_keys(self::$conversionTables),
+            array_values(self::$conversionTables),
+            $slug
+        );
         $slug = preg_replace('~[^a-z0-9\-_]~i', '-', trim($slug));
         $slug = preg_replace('~([\-_])+~', '$1', $slug);
         $slug = trim($slug, '-_');

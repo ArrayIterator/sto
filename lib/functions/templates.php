@@ -1,6 +1,6 @@
 <?php
 
-use ArrayIterator\Helper\Normalizer;
+use ArrayIterator\Helper\NormalizerData;
 
 /* -------------------------------------------------
  *                     ADMIN
@@ -17,7 +17,7 @@ function get_admin_html_attributes(): string
         'lang' => get_selected_site_language(),
         'class' => implode(
             ' ',
-            array_map('ArrayIterator\Helper\Normalizer::normalizeHtmlClass', $html_class)
+            array_map('ArrayIterator\Helper\NormalizerData::normalizeHtmlClass', $html_class)
         ),
     ];
     $attribute = hook_apply('admin_html_attribute', $attribute);
@@ -45,15 +45,16 @@ function get_admin_login_form_attributes(): string
     $attribute = [
         'class' => implode(
             ' ',
-            array_map('ArrayIterator\Helper\Normalizer::normalizeHtmlClass', $body_class)
+            array_map('ArrayIterator\Helper\NormalizerData::normalizeHtmlClass', $body_class)
         ),
         'id' => 'login-form',
         'method' => 'post',
-        'action' => get_admin_login_url(),
+        'action' => get_current_admin_login_url(),
     ];
+
     $attribute = hook_apply('admin_login_form_attributes', $attribute);
     if (isset($attribute['id'])) {
-        $attribute['id'] = Normalizer::normalizeHtmlClass($attribute['id']);
+        $attribute['id'] = NormalizerData::normalizeHtmlClass($attribute['id']);
     }
     $attr = '';
     foreach ((array)$attribute as $key => $item) {
@@ -100,7 +101,7 @@ function get_admin_body_attributes(): string
     $attribute = [
         'class' => implode(
             ' ',
-            array_map('ArrayIterator\Helper\Normalizer::normalizeHtmlClass', $body_class)
+            array_map('ArrayIterator\Helper\NormalizerData::normalizeHtmlClass', $body_class)
         ),
         'data-site-id' => $siteId,
     ];
@@ -468,7 +469,7 @@ function get_html_attributes(): string
         'lang' => get_selected_site_language(),
         'class' => implode(
             ' ',
-            array_map('ArrayIterator\Helper\Normalizer::normalizeHtmlClass', $html_class)
+            array_map('ArrayIterator\Helper\NormalizerData::normalizeHtmlClass', $html_class)
         ),
     ];
 
@@ -516,7 +517,7 @@ function get_body_attributes(): string
     $attribute = [
         'class' => implode(
             ' ',
-            array_map('ArrayIterator\Helper\Normalizer::normalizeHtmlClass', $body_class)
+            array_map('ArrayIterator\Helper\NormalizerData::normalizeHtmlClass', $body_class)
         ),
         'data-site-id' => $siteId,
     ];
@@ -546,7 +547,7 @@ function get_login_form_attributes(): string
     $attribute = [
         'class' => implode(
             ' ',
-            array_map('ArrayIterator\Helper\Normalizer::normalizeHtmlClass', $body_class)
+            array_map('ArrayIterator\Helper\NormalizerData::normalizeHtmlClass', $body_class)
         ),
         'id' => 'login-form',
         'method' => 'post',
@@ -554,7 +555,7 @@ function get_login_form_attributes(): string
     ];
     $attribute = hook_apply('login_form_attributes', $attribute);
     if (isset($attribute['id'])) {
-        $attribute['id'] = Normalizer::normalizeHtmlClass($attribute['id']);
+        $attribute['id'] = NormalizerData::normalizeHtmlClass($attribute['id']);
     }
     $attr = '';
     foreach ((array)$attribute as $key => $item) {

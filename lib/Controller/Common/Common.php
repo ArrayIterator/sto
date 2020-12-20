@@ -1,9 +1,9 @@
 <?php
-namespace ArrayIterator\Controller;
+namespace ArrayIterator\Controller\Common;
 
 /**
  * Class Common
- * @package ArrayIterator\Controller
+ * @package ArrayIterator\Controller\Common
  */
 class Common
 {

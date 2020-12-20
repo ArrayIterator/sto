@@ -1,5 +1,6 @@
 <?php
 
+use ArrayIterator\Helper\NormalizerData;
 use ArrayIterator\Helper\Path;
 use ArrayIterator\Info\Module;
 use ArrayIterator\Info\Theme;
@@ -82,12 +83,15 @@ function get_site_uri(): UriInterface
  */
 function get_admin_url(string $pathUri = ''): string
 {
-    $path = sprintf('%s/', get_admin_path());
+    static $adminUri;
+    if (!$adminUri) {
+        $adminUri = get_site_url(slash_it(get_admin_path()));
+    }
+
     $originalPathUri = $pathUri;
     $pathUri = substr($pathUri, 0, 1) === '/'
         ? ltrim($pathUri, '/')
         : $pathUri;
-    $adminUri = get_site_url($path);
     return hook_apply(
         'admin_url',
         sprintf('%s%s', $adminUri, $pathUri),
@@ -98,29 +102,176 @@ function get_admin_url(string $pathUri = ''): string
 }
 
 /**
- * @param string $uri
+ * @param array $query
  * @return string
  */
-function get_assets_url(string $uri = ''): string
+function get_admin_logout_redirect_url(array $query = []) : string
 {
-    $assets = '/assets/';
-    if ($uri && $uri[0] == '/') {
-        $uri = substr($uri, 1);
+    $referer = get_referer();
+    $loginUrl = get_admin_login_url();
+    if (!$referer) {
+        return $loginUrl;
     }
-    return get_site_url($assets . $uri);
+
+    static $uri;
+    if (!$uri) {
+        $exp = explode('?', $referer);
+        $url = $exp[0];
+        unset($exp[0]);
+        $url_admin = preg_replace('#^[^:]+://#', '', get_admin_url());
+        $url_2     = preg_replace('#^[^:]+://#', '', $url);
+        $baseName = '';
+        if (strpos($url_2, $url_admin) === 0) {
+            $baseName = ltrim(substr($url_2, strlen($url_admin)), '/');
+        }
+        switch ($baseName) {
+            case 'login.php':
+            case 'logout.php':
+            case 'init.php':
+                $baseName = '';
+                break;
+        }
+        if (!empty($exp)) {
+            $baseName .= '?'.implode('?', $exp);
+        }
+        $uri = NormalizerData::addQueryArgs(['redirect' => $baseName], $loginUrl);
+    }
+
+    return NormalizerData::addQueryArgs($query, $uri);
+}
+
+function get_admin_login_redirect_url(array $query = []) : string
+{
+    static $uri;
+    if ($uri) {
+        $uri = hook_apply('admin_login_redirect_url', $uri);
+        return NormalizerData::addQueryArgs($query, $uri);
+    }
+
+    $redirectUri = get_admin_base_name_file();
+    $loginUrl    = get_admin_login_url();
+    switch (get_admin_base_name_file()) {
+        case 'logout.php':
+        case 'init.php':
+        case 'login.php':
+            $redirectUri = null;
+            break;
+    }
+
+    if (!$redirectUri || ! file_exists(get_admin_directory() .'/' . $redirectUri)) {
+        $redirectUri = null;
+    }
+
+    $params = get_admin_param_redirect();
+    $redirectParams = $params['redirect'] ?? null;
+    if ($redirectParams !== null) {
+        $redirectParams = urldecode($redirectParams);
+        $exp    = explode('?', $redirectParams);
+        $redirectUri = $redirectUri === null
+        && isset($exp[0])
+        && !in_array(trim($exp[0], '\\/'), ['logout.php', 'login.php', 'init.php'])
+            ? $exp[0]
+            : $redirectUri;
+        unset($exp[0]);
+        $redirectParams = implode('?', $exp);
+        $params['redirect'] = $redirectParams;
+    }
+    unset($params['error'], $query['logout'], $query['redirect']);
+    if ($redirectUri) {
+        $query['redirect'] = $redirectUri.'?'.$redirectParams;
+    }
+
+    $query = array_merge($params, $query);
+    $uri = hook_apply('admin_login_redirect_url', $uri);
+    return NormalizerData::addQueryArgs($query, $loginUrl);
 }
 
 /**
- * @param string $uri
+ * @return array
+ */
+function get_admin_param_redirect() : array
+{
+    static $params;
+    if (is_array($params)) {
+        return $params;
+    }
+
+    $params   = query_param();
+    $redirect = $_REQUEST['redirect']??($params['redirect']??null);
+    $redirectParams = [];
+
+    if (is_string($redirect)) {
+        $redirectFile = explode('?', trim($redirect))[0];
+        $redirectFile = trim($redirectFile, '\\/');
+        $redirectParam = explode('?', trim($redirect))[1]??'';
+        parse_str($redirectParam, $redirectParams);
+        $redirectParams = $redirectParams??[];
+        unset($redirectParams['redirect']);
+
+        if (substr($redirectFile, -4) !== '.php') {
+            $redirectFile = null;
+        } else {
+            switch ($redirectFile) {
+                case 'logout.php':
+                case 'init.php':
+                case 'login.php':
+                    $redirectFile = null;
+                    break;
+            }
+
+            if (!$redirectFile || !file_exists(get_admin_directory() . '/' . $redirectFile)) {
+                $redirectFile = null;
+            }
+        }
+    } else {
+        $redirectFile = null;
+    }
+
+    if (!empty($redirectParams)) {
+        $redirect = $redirectFile.'?'.http_build_query($redirectParams);
+    }
+
+    if ($redirect) {
+        $params['redirect'] = $redirect;
+    }
+
+    return $params;
+}
+
+/**
+ * @param array $query
  * @return string
  */
-function get_assets_vendor_url(string $uri = ''): string
+function get_current_admin_login_url(array $query = []) : string
 {
-    $assets = '/assets/vendor/';
-    if ($uri && $uri[0] == '/') {
-        $uri = substr($uri, 1);
+    static $uri;
+    if ($uri) {
+        $uri = hook_apply('current_admin_login_redirect_uri', $uri);
+        return $uri;
     }
-    return get_site_url($assets . $uri);
+
+    $login_uri = get_admin_login_url();
+    $params = get_admin_param_redirect();
+    unset($params['error'], $params['logout']);
+
+    $uri = NormalizerData::addQueryArgs($params, $login_uri);
+    $uri = hook_apply('current_admin_login_redirect_uri', $uri);
+    return NormalizerData::addQueryArgs($query, $uri);
+}
+
+/**
+ * @param array $query
+ * @return string
+ */
+function get_admin_redirect_url(array $query = []) : string
+{
+    $params = get_admin_param_redirect();
+    $redirect = $params['redirect']??'';
+    $redirect = urlencode($redirect);
+    $params   = array_merge($params, $query);
+    unset($params['redirect'], $params['logout']);
+
+    return NormalizerData::addQueryArgs($params, get_admin_url($redirect));
 }
 
 /**
@@ -256,6 +407,32 @@ function current_login_url(): string
     return is_admin_page()
         ? get_admin_login_url()
         : get_login_url();
+}
+
+/**
+ * @param string $uri
+ * @return string
+ */
+function get_assets_url(string $uri = ''): string
+{
+    $assets = '/assets/';
+    if ($uri && $uri[0] == '/') {
+        $uri = substr($uri, 1);
+    }
+    return get_site_url($assets . $uri);
+}
+
+/**
+ * @param string $uri
+ * @return string
+ */
+function get_assets_vendor_url(string $uri = ''): string
+{
+    $assets = '/assets/vendor/';
+    if ($uri && $uri[0] == '/') {
+        $uri = substr($uri, 1);
+    }
+    return get_site_url($assets . $uri);
 }
 
 /**

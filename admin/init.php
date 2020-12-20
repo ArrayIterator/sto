@@ -13,14 +13,18 @@ require_once dirname(__DIR__) . '/lib/load.php';
 require_once __DIR__ . '/includes/menus.php';
 require_once __DIR__ . '/includes/pages.php';
 
+use \ArrayIterator\Helper\NormalizerData;
+
 // SET NO ROBOTS INDEX
 set_no_index_header();
 
+
 // check login
 if (!is_login() && !is_admin_login_page() && !is_install_page()) {
-    redirect(get_admin_login_url());
+    redirect(get_admin_login_redirect_url());
     do_exit(0);
 }
+
 if (is_supervisor()) {
     if (is_admin_login_page()) {
         // check if login and is on login page
@@ -39,7 +43,7 @@ if (is_supervisor()) {
 hook_run('admin_init');
 
 if (!is_admin_login_page()) {
-    $is_interim = isset($_GET['interim']);
+    $is_interim = isset($_REQUEST['interim']);
     $is_success = query_param('login') === 'success';
     $referer = get_referer() ?: '';
     $login_page = explode('?', get_admin_login_url())[0];

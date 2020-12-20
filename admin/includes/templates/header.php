@@ -2,6 +2,8 @@
 if (!defined('ADMIN_AREA')) {
     return;
 }
+
+use ArrayIterator\Controller\Api\Status;
 ?><!DOCTYPE html>
 <html<?= get_admin_html_attributes(); ?>>
 <head>
@@ -10,7 +12,7 @@ if (!defined('ADMIN_AREA')) {
     <script type="text/javascript">
         document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
         <?php if (!is_admin_login_page()) : ?>
-        const ping_url = <?= json_encode(get_api_url('/ping'), JSON_UNESCAPED_SLASHES);?>,
+        const ping_url = <?= json_encode(get_api_url(Status::PING_PATH), JSON_UNESCAPED_SLASHES);?>,
             login_url = <?= json_encode(get_admin_login_url(), JSON_UNESCAPED_SLASHES);?>,
             user_id = <?= get_current_user_id();?>;
         var translation_text = <?= json_encode(

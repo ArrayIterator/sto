@@ -1,11 +1,11 @@
 <?php
-namespace ArrayIterator\Controller;
+namespace ArrayIterator\Controller\Common;
 
 use ArrayIterator\Route;
 
 /**
  * Class Auth
- * @package ArrayIterator\Controller
+ * @package ArrayIterator\Controller\Common
  */
 class Auth
 {

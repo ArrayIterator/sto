@@ -2,7 +2,7 @@
 
 namespace ArrayIterator\Dependency;
 
-use ArrayIterator\Helper\Normalizer;
+use ArrayIterator\Helper\NormalizerData;
 use ArrayIterator\Helper\Path;
 use ArrayIterator\Helper\StringFilter;
 use ArrayIterator\Hooks;
@@ -196,7 +196,7 @@ class Scripts extends AbtsractDependencies
         }
 
         if (!empty($ver)) {
-            $src = Normalizer::addQueryArgs('ver', $ver, $src);
+            $src = NormalizerData::addQueryArgs('ver', $ver, $src);
         }
 
         $src = $this->hooks

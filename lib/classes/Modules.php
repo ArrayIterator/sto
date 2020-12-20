@@ -34,6 +34,7 @@ final class Modules
     protected $headers = [
         'name' => ['Name', 'Module Name', 'ModuleName'],
         'uri' => ['URI', '@link'],
+        'description' => ['Description', '@description'],
         'author_uri' => ['Author URI', 'AuthorURI'],
         'version' => ['Version', '@version'],
         'license' => ['License', '@license'],
@@ -170,6 +171,7 @@ final class Modules
         $path = $this->modulesDir . DIRECTORY_SEPARATOR . $name . DIRECTORY_SEPARATOR . $data['plugin'];
         if (!is_array($data['info'])) {
             $data['info'] = $this->readModuleInfo($path);
+            $data['base_module_name'] = $name;
             self::$fileLists[$this->modulesDir][$name]['info'] = $data['info'];
         }
 
@@ -189,8 +191,9 @@ final class Modules
         if ($this->completed < 1 && is_array($this->modules)) {
             return $this->modules;
         }
-
-        $this->modules = [];
+        if (!is_array($this->modules)) {
+            $this->modules = [];
+        }
         foreach ($this->scan() as $item => $key) {
             $this->getMod($item, $key);
         }
@@ -209,13 +212,14 @@ final class Modules
                 $modules[$name] = $item;
             }
         }
+
         return $modules;
     }
 
     protected function readModuleInfo(string $fileName): array
     {
         $info = $this->readData($fileName, $this->headers);
-        if (in_array(strtolower($info['site_wide']), ['yes', 'true'])) {
+        if (in_array(strtolower($info['site_wide']), ['yes', 'true', '1'])) {
             $info['site_wide'] = true;
         } else {
             $info['site_wide'] = false;

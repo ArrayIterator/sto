@@ -2,7 +2,7 @@
 
 namespace ArrayIterator;
 
-use ArrayIterator\Helper\Normalizer;
+use ArrayIterator\Helper\NormalizerData;
 use ArrayIterator\Traits\SimpleAttributeFilter;
 use Serializable;
 
@@ -59,7 +59,7 @@ class Menus implements Serializable
         $default_main_menu_class = explode(' ', $default_main_menu_class);
         foreach ($default_main_menu_class as $k => $item) {
             unset($default_main_menu_class[$k]);
-            $default_main_menu_class[] = Normalizer::normalizeHtmlClass($item);
+            $default_main_menu_class[] = NormalizerData::normalizeHtmlClass($item);
         }
         $default_main_menu_class = array_unique(array_filter($default_main_menu_class));
         $this->default_main_menu_class = implode(' ', $default_main_menu_class);
@@ -248,7 +248,7 @@ class Menus implements Serializable
          * SANITIZE TAG ATTRIBUTES
          * ------------------------------------------------------*/
         $currentTag = !in_array($globalTag, ['ol', 'ul']) ? $globalTag : 'li';
-        $menuId = Normalizer::normalizeHtmlClass($parentMenu->getId());
+        $menuId = NormalizerData::normalizeHtmlClass($parentMenu->getId());
         $attrs = $this->sanitizeAttribute($parentMenu->getAttributes());
 
         if ($deep === 0) {
@@ -269,7 +269,7 @@ class Menus implements Serializable
         if (isset($attrs['class'])) {
             $array = explode(' ', $attrs['class'] ?? '');
             foreach ($array as $menu) {
-                $classes[] = Normalizer::normalizeHtmlClass($menu);
+                $classes[] = NormalizerData::normalizeHtmlClass($menu);
             }
         }
 
@@ -290,7 +290,7 @@ class Menus implements Serializable
                 if (!is_string($menu)) {
                     continue;
                 }
-                $classesLink[] = Normalizer::normalizeHtmlClass($menu);
+                $classesLink[] = NormalizerData::normalizeHtmlClass($menu);
             }
         }
 
@@ -388,7 +388,7 @@ class Menus implements Serializable
 
         unset($attrs, $classes);
         $html = "<{$currentTag}{$attr}>\n";
-        $icon = Normalizer::normalizeHtmlClass($icon);
+        $icon = NormalizerData::normalizeHtmlClass($icon);
         $nameText = "<span class=\"link-text\">{$name}</span>";
         if ($icon !== '') {
             $icon = ! preg_match('~icofont[-]~', $icon)
@@ -470,14 +470,14 @@ class Menus implements Serializable
 
         foreach ($classes as $k => $item) {
             unset($classes[$k]);
-            $classes[] = Normalizer::normalizeHtmlClass($item);
+            $classes[] = NormalizerData::normalizeHtmlClass($item);
         }
 
         $newClasses = [];
         if (isset($attrs['class'])) {
             $array = explode(' ', $attrs['class'] ?? '');
             foreach ($array as $item) {
-                $newClasses[] = Normalizer::normalizeHtmlClass($item);
+                $newClasses[] = NormalizerData::normalizeHtmlClass($item);
             }
         }
         if (empty($newClasses)) {

@@ -97,3 +97,5 @@ node_modules/
 
 /app.config.php
 /uploads/*/*
+!/modules/example/
+/modules/*/

@@ -7,5 +7,5 @@ if (is_admin_login()) {
     delete_user_session();
 }
 
-redirect(get_admin_login_url().'?logout=success');
+redirect(get_admin_logout_redirect_url(['logout'=>'success']));
 do_exit(0);

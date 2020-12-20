@@ -133,43 +133,38 @@ require_once __DIR__ . '/filters.php';
 
 if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
     $loadedModules = [];
-    foreach (get_site_wide_active_modules() as $moduleName => $time) {
+    foreach (get_globals_active_modules() as $moduleName => $time) {
         if (!is_string($moduleName)) {
             continue;
         }
-        if (!($module = get_module($moduleName)) || !$module->isSiteWide()) {
+        if (!($module = get_module($moduleName))) {
             continue;
         }
-
-        // mutable include
-        (function (ArrayIterator\Info\Module $module, $moduleName, $loadedModules) {
-            /** @noinspection PhpIncludeInspection */
-            require_once $module->getPath();
-        })($module, $moduleName, $loadedModules);
-        $loadedModules[$moduleName] = time();
-        hook_run('module_loaded', $moduleName, $time, $module);
-        hook_run('site_wide_module_loaded', $moduleName, $time, $module);
+        $module = $module->load($time);
+        if ($module) {
+            $loadedModules[$moduleName] = $module->getLoadedTime();
+            hook_run('module_loaded', $moduleName, $time, $module);
+            hook_run('globals_module_loaded', $moduleName, $time, $module);
+        }
     }
 
-    // HOOK SITE WIDE LOADED
-    hook_run('site_wide_modules_loaded', $loadedModules);
+    // HOOK GLOBALS LOADED
+    hook_run('globals_modules_loaded', $loadedModules);
 
     foreach (get_site_active_modules() as $moduleName => $time) {
         if (!is_string($moduleName) || isset($loadedModules[$moduleName])) {
             continue;
         }
 
-        if (!($module = get_module($moduleName)) || !$module->isSiteWide()) {
+        if (!($module = get_module($moduleName)) || ! $module->isSiteWide()) {
             continue;
         }
 
-        // mutable include
-        (function (ArrayIterator\Info\Module $module, $moduleName, $loadedModules) {
-            /** @noinspection PhpIncludeInspection */
-            require_once $module->getPath();
-        })($module, $moduleName, $loadedModules);
-        $loadedModules[$moduleName] = time();
-        hook_run('module_loaded', $moduleName, $time, $module);
+        $module = $module->load($time);
+        if ($module) {
+            $loadedModules[$moduleName] = $module->getLoadedTime();
+            hook_run('module_loaded', $moduleName, $time, $module);
+        }
     }
 }
 

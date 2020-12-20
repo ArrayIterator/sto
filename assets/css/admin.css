@@ -825,3 +825,102 @@ label.custom-label-radio input[type=radio]:checked + span {
     background-color: #28a745;
     color: #fff;
 }
+
+.card-area {
+
+}
+.standard-card .card-image {
+    height: 200px;
+    line-height: normal;
+    position:relative;
+    overflow:hidden;
+    display:block;
+    vertical-align:middle;
+    text-align: center;
+    font-size:14px;
+    background-color: rgba(0,0,0,.1);
+    z-index: 2;
+    background-repeat:no-repeat;
+    background-position: center;
+    background-size: cover;
+    overflow:hidden;
+}
+.standard-card .card {
+    overflow:hidden;
+}
+.standard-card .card.hide {
+    display:none;
+}
+
+.standard-card .card-image::before {
+    content:'';
+    text-align: center;
+    position:relative;
+    display:block;
+    background-color: transparent;
+    transition: all ease .1s;
+    opacity:1;
+    height:100%;
+    width:100%;
+    margin:0;
+}
+
+.standard-card .card-image:hover::before {
+    height:0;
+    opacity:0;
+}
+
+.standard-card .card .card-image .card-description {
+    font-weight: lighter;
+    padding: 20px;
+    position:relative;
+    height: 100%;
+    display:block;
+    margin:0;
+    overflow: hidden;
+    background-color: rgba(0,0,0,.5);
+    color:#fff;
+}
+
+.standard-card .card-title {
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+.standard-card .card-columns {
+    column-count: 4;
+}
+
+@media (max-width: 1120px) and (min-width: 1024px) {
+    .standard-card .card-columns {
+        column-count: 2;
+    }
+    .sidebar-closed .standard-card .card-columns {
+        column-count: 4;
+    }
+}
+@media (max-width: 1024px) and (min-width: 576px) {
+    .standard-card .card-columns {
+        column-count: 2;
+    }
+    .sidebar-closed .standard-card .card-columns {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 820px) and (min-width: 576px) {
+    .sidebar-closed .standard-card .card-columns {
+        column-count: 2;
+    }
+}
+@media (max-width: 720px)  and (min-width: 576px) {
+    .standard-card .card-columns {
+        column-count: 1;
+    }
+}
+@media (max-width: 576px) {
+    .standard-card .card-columns {
+        column-count: 1;
+    }
+}

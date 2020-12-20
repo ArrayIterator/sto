@@ -246,7 +246,7 @@ function cookie_multi_domain(): string
 {
     $host = get_host();
     if (filter_var($host, FILTER_VALIDATE_DOMAIN)) {
-        $host = \ArrayIterator\Helper\Normalizer::splitCrossDomain($host);
+        $host = \ArrayIterator\Helper\NormalizerData::splitCrossDomain($host);
     }
     return hook_apply('cookie_domain', $host, get_host());
 }

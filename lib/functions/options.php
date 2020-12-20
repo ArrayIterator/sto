@@ -225,13 +225,19 @@ function get_site_option(string $optionName, $default = null)
     return $res;
 }
 
-function get_site_wide_active_modules(): array
+/**
+ * Modules that activate as global
+ *
+ * @return array
+ */
+function get_globals_active_modules(): array
 {
-    $modules = get_option('active_modules', null, 1);
+    $modules = get_option('globals_active_modules', null, 1);
     $update = false;
     if (!is_array($modules)) {
         $modules = [];
     }
+
     foreach ($modules as $key => $time) {
         if (!is_string($key) || !is_int($time)) {
             $update = true;
@@ -240,11 +246,11 @@ function get_site_wide_active_modules(): array
     }
 
     if ($update) {
-        update_option('active_modules', $modules, 1);
+        update_option('globals_active_modules', $modules, 1);
     }
 
     asort($modules);
-    return hook_apply('site_wide_active_modules', $modules);
+    return hook_apply('globals_active_modules', $modules);
 }
 
 /**
@@ -284,7 +290,7 @@ function get_site_active_modules(): array
  */
 function set_site_wide_active_module(string $module, bool $replaceTime = false): bool
 {
-    $modules = get_site_wide_active_modules();
+    $modules = get_globals_active_modules();
     if (isset($modules[$module]) && !$replaceTime) {
         return true;
     }
@@ -314,7 +320,7 @@ function set_site_active_module(string $module, bool $replaceTime = false): bool
  */
 function remove_site_wide_active_module(string $module): bool
 {
-    $modules = get_site_wide_active_modules();
+    $modules = get_globals_active_modules();
     if (!isset($modules[$module])) {
         return false;
     }
@@ -341,7 +347,7 @@ function remove_site_active_module(string $module): bool
  */
 function get_all_active_modules(): array
 {
-    $modules = get_site_wide_active_modules();
+    $modules = get_globals_active_modules();
     $siteModules = get_site_active_modules();
     foreach ($siteModules as $key => $item) {
         if (!isset($modules[$key])) {

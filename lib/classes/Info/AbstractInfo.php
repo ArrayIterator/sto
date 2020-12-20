@@ -31,9 +31,6 @@ class AbstractInfo
         $this->info = $info;
     }
 
-    /**
-     * @return mixed
-     */
     public function isValid(): bool
     {
         return false;
@@ -42,6 +39,11 @@ class AbstractInfo
     public function getName(): string
     {
         return $this->info['name'] ?? '';
+    }
+
+    public function getDescription(): string
+    {
+        return $this->info['description'] ?? '';
     }
 
     public function getUri(): string
