@@ -9,6 +9,11 @@ use ArrayIterator\Controller\Api\Status;
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type="text/css">
+        .hide-if-js {
+            display: none;
+        }
+    </style>
     <script type="text/javascript">
         document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
         <?php if (!is_admin_login_page()) : ?>
@@ -97,7 +102,13 @@ use ArrayIterator\Controller\Api\Status;
                 </ul>
             </div>
         </div>
-        <div id="global-message"></div>
+        <div class="hide-if-js mt-2">
+            <div class="alert alert-danger">
+                <?php esc_html_trans_e('Please Enable Javascript');?>
+            </div>
+        </div>
+        <div id="global-message" class="mt-2">
+        </div>
         <div class="admin-title">
             <h2 class="page-title"><?= esc_html(get_admin_title()); ?></h2>
         </div>
