@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 05, 2020 at 05:56 AM
+-- Generation Time: Dec 20, 2020 at 05:58 AM
 -- Server version: 10.4.10-MariaDB
 -- PHP Version: 7.4.1
 
@@ -78,6 +78,7 @@ CREATE TABLE `sto_exam`
     `revisions`       int(11)      NOT NULL DEFAULT 0,
     `exam_code`       varchar(255) NOT NULL,
     `invigilator`     bigint(20)            DEFAULT NULL,
+    `exam_time`       int(10)      NOT NULL COMMENT 'Time in Minutes',
     `exam_date`       date                  DEFAULT NULL,
     `exam_time_start` time                  DEFAULT NULL,
     `exam_time_end`   time                  DEFAULT NULL,
@@ -177,7 +178,7 @@ CREATE TABLE `sto_question`
     `status`        enum ('published','draft','pending','deleted','hidden') NOT NULL,
     `question`      text                                                    NOT NULL,
     `question_note` text                                                             DEFAULT NULL,
-    `question_type` enum ('choice','essay')                                 NOT NULL,
+    `question_type` enum ('choice','essai')                                 NOT NULL,
     `answer_alpha`  char(1)                                                          DEFAULT NULL,
     `score_default` int(10)                                                 NOT NULL DEFAULT 10,
     `created_by`    bigint(20)                                                       DEFAULT NULL,
@@ -276,18 +277,19 @@ CREATE TABLE `sto_sites`
     `additional_host` varchar(255)          DEFAULT NULL,
     `token`           varchar(255)          DEFAULT NULL,
     `status`          varchar(60)           DEFAULT 'active' COMMENT 'active, delete, banned, pending',
+    `logo`            varchar(255)          DEFAULT NULL,
     `metadata`        longtext              DEFAULT NULL,
     `created_at`      datetime     NOT NULL DEFAULT current_timestamp(),
     `updated_at`      datetime     NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
-
 --
 -- Dumping data for table `sto_sites`
 --
-INSERT INTO `sto_sites` (`id`, `name`, `host`, `additional_host`, `token`, `status`, `metadata`)
-VALUES (1, 'Default System Wide', NULL, NULL, NULL, 'active', NULL);
+
+INSERT INTO `sto_sites` (`id`, `name`, `host`, `additional_host`, `token`, `status`, `logo`, `metadata`, `created_at`, `updated_at`)
+VALUES (1, 'Default System Wide', NULL, NULL, NULL, 'active', '', NULL, '2020-12-04 11:39:54', '0000-00-00 00:00:00');
 
 --
 -- Triggers `sto_sites`
@@ -304,7 +306,6 @@ BEGIN
 END
 $$
 DELIMITER ;
-
 DELIMITER $$
 CREATE TRIGGER `PREVENT_UPDATE_STATUS_DEFAULT_SITE`
     BEFORE UPDATE
@@ -361,7 +362,7 @@ CREATE TABLE `sto_student_answer`
     `question_id`     bigint(20) NOT NULL,
     `student_exam_id` bigint(20) NOT NULL,
     `answer_alpha`    char(1)  DEFAULT NULL,
-    `answer_essay`    longtext DEFAULT NULL,
+    `answer_essai`    longtext DEFAULT NULL,
     `score`           int(10)    NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
@@ -395,7 +396,7 @@ CREATE TABLE `sto_student_exam`
 CREATE TABLE `sto_student_logs`
 (
     `id`         bigint(20)   NOT NULL,
-    `student_id` bigint(10)            DEFAULT NULL,
+    `user_id`    bigint(10)            DEFAULT NULL,
     `type`       varchar(255) NOT NULL COMMENT 'log type: login, logout, change_password, etc..',
     `note`       text                  DEFAULT NULL,
     `created_at` datetime     NOT NULL DEFAULT current_timestamp()
@@ -411,7 +412,7 @@ CREATE TABLE `sto_student_logs`
 CREATE TABLE `sto_student_meta`
 (
     `meta_id`    bigint(20)   NOT NULL,
-    `student_id` bigint(10)   NOT NULL,
+    `user_id`    bigint(10)   NOT NULL,
     `meta_name`  varchar(255) NOT NULL,
     `meta_value` longtext DEFAULT NULL
 ) ENGINE = InnoDB
@@ -468,11 +469,21 @@ CREATE TABLE `sto_supervisor`
     `role`           varchar(255)            DEFAULT NULL COMMENT 'superadmin, admin, teacher, invigilator, contributor, editor',
     `status`         varchar(255)   NOT NULL DEFAULT 'active' COMMENT 'active, deleted, banned, pending',
     `religion`       varchar(5)              DEFAULT NULL,
-    `avatar`         varchar(255)            DEFAULT NULL COMMENT 'User Avatar',
+    `avatar`         varchar(255)   NOT NULL,
     `created_at`     datetime       NOT NULL DEFAULT current_timestamp(),
     `updated_at`     datetime                DEFAULT '0000-00-00 00:00:00'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
+
+--
+-- Dumping data for table `sto_supervisor`
+--
+
+INSERT INTO `sto_supervisor` (`id`, `site_id`, `username`, `email`, `password`, `position_code`, `disallow_admin`,
+                              `join_date`, `full_name`, `gender`, `role`, `status`, `religion`, `avatar`, `created_at`,
+                              `updated_at`)
+VALUES (1, 1, 'admin', 'admin@example.com', 'password', '', 0, NULL, '', 'M', 'superadmin', 'active', NULL, '', now(),
+        '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -482,11 +493,11 @@ CREATE TABLE `sto_supervisor`
 
 CREATE TABLE `sto_supervisor_logs`
 (
-    `id`            bigint(20)   NOT NULL,
-    `supervisor_id` bigint(20)   NOT NULL,
-    `type`          varchar(255) NOT NULL COMMENT 'log type: login, logout, change_password, etc..',
-    `note`          text                  DEFAULT NULL,
-    `created_at`    datetime     NOT NULL DEFAULT current_timestamp()
+    `id`         bigint(20)   NOT NULL,
+    `user_id`    bigint(20)   NOT NULL,
+    `type`       varchar(255) NOT NULL COMMENT 'log type: login, logout, change_password, etc..',
+    `note`       text                  DEFAULT NULL,
+    `created_at` datetime     NOT NULL DEFAULT current_timestamp()
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -498,10 +509,10 @@ CREATE TABLE `sto_supervisor_logs`
 
 CREATE TABLE `sto_supervisor_meta`
 (
-    `meta_id`       bigint(20)   NOT NULL,
-    `supervisor_id` bigint(10)   NOT NULL,
-    `meta_name`     varchar(255) NOT NULL,
-    `meta_value`    longtext DEFAULT NULL
+    `meta_id`    bigint(20)   NOT NULL,
+    `user_id`    bigint(10)   NOT NULL,
+    `meta_name`  varchar(255) NOT NULL,
+    `meta_value` longtext DEFAULT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -811,7 +822,8 @@ ALTER TABLE `sto_exam`
     ADD KEY `exam_code` (`exam_code`),
     ADD KEY `invigilator` (`invigilator`),
     ADD KEY `exam_status` (`exam_status`),
-    ADD KEY `created_by` (`created_by`);
+    ADD KEY `created_by` (`created_by`),
+    ADD KEY `exam_time` (`exam_time`);
 
 --
 -- Indexes for table `sto_exam_classes_id`
@@ -920,7 +932,8 @@ ALTER TABLE `sto_sites`
     ADD UNIQUE KEY `token` (`token`),
     ADD UNIQUE KEY `additional_host` (`additional_host`) USING BTREE,
     ADD UNIQUE KEY `host_additional` (`host`, `additional_host`) USING BTREE,
-    ADD KEY `name` (`name`);
+    ADD KEY `name` (`name`),
+    ADD KEY `logo` (`logo`);
 
 --
 -- Indexes for table `sto_student`
@@ -962,14 +975,16 @@ ALTER TABLE `sto_student_exam`
 ALTER TABLE `sto_student_logs`
     ADD PRIMARY KEY (`id`),
     ADD KEY `type` (`type`),
-    ADD KEY `student_id` (`student_id`) USING BTREE;
+    ADD KEY `student_id` (`user_id`) USING BTREE;
 
 --
 -- Indexes for table `sto_student_meta`
 --
 ALTER TABLE `sto_student_meta`
     ADD PRIMARY KEY (`meta_id`),
-    ADD UNIQUE KEY `meta_student_unique` (`meta_name`, `student_id`);
+    ADD UNIQUE KEY `meta_user_unique` (`meta_name`, `user_id`) USING BTREE,
+    ADD KEY `meta_name` (`meta_name`),
+    ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `sto_student_online`
@@ -1009,16 +1024,17 @@ ALTER TABLE `sto_supervisor`
 --
 ALTER TABLE `sto_supervisor_logs`
     ADD PRIMARY KEY (`id`),
-    ADD KEY `type` (`type`);
+    ADD KEY `type` (`type`),
+    ADD KEY `sto_supervisor_logs_user_id` (`user_id`);
 
 --
 -- Indexes for table `sto_supervisor_meta`
 --
 ALTER TABLE `sto_supervisor_meta`
     ADD PRIMARY KEY (`meta_id`),
-    ADD UNIQUE KEY `supervisor_meta_name` (`supervisor_id`, `meta_name`) USING BTREE,
+    ADD UNIQUE KEY `supervisor_meta_name` (`user_id`, `meta_name`) USING BTREE,
     ADD KEY `meta_name` (`meta_name`),
-    ADD KEY `supervisor_id` (`supervisor_id`) USING BTREE;
+    ADD KEY `supervisor_id` (`user_id`) USING BTREE;
 
 --
 -- Indexes for table `sto_supervisor_online`
@@ -1266,13 +1282,13 @@ ALTER TABLE `sto_student_exam`
 -- Constraints for table `sto_student_logs`
 --
 ALTER TABLE `sto_student_logs`
-    ADD CONSTRAINT `sto_student_logs_student_id` FOREIGN KEY (`student_id`) REFERENCES `sto_student` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+    ADD CONSTRAINT `sto_student_logs_student_id` FOREIGN KEY (`user_id`) REFERENCES `sto_student` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `sto_student_meta`
 --
 ALTER TABLE `sto_student_meta`
-    ADD CONSTRAINT `sto_student_meta_student_id` FOREIGN KEY (`student_id`) REFERENCES `sto_student` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+    ADD CONSTRAINT `sto_student_meta_user_id` FOREIGN KEY (`user_id`) REFERENCES `sto_student` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `sto_student_online`
@@ -1294,10 +1310,16 @@ ALTER TABLE `sto_supervisor`
     ADD CONSTRAINT `sto_supervisor_site_id` FOREIGN KEY (`site_id`) REFERENCES `sto_sites` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
+-- Constraints for table `sto_supervisor_logs`
+--
+ALTER TABLE `sto_supervisor_logs`
+    ADD CONSTRAINT `sto_supervisor_logs_user_id` FOREIGN KEY (`user_id`) REFERENCES `sto_supervisor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Constraints for table `sto_supervisor_meta`
 --
 ALTER TABLE `sto_supervisor_meta`
-    ADD CONSTRAINT `sto_supervisor_meta_supervisor_id` FOREIGN KEY (`supervisor_id`) REFERENCES `sto_supervisor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+    ADD CONSTRAINT `sto_supervisor_meta_supervisor_id` FOREIGN KEY (`user_id`) REFERENCES `sto_supervisor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `sto_supervisor_online`
