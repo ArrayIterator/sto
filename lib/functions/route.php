@@ -1,5 +1,7 @@
 <?php
 
+use ArrayIterator\Controller\BaseController;
+use ArrayIterator\RouteStorage;
 use FastRoute\BadRouteException;
 
 /* -------------------------------------------------
@@ -267,4 +269,62 @@ function route_public_any(string $pattern, callable $callback)
 function route_public_group(string $pattern, callable $callback)
 {
     return route_public()->group($pattern, $callback);
+}
+
+/**
+ * @param $controller
+ * @param RouteStorage $routeApi
+ * @return bool
+ */
+function register_route_controller($controller, RouteStorage $routeApi) : bool
+{
+    if (is_string($controller)) {
+        // preg_match('#^(?P<className>[^:]+)([:]{1,2}(?P<method>))$#', $controller, $match);
+        if (!@class_exists($controller) || ! is_subclass_of($controller, BaseController::class)) {
+            return false;
+        }
+        $controller = new $controller;
+    }
+
+    if (!is_object($controller) || !$controller instanceof BaseController) {
+        return false;
+    }
+
+    $controller($routeApi);
+    return true;
+}
+
+/**
+ * @param string|BaseController $controller
+ * @return bool
+ */
+function register_route_public_controller($controller) : bool
+{
+    return register_route_controller($controller, route_public());
+}
+
+/**
+ * @param string|BaseController $controller
+ * @return bool
+ */
+function register_route_api_controller($controller) : bool
+{
+    return register_route_controller($controller, route_api());
+}
+
+/**
+ * @param string $str
+ * @return string
+ */
+function route_slash_it(string $str) : string
+{
+    if (preg_match('#^(.*)?([^\]])([\]]+)?$#', $str, $match)) {
+        $slash = $match[2]??'';
+        $close = $match[3]??'';
+        $slash = $slash !== '/' ? "{$slash}[/]" : "[/]";
+        $str = $match[1] . $slash . $close;
+        return $str;
+    }
+    $str = preg_replace('#(\[[/]+\]|[/]+)$#', '', $str);
+    return "{$str}[/]";
 }

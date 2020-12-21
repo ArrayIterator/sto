@@ -4,6 +4,11 @@ define('APP_SHORT_NAME', 'STO');
 define('VERSION', '1.0.0');
 define('RELEASE', '1');
 
+// SET MYSQL LIMIT TO 1000
+define('MYSQL_MAX_RESULT_LIMIT', 10000);
+define('MYSQL_MAX_SEARCH_LIMIT', 100);
+define('MYSQL_DEFAULT_SEARCH_LIMIT', 10);
+
 define('DS', DIRECTORY_SEPARATOR);
 define('LIB_DIR', __DIR__);
 define('LIB_PATH', basename(__DIR__));
@@ -102,3 +107,4 @@ define('VERSION_BOOTSTRAP', 'v4.5.3');
 define('VERSION_CHART_JS', 'v2.9.4');
 define('VERSION_MOMENT_JS', '2.29.1');
 define('VERSION_ICOFONT_CSS', '1.0.1');
+define('VERSION_SELECT2', '4.0.13');

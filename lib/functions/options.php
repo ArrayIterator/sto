@@ -220,7 +220,7 @@ function get_site_option(string $optionName, $default = null)
 
     $res = get_option($optionName, $default, get_current_site_id(), $found);
     if ($found) {
-        cache_set($optionName, $res);
+        cache_set($optionName, $res, 'site_options');
     }
     return $res;
 }

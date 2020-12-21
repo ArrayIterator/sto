@@ -7,10 +7,10 @@ use FastRoute\BadRouteException;
 use FastRoute\RouteCollector;
 
 /**
- * Class RouteApi
+ * Class RouteStorage
  * @package ArrayIterator
  */
-class RouteApi extends GroupingRoute
+class RouteStorage extends GroupingRoute
 {
     /**
      * RouteApi constructor.
@@ -20,7 +20,7 @@ class RouteApi extends GroupingRoute
      */
     public function __construct(
         Route $route,
-        string $prefix = '/api',
+        string $prefix,
         bool $groupCaseSensitive = true
     ) {
         parent::__construct($route, $prefix, $groupCaseSensitive);

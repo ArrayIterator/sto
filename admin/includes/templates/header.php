@@ -3,39 +3,19 @@ if (!defined('ADMIN_AREA')) {
     return;
 }
 
-use ArrayIterator\Controller\Api\Status;
 ?><!DOCTYPE html>
 <html<?= get_admin_html_attributes(); ?>>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style type="text/css">
-        .hide-if-js {
-            display: none;
-        }
-    </style>
-    <script type="text/javascript">
-        document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
-        <?php if (!is_admin_login_page()) : ?>
-        const ping_url = <?= json_encode(get_api_url(Status::PING_PATH), JSON_UNESCAPED_SLASHES);?>,
-            login_url = <?= json_encode(get_admin_login_url(), JSON_UNESCAPED_SLASHES);?>,
-            user_id = <?= get_current_user_id();?>;
-        var translation_text = <?= json_encode(
-            [
-                'You seem to be offline' => trans('You seem to be offline'),
-                'Reconnecting...' => trans('Reconnecting...'),
-            ],
-            JSON_UNESCAPED_SLASHES
-        );?>;
-        <?php endif;?>
-    </script>
+    <style type="text/css">.hide-if-js{display:none}</style>
     <?php admin_html_head(); ?>
 </head>
 <body<?= get_admin_body_attributes(); ?>>
 <div id="page"<?php if (cookie('sidebar_closed') === 'true') {
     echo ' class="sidebar-closed"';
 } ?>>
-    <?php hook_run('admin_body_open'); ?>
+    <?php admin_body_open(); ?>
     <?php if (!is_admin_login_page()) : ?>
     <div id="left-area">
         <div id="admin-sidebar">
@@ -107,9 +87,10 @@ use ArrayIterator\Controller\Api\Status;
                 <?php esc_html_trans_e('Please Enable Javascript');?>
             </div>
         </div>
-        <div id="global-message" class="mt-2">
-        </div>
+        <div id="global-message" class="mt-2"></div>
+        <div id="top-message" class="mt-2"><?php hook_run('admin_top_message');?></div>
         <div class="admin-title">
-            <h2 class="page-title"><?= esc_html(get_admin_title()); ?></h2>
+            <h2 class="page-title"><?php esc_attr_trans_e(get_admin_title()); ?></h2>
         </div>
         <?php endif; ?>
+        <div id="content" class="page-content">

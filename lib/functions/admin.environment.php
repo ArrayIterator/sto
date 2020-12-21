@@ -1,4 +1,7 @@
 <?php
+
+use ArrayIterator\Helper\NormalizerData;
+
 /**
  * @return string
  */
@@ -202,9 +205,22 @@ function is_admin_pending() : bool
 /**
  * @return bool
  */
-function teacher_can_see_supervisor() : bool
+function teacher_can_see_supervisors() : bool
 {
     $data = get_site_option('teacher_can_see_supervisors');
+    $data = is_string($data) ? trim(strtolower($data)) : $data;
+    return hook_apply(
+            'teacher_can_see_supervisors',
+            $data === 'true' || $data === 'yes' || $data === true
+        ) === true;
+}
+
+/**
+ * @return bool
+ */
+function teacher_can_see_supervisor() : bool
+{
+    $data = get_site_option('teacher_can_see_supervisor');
     $data = is_string($data) ? trim(strtolower($data)) : $data;
     return hook_apply(
             'teacher_can_see_supervisor',
@@ -212,6 +228,18 @@ function teacher_can_see_supervisor() : bool
         ) === true;
 }
 
+/**
+ * @return bool
+ */
+function invigilator_can_see_supervisors() : bool
+{
+    $data = get_site_option('invigilator_can_see_supervisors');
+    $data = is_string($data) ? trim(strtolower($data)) : $data;
+    return hook_apply(
+            'invigilator_can_see_supervisors',
+            $data === 'true' || $data === 'yes' || $data === true
+        ) === true;
+}
 /**
  * @return bool
  */
@@ -223,4 +251,150 @@ function invigilator_can_see_supervisor() : bool
             'invigilator_can_see_supervisor',
             $data === 'true' || $data === 'yes' || $data === true
         ) === true;
+}
+
+/**
+ * @return int|false
+ */
+function get_super_admin_site_id_param()
+{
+    $siteId = query_param('site_id');
+    if (is_super_admin()) {
+        $siteId = is_string($siteId) ? trim($siteId) : $siteId;
+        if (!has_query_param('site_id') || !is_numeric($siteId) || abs($siteId) < 1) {
+            $siteId = false;
+        } else {
+            $siteId = (int) abs(intval($siteId));
+            $siteId = $siteId < 1 ? get_current_site_id() : $siteId;
+        }
+    } else {
+        $siteId = get_current_site_id();
+    }
+
+    return $siteId;
+}
+
+/**
+ * @return int[]
+ */
+function get_super_admin_site_ids_param() : array
+{
+    $siteIds = query_param('site_ids');
+    if (!is_super_admin()) {
+        return [get_current_site_id()];
+    }
+    if (!is_array($siteIds)) {
+        if (!is_string($siteIds)) {
+            return [];
+        }
+        $siteIds = explode(',', trim($siteIds));
+    }
+
+    $siteIds = array_filter(array_map('trim', $siteIds));
+    $siteIds = array_unique($siteIds);
+    $siteIds = array_unique(array_map('intval', $siteIds));
+
+    return array_values($siteIds);
+}
+
+/**
+ * @return array
+ */
+function &get_admin_messages() : array
+{
+    static $message = null;
+    if (!is_array($message)) {
+        $message = [];
+    }
+
+    return $message;
+}
+
+function remove_admin_success_message(string $key) : bool
+{
+    $message =& get_admin_messages();
+    if (!isset($message['success']) || !is_array($message['success'])) {
+        $message['success'] = [];
+    }
+    if (isset($message['success'][$key])) {
+        unset($message['success'][$key]);
+    }
+
+    return false;
+}
+
+function remove_admin_error_message(string $key) : bool
+{
+    $message =& get_admin_messages();
+    if (!isset($message['error']) || !is_array($message['error'])) {
+        $message['error'] = [];
+    }
+    if (isset($message['error'][$key])) {
+        unset($message['error'][$key]);
+    }
+
+    return false;
+}
+
+function add_admin_success_message(string $key, string $message)
+{
+    $messages =& get_admin_messages();
+    if (!isset($messages['success']) || !is_array($messages['success'])) {
+        $messages['success'] = [];
+    }
+
+    $message = NormalizerData::forceBalanceTags($message);
+    $messages['success'][$key] = <<<HTML
+    <div class="alert alert-success alert-dismissible fade show">
+        {$message}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+HTML;
+}
+
+/**
+ * @param string $key
+ * @param string $message
+ */
+function add_admin_error_message(string $key, string $message)
+{
+    $messages =& get_admin_messages();
+    if (!isset($messages['error']) || !is_array($messages['error'])) {
+        $messages['error'] = [];
+    }
+
+    $message = NormalizerData::forceBalanceTags($message);
+    $messages['error'][$key] = <<<HTML
+    <div class="alert alert-danger alert-dismissible fade show">
+        {$message}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+HTML;
+}
+
+/**
+ * Render Message
+ */
+function render_admin_message()
+{
+    $messages =& get_admin_messages();
+    foreach ($messages as $key => &$item) {
+        if (!is_array($item)) {
+            $item = [];
+            continue;
+        }
+        foreach ($item as $l => $message) {
+            if (!is_string($message)) {
+                unset($item[$l]);
+                continue;
+            }
+            echo $message;
+        }
+    }
 }

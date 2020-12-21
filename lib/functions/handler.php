@@ -38,10 +38,12 @@ function shutdown_handler()
  */
 function route_not_found_handler(Route $route)
 {
+    set_title('404 Not Found');
     set_content_type('text/html; charset=utf-8', 404);
     if (!load_template('404')) {
         include ROOT_TEMPLATES_DIR . '/404.php';
     }
+    do_exit();
 }
 
 /**
@@ -51,15 +53,23 @@ function route_not_found_handler(Route $route)
  */
 function route_not_allowed_handler(Route $route, $allowedMethods = [])
 {
+    set_title('404 Method Not Allowed');
     set_content_type('text/html; charset=utf-8', 404);
     if (!load_template('405')) {
         include ROOT_TEMPLATES_DIR . '/405.php';
     }
+    do_exit();
 }
 
 function route_json_not_found_handler()
 {
     json(404, hook_apply('route_json_not_found_message', 'Route not found'));
+}
+
+function route_not_found()
+{
+    is_route_api() ? route_json_not_found_handler() : route_not_found_handler(route());
+    do_exit();
 }
 
 function route_json_not_allowed_handler()
@@ -184,6 +194,7 @@ function render(string $data, bool $exit = false)
     hook_run('before_render');
     echo $data;
     hook_run('after_render');
+    unset($data);
     if ($exit) {
         do_exit();
     }

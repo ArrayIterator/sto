@@ -121,6 +121,9 @@ class PrepareStatement extends PDOStatement
         return $this->fetch();
     }
 
+    /**
+     * @return array|false
+     */
     public function fetchAssoc()
     {
         return $this->fetch(PDO::FETCH_ASSOC);

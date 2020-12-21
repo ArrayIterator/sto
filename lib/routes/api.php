@@ -3,6 +3,11 @@
  * Routes API Configurations
  */
 
-use ArrayIterator\Controller\Api\Status;
+use ArrayIterator\Controller\Api\ClassesController;
+use ArrayIterator\Controller\Api\StatusController;
 
-route_api_any(Status::PING_PATH . '[/]', [Status::class, 'ping']);
+return [
+    StatusController::class,
+    ClassesController::class,
+];
+

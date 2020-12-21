@@ -1,13 +1,19 @@
 <?php
 namespace ArrayIterator\Controller\Common;
 
+use ArrayIterator\Controller\BaseController;
+use ArrayIterator\RouteStorage;
+
 /**
  * Class Common
  * @package ArrayIterator\Controller\Common
  */
-class Common
+class Common extends BaseController
 {
-    public static function favicon()
+    /**
+     * Route Render Favicon
+     */
+    public function favicon()
     {
         $data = base64_decode(
             // blank icon deflated
@@ -33,6 +39,11 @@ class Common
         set_header('Cache-Control', 'max-age=315360000, public');
         set_header('Last-Modified', $lastMod);
         set_header('Etag', $etagFile);
-        do_exit($data);
+        render($data, true);
+    }
+
+    protected function registerController(RouteStorage $route)
+    {
+        $route->any('/favicon.ico', [$this, 'favicon']);
     }
 }

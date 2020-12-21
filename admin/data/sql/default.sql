@@ -46,7 +46,7 @@ CREATE TABLE `sto_classes`
     `site_id` bigint(20) DEFAULT 1,
     `code`    varchar(60)  NOT NULL,
     `name`    varchar(255) NOT NULL,
-    `note`    longtext     NOT NULL
+    `note`    longtext     DEFAULT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 

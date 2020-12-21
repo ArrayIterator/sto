@@ -21,7 +21,7 @@ use ArrayIterator\Model\Supervisor;
 use ArrayIterator\Model\SupervisorOnline;
 use ArrayIterator\Modules;
 use ArrayIterator\Route;
-use ArrayIterator\RouteApi;
+use ArrayIterator\RouteStorage;
 use ArrayIterator\Themes;
 use FastRoute\RouteCollector;
 use GuzzleHttp\Psr7\ServerRequest;
@@ -246,13 +246,13 @@ function route_collector(): RouteCollector
 }
 
 /**
- * @return RouteApi
+ * @return RouteStorage
  */
-function route_api(): RouteApi
+function route_api(): RouteStorage
 {
     static $route_api;
     if (!$route_api) {
-        $route_api = new RouteApi(
+        $route_api = new RouteStorage(
             \route(),
             get_route_api_path(),
             true
@@ -263,16 +263,16 @@ function route_api(): RouteApi
 }
 
 /**
- * @return RouteApi
+ * @return RouteStorage
  */
-function route_public(): RouteApi
+function route_public(): RouteStorage
 {
     static $route_api;
 
     if (!$route_api) {
         // $admin = preg_quote(get_route_api_path(), '#');
         $api = preg_quote(get_admin_path(), '#');
-        $route_api = new RouteApi(
+        $route_api = new RouteStorage(
             \route(),
             "{__not_admin: (?!{$api})}",
             true

@@ -8,7 +8,6 @@ if (($_SERVER['SCRIPT_FILENAME'] ?? null) === __FILE__) {
 // require autoload
 require __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/constant.php';
-require_once __DIR__ . '/functions/meta.php';
 require_once __DIR__ . '/functions/environment.php';
 require_once __DIR__ . '/functions/cache.php';
 require_once __DIR__ . '/functions/path.php';
@@ -21,8 +20,6 @@ require_once __DIR__ . '/functions/settings.php';
 require_once __DIR__ . '/functions/attachments.php';
 require_once __DIR__ . '/functions/api.php';
 require_once __DIR__ . '/functions/database.php';
-require_once __DIR__ . '/functions/options.php';
-require_once __DIR__ . '/functions/user.php';
 require_once __DIR__ . '/functions/auth.php';
 require_once __DIR__ . '/functions/filters.php';
 require_once __DIR__ . '/functions/translations.php';
@@ -31,6 +28,13 @@ require_once __DIR__ . '/functions/calendar.php';
 require_once __DIR__ . '/functions/assets.php';
 require_once __DIR__ . '/functions/templates.php';
 require_once __DIR__ . '/functions/admin.environment.php';
+
+// database tables
+require_once __DIR__ . '/functions/meta.php';
+require_once __DIR__ . '/functions/grants.php';
+require_once __DIR__ . '/functions/classes.php';
+require_once __DIR__ . '/functions/user.php';
+require_once __DIR__ . '/functions/options.php';
 
 if (ob_get_level() < 1) {
     ob_start();
@@ -197,4 +201,10 @@ if (!is_admin_page()) {
     }
     // do init
     init();
+}
+
+
+if (get_current_site_id() === 0) {
+    route_not_found();
+    do_exit(0);
 }

@@ -29,6 +29,14 @@ function get_current_url(): string
 }
 
 /**
+ * @return UriInterface
+ */
+function get_current_uri() : UriInterface
+{
+    return new Uri(get_current_url());
+}
+
+/**
  * @param string $pathUri
  * @return string
  */
@@ -99,6 +107,15 @@ function get_admin_url(string $pathUri = ''): string
         $pathUri,
         $originalPathUri
     );
+}
+
+/**
+ * @return string
+ */
+function get_admin_current_file_url() : string
+{
+    $base = get_admin_base_name_file();
+    return get_admin_url($base);
 }
 
 /**

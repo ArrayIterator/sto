@@ -130,6 +130,25 @@ function query_param($key = null)
 }
 
 /**
+ * @param string $key
+ * @return bool
+ */
+function has_query_param(string $key) : bool
+{
+    return isset(server_request()->getQueryParams()[$key]);
+}
+
+/**
+ * @param string $key
+ * @return int
+ */
+function query_param_int(string $key) : int
+{
+    $value = query_param($key);
+    return !is_numeric($value) ? 0 : abs(intval($value));
+}
+
+/**
  * @param bool $recreate
  * @return array
  */
@@ -199,6 +218,34 @@ function http_method(): string
 {
     $method = server_request()->getMethod();
     return hook_apply('http_method', $method);
+}
+
+function is_method_post() : bool
+{
+    $method = http_method();
+    $method = $method ? strtoupper($method) : $method;
+    return $method === 'POST';
+}
+
+function is_method_get() : bool
+{
+    $method = http_method();
+    $method = $method ? strtoupper($method) : $method;
+    return $method === 'GET';
+}
+
+function is_method_put() : bool
+{
+    $method = http_method();
+    $method = $method ? strtoupper($method) : $method;
+    return $method === 'GET';
+}
+
+function is_method_delete() : bool
+{
+    $method = http_method();
+    $method = $method ? strtoupper($method) : $method;
+    return $method === 'GET';
 }
 
 /**

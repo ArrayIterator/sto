@@ -5,7 +5,7 @@ if (!admin_is_allowed(__FILE__)) {
     return load_admin_denied();
 }
 
-set_admin_title('All Invigilators');
+set_admin_title('Add New Room');
 
 get_admin_header_template();
 get_admin_footer_template();

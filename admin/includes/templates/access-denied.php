@@ -2,7 +2,7 @@
 if (!defined('ADMIN_AREA')) {
     return;
 }
-set_admin_title(trans('Access Denied'));
+set_admin_title('Access Denied');
 get_admin_header_template();
 ?>
     <div class="mt-5"></div>

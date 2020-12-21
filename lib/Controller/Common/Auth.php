@@ -1,20 +1,22 @@
 <?php
 namespace ArrayIterator\Controller\Common;
 
+use ArrayIterator\Controller\BaseController;
 use ArrayIterator\Route;
+use ArrayIterator\RouteStorage;
 
 /**
  * Class Auth
  * @package ArrayIterator\Controller\Common
  */
-class Auth
+class Auth extends BaseController
 {
     /**
      * Route Handle Login Form
      *
      * @param Route $route
      */
-    public static function reset(Route $route)
+    public function reset(Route $route)
     {
         // redirect if login
         if (is_login()) {
@@ -37,7 +39,7 @@ class Auth
      * @param Route $route
      * @param array $params
      */
-    public static function login(Route $route, array $params = [])
+    public function login(Route $route, array $params = [])
     {
         // redirect if login
         if (is_login()) {
@@ -47,5 +49,14 @@ class Auth
 
         set_title('Login To Dashboard');
         load_template('login.php');
+    }
+
+    /**
+     * @param RouteStorage $route
+     */
+    protected function registerController(RouteStorage $route)
+    {
+        $route->any(route_slash_it(get_login_path()), [$this, 'login']);
+        $route->any(route_slash_it(get_reset_password_path()), [$this, 'login']);
     }
 }

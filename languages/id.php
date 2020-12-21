@@ -8,11 +8,20 @@ return [
     'Signin' => 'Masuk',
     'SignIn' => 'Masuk',
 
+    'Name' => 'Nama',
+    'name' => 'nama',
+    'Code' => 'Kode',
+    'kode' => 'kode',
+
     // TITLE
     'Login To Admin Area' => 'Masuk Ke Area Admin',
 
     // LOGOUT
     'Are You Sure ... ?' => 'Apakah Anda Yakin ... ?',
+    'Type To Search ...' => 'Ketik Untuk Mencari ...',
+    'Version' => 'Versi',
+    'Active' => 'Aktif',
+    'Inactive' => 'Tidak Aktif',
 
     // INPUT
     'Username' => 'Nama Pengguna',
@@ -46,6 +55,14 @@ return [
     'All Exam Schedules' => 'Semua Jadwal Ujian',
     'New Exam' => 'Ujian Baru',
     'Add New Exam' => 'Tambah Ujian Baru',
+
+    'Rooms' => 'Ruangan',
+    'Exam Rooms' => 'Ruangan Ujian',
+    'All Exam Rooms' => 'Semua Ruangan Ujian',
+    'Add New Room' => 'Tambah Ruangan Baru',
+    'Classes' => 'Kelas',
+    'All Classes' => 'Semua Kelas',
+    'Add New Class' => 'Tambah Kelas Baru',
 
     'Students' => 'Murid',
     'All Students' => 'Semua Murid',
@@ -89,4 +106,12 @@ return [
     '404 Page Not Found' => '404 Halaman Tidak Ditemukan',
     '405 Method Not Allowed' => '405 Metode Tidak Diijinkan',
     'Method Not Allowed' => 'Metode Tidak Diijinkan',
+
+    // INTERACTIVE
+    'Class %s could not be empty!' => '%s Kelas Tidak Boleh Kosong!',
+    'Class name %s is duplicate!' => 'Duplikasi pada nama kelas %s!',
+    'Class %s is duplicate! Data has been reverted!' => 'Duplikasi pada %s kelas! Data telah dikembalikan!',
+    'Error save data!' => 'Terjadi masalah saat menyimpan data',
+    'Search query could not be empty' => 'Kueri pencarian tidak boleh kosong',
+    'Search type is invalid!' => 'Jenis pencarian salah!'
 ];

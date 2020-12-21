@@ -34,6 +34,37 @@ function admin_sidebar_menu_array(): array
                 ],
             ]
         ],
+        'report' => [
+            'name' => trans('Report'),
+            'link' => get_admin_url('report.php'),
+            'hide' => !admin_is_allowed('report.php'),
+            'icon' => 'chart-line',
+//            'icon' => 'signal',
+            'position' => 100,
+            'menus' => [],
+        ],
+        'classes' => [
+            'name' => trans('Classes'),
+            'link' => get_admin_url('classes.php'),
+            'hide' => !admin_is_allowed('classes.php'),
+            'icon' => 'institution',
+            'position' => 150,
+            'menus' => [
+                'classes' => [
+                    'name' => trans('All Classes'),
+                    'link' => get_admin_url('classes.php'),
+                    'hide' => !admin_is_allowed('classes.php'),
+                    'position' => 150,
+                ],
+                'class_new' => [
+                    'name' => trans('Add New Class'),
+                    'link' => get_admin_url('class-new.php'),
+                    'hide' => !admin_is_allowed('class-new.php'),
+                    'position' => 150,
+                ],
+            ],
+        ],
+        // EXAMS
         'tasks' => [
             'name' => trans('Tasks'),
             'link' => get_admin_url('tasks.php'),
@@ -96,10 +127,24 @@ function admin_sidebar_menu_array(): array
                     'name' => trans('Add New Exam'),
                     'link' => get_admin_url('exam-new.php'),
                     'hide' => !admin_is_allowed('exam-new.php'),
+                    'position' => 360,
+                ],
+                'rooms' => [
+                    'name' => trans('All Exam Rooms'),
+                    'link' => get_admin_url('rooms.php'),
+                    'hide' => !admin_is_allowed('rooms.php'),
                     'position' => 370,
+                ],
+                'new_room' => [
+                    'name' => trans('Add New Room'),
+                    'link' => get_admin_url('room-new.php'),
+                    'hide' => !admin_is_allowed('room-new.php'),
+                    'position' => 380,
                 ],
             ]
         ],
+
+        // USERS
         'teachers' => [
             'name' => trans('Teachers'),
             'link' => get_admin_url('teachers.php'),
@@ -163,31 +208,43 @@ function admin_sidebar_menu_array(): array
                 ],
             ]
         ],
+        'tools' => [
+            'name' => trans('Tools'),
+            'link' => get_admin_url('tools.php'),
+            'hide' => !admin_is_allowed('tools.php'),
+            'icon' => 'tools-alt-2',
+//            'icon' => 'tools',
+            'position' => 600,
+            'menus' => [
+
+            ]
+        ],
+        // SITE SETUP
         'modules' => [
             'name' => trans('Modules'),
             'link' => get_admin_url('modules.php'),
             'hide' => !admin_is_allowed('modules.php'),
 //            'icon' => 'addons',
             'icon' => 'plugin',
-            'position' => 600,
+            'position' => 700,
             'menus' => [
                 'all_modules' => [
                     'name' => trans('All Modules'),
                     'link' => get_admin_url('modules.php'),
                     'hide' => !admin_is_allowed('modules.php'),
-                    'position' => 600,
+                    'position' => 700,
                 ],
                 'active_modules' => [
                     'name' => trans('Active Modules'),
                     'link' => get_admin_url('modules.php?status=active'),
                     'hide' => !admin_is_allowed('modules.php'),
-                    'position' => 620,
+                    'position' => 720,
                 ],
                 'inactive_modules' => [
                     'name' => trans('Inactive Modules'),
                     'link' => get_admin_url('modules.php?status=inactive'),
                     'hide' => !admin_is_allowed('modules.php'),
-                    'position' => 630,
+                    'position' => 730,
                 ],
             ]
         ],
@@ -196,7 +253,7 @@ function admin_sidebar_menu_array(): array
             'link' => get_admin_url('themes.php'),
             'hide' => !admin_is_allowed('themes.php'),
             'icon' => 'paint',
-            'position' => 700,
+            'position' => 800,
         ],
         'settings' => [
             'name' => trans('Settings'),
@@ -204,40 +261,20 @@ function admin_sidebar_menu_array(): array
             'hide' => !admin_is_allowed('settings.php'),
 //            'icon' => 'gears',
             'icon' => 'settings',
-            'position' => 800,
+            'position' => 900,
             'menus' => [
                 'settings' => [
                     'name' => trans('General Settings'),
                     'link' => get_admin_url('settings.php'),
                     'hide' => !admin_is_allowed('settings.php'),
-                    'position' => 800,
+                    'position' => 900,
                 ],
                 'admin-settings' => [
                     'name' => trans('Global Settings'),
                     'link' => get_admin_url('admin.php'),
                     'hide' => !admin_is_allowed('admin.php'),
-                    'position' => 830,
+                    'position' => 930,
                 ]
-            ]
-        ],
-        'report' => [
-            'name' => trans('Report'),
-            'link' => get_admin_url('report.php'),
-            'hide' => !admin_is_allowed('report.php'),
-            'icon' => 'chart-line',
-//            'icon' => 'signal',
-            'position' => 900,
-            'menus' => [],
-        ],
-        'tools' => [
-            'name' => trans('Tools'),
-            'link' => get_admin_url('tools.php'),
-            'hide' => !admin_is_allowed('tools.php'),
-            'icon' => 'tools-alt-2',
-//            'icon' => 'tools',
-            'position' => 1000,
-            'menus' => [
-
             ]
         ],
         'profile' => [

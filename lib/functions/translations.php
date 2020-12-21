@@ -222,7 +222,7 @@ function trans_printf(string $code, ...$args)
 
 /**
  * @param string $message
- * @param null $flags
+
  * @param $found
  * @return string
  */
@@ -231,10 +231,39 @@ function esc_html_trans(string $message, &$found = null): string
     return esc_html(trans($message, $found));
 }
 
+/**
+ * @param string $message
+ * @param $args
+ * @return string
+ */
+function esc_html_trans_sprintf(string $message, ...$args): string
+{
+    return esc_html(trans_sprintf($message, ...$args));
+}
+
+/**
+ * @param string $message
+ * @param $args
+ */
+function esc_html_trans_printf(string $message, ...$args)
+{
+    echo esc_html_trans_sprintf($message, ...$args);
+}
+
 function esc_html_trans_e(string $code, &$found = null)
 {
     echo esc_html_trans($code, $found);
 }
+
+/**
+ * @param string $message
+ * @param $args
+ */
+function esc_html_trans_sprintf_e(string $message, ...$args)
+{
+    esc_html_trans_printf($message, ...$args);
+}
+
 
 /**
  * @param string $code
@@ -244,6 +273,22 @@ function esc_html_trans_e(string $code, &$found = null)
 function esc_attr_trans(string $code, &$found = null): string
 {
     return esc_attr(trans($code, $found));
+}
+
+function esc_attr_trans_sprintf(string $code, ...$args): string
+{
+    return esc_attr(trans_sprintf($code, ...$args));
+}
+
+
+function esc_attr_trans_printf(string $code, ...$args)
+{
+    echo esc_attr(trans_sprintf($code, ...$args));
+}
+
+function esc_attr_trans_sprintf_e(string $code, ...$args)
+{
+    esc_attr_trans_printf($code, ...$args);
 }
 
 /**

@@ -30,12 +30,39 @@ function database_query(string $query)
 }
 
 /**
+ * @param string $quote
+ * @return string
+ */
+function database_quote(string $quote) : string
+{
+    return database()->quote($quote);
+}
+
+/**
+ * @param string $query
+ * @return AbstractResult|false
+ */
+function database_unbuffered_query(string $query)
+{
+    return database()->unbufferedQuery($query);
+}
+
+/**
  * @param string $query
  * @return PrepareStatement|false
  */
 function database_prepare(string $query)
 {
     return database()->prepare($query);
+}
+
+/**
+ * @param string $query
+ * @return PrepareStatement|false
+ */
+function database_unbuffered_prepare(string $query)
+{
+    return database()->unbufferedPrepare($query);
 }
 
 /**

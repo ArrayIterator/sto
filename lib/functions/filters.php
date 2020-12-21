@@ -145,3 +145,22 @@ function esc_html_e(string $message)
 {
     echo esc_html($message);
 }
+
+/**
+ * @param array $array
+ * @return array
+ */
+function array_map_string_empty(array $array) : array
+{
+    foreach ($array as $key => &$v) {
+        if (is_numeric($v) || is_object($v) && method_exists($v, '__tostring')) {
+            $v = (string) $v;
+        }
+
+        if (!is_string($v)) {
+            $v = '';
+        }
+    }
+
+    return $array;
+}

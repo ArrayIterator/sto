@@ -8,6 +8,38 @@ use ArrayIterator\Model\Supervisor;
 use ArrayIterator\User;
 
 /**
+ * @return string
+ */
+function get_student_table_name() : string
+{
+    return student()->getTableName();
+}
+
+/**
+ * @return string
+ */
+function get_supervisor_table_name() : string
+{
+    return supervisor()->getTableName();
+}
+
+/**
+ * @return string
+ */
+function get_student_online_table_name() : string
+{
+    return student_online()->getTableName();
+}
+
+/**
+ * @return string
+ */
+function get_supervisor_online_table_name() : string
+{
+    return supervisor_online()->getTableName();
+}
+
+/**
  * @return mixed|User
  * @noinspection PhpMissingReturnTypeInspection
  */

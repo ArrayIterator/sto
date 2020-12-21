@@ -10,7 +10,7 @@ if (is_admin() || is_admin_active()) {
     do_exit(0);
 }
 
-set_admin_title(trans('Quarantined'));
+set_admin_title('Quarantined');
 
 get_admin_header_template();
 get_admin_footer_template();

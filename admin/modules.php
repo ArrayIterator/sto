@@ -9,13 +9,13 @@ if (!admin_is_allowed(__FILE__)) {
 
 switch (query_param('status')) {
     case 'active':
-        set_admin_title(trans('Active Modules'));
+        set_admin_title('Active Modules');
         break;
     case 'inactive':
-        set_admin_title(trans('Inactive Modules'));
+        set_admin_title('Inactive Modules');
         break;
     default:
-        set_admin_title(trans('All Modules'));
+        set_admin_title('All Modules');
 }
 
 get_admin_header_template();

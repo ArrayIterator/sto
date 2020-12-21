@@ -12,12 +12,10 @@ if (($_SERVER['SCRIPT_FILENAME'] ?? null) === __FILE__) {
 require_once dirname(__DIR__) . '/lib/load.php';
 require_once __DIR__ . '/includes/menus.php';
 require_once __DIR__ . '/includes/pages.php';
-
-use \ArrayIterator\Helper\NormalizerData;
+require_once __DIR__ . '/includes/hooks.php';
 
 // SET NO ROBOTS INDEX
 set_no_index_header();
-
 
 // check login
 if (!is_login() && !is_admin_login_page() && !is_install_page()) {

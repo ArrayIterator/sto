@@ -6,8 +6,6 @@
     /*! META
      * ----------------------*/
     var currentHref = window.location.href;
-    var trans = translation_text || {};
-
     function setCookie(name, value, days) {
         var expires = "";
         if (days) {
@@ -91,110 +89,4 @@
             }
         });
     });
-
-    /*! PING ACCOUNT
-    --------------------------------- */
-    if (typeof login_url === 'string' && typeof ping_url === 'string') {
-        var checkFail = 3000,
-            checkSucceed = 5000;
-        var $iframeInterim;
-        var $interimLayout;
-        function check_loop_login() {
-            var $global_message = $('#global-message');
-            var $page = $('#page');
-            $.get(
-                ping_url,
-                {},
-                function (e) {
-                    // console.log(e.data['as']['supervisor']);
-                    if (e.data && (e.data['login'] === false || !e.data['as'] || typeof e.data['as']['supervisor'] === 'undefined')) {
-                        if (!$iframeInterim) {
-                            var log = login_url.replace(/\?.+/, '');
-                            $interimLayout = $('#interim-login');
-                            if ($interimLayout.length) {
-                                $interimLayout.html('');
-                            } else {
-                                $interimLayout = $('<div id="interim-login"></div>');
-                            }
-                            $iframeInterim = $('<iframe id="iframe-interim-login" class="iframe-interim" src="' + log + '?interim=1"></iframe>');
-                            $interimLayout.html($iframeInterim);
-                            $page.append($interimLayout);
-                            $iframeInterim.on('load', function () {
-                                try {
-                                    var href = this.contentWindow.location.href;
-                                    if (!href) {
-                                        return;
-                                    }
-                                } catch (e) {
-                                    return;
-                                }
-
-                                if (href.match(/\?login=success(?:&.*|$)/)) {
-                                    $iframeInterim = null;
-                                    if (typeof user_id === "number") {
-                                        var $match = href.match(/user_id=([0-9]+)(?:&|$)/);
-                                        var id = parseInt($match[1]);
-                                        if (id !== user_id) {
-                                            window.location.reload();
-                                            return;
-                                        }
-                                    }
-
-                                    $interimLayout.remove();
-                                    $iframeInterim.remove();
-                                    setTimeout(function () {
-                                        check_loop_login();
-                                    }, checkSucceed);
-                                }
-                            });
-                        }
-                        setTimeout(function () {
-                            check_loop_login();
-                        }, checkFail);
-
-                        return;
-                    }
-
-                    if (user_id && e.data['as']['supervisor'].id && e.data['as']['supervisor'].id !== user_id) {
-                        window.location.reload();
-                        return;
-                    }
-
-                    if ($interimLayout) {
-                        $interimLayout.remove();
-                        $interimLayout = null;
-                    }
-                    if ($iframeInterim) {
-                        $iframeInterim.remove();
-                        $iframeInterim = null;
-                    }
-
-                    $global_message.html('');
-                    setTimeout(function () {
-                        check_loop_login();
-                    }, checkFail);
-                })
-                .fail(function (e) {
-                    // console.log(e);
-                    if (e.status === 0) {
-                        var text = trans['You seem to be offline'] || 'You seem to be offline';
-                        $global_message.html(text);
-                        setTimeout(function () {
-                            text = trans['Reconnecting...'] || 'Reconnecting...';
-                            $global_message.html(text);
-                            check_loop_login();
-                        }, checkFail);
-                        return;
-                    }
-                    setTimeout(function () {
-                        check_loop_login();
-                    }, checkFail);
-                });
-        }
-        $(document).ready(function () {
-            setTimeout(function () {
-                check_loop_login();
-            }, checkSucceed);
-        });
-    }
 })(window.jQuery);

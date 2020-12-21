@@ -254,12 +254,13 @@ final class NormalizerData
      * @param bool|string $query Optional. When false uses the current URL. Default false.
      * @return string New URL query string.
      */
-    function removeQueryArg($key, $query = false)
+    public static function removeQueryArg($key, $query = false)
     {
         if (is_array($key)) { // Removing multiple keys.
             foreach ($key as $k) {
                 $query = self::addQueryArgs($k, false, $query);
             }
+
             return $query;
         }
         return self::addQueryArgs($key, false, $query);

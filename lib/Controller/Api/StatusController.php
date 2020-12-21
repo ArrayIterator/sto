@@ -1,15 +1,21 @@
 <?php
 namespace ArrayIterator\Controller\Api;
 
+use ArrayIterator\Controller\BaseController;
+use ArrayIterator\RouteStorage;
+
 /**
  * Class Status
  * @package ArrayIterator\Controller\Api
  */
-class Status
+class StatusController extends BaseController
 {
     const PING_PATH = '/ping';
 
-    public static function ping()
+    /**
+     * Ping Route
+     */
+    public function ping()
     {
         // # Sample
         //create_cookie(COOKIE_STUDENT_NAME, create_json_hash(1, 'student'));
@@ -46,5 +52,13 @@ class Status
             'time' => time(),
             'timezone' => date_default_timezone_get(),
         ]));
+    }
+
+    /**
+     * @param RouteStorage $route
+     */
+    protected function registerController(RouteStorage $route)
+    {
+        $route->any(route_slash_it(self::PING_PATH), [$this, 'ping']);
     }
 }

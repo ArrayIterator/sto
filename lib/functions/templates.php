@@ -244,26 +244,92 @@ function get_admin_login_title(): string
 }
 
 /**
+ * @param string|null $float
  * @return string
  */
-function get_admin_button_submit(): string
+function get_admin_button_submit_login(string $float = null): string
 {
+    $newFloat = $float === 'right'
+        ? 'float-right'
+        : ($float === 'left' ? 'float-left' : '');
     return hook_apply(
-        'admin_button_submit',
+        'admin_button_submit_login',
         sprintf(
-            '<button type="submit" class="btn-primary btn btn-block admin-submit-button">%s</button>',
+            '<button type="submit" class="btn-primary btn btn-block admin-submit-button%s">%s</button>',
+            $newFloat ? " {$newFloat}" : '',
             trans('Sign In')
-        )
+        ),
+        $float
+    );
+}
+
+/**
+ * @param string|null $float
+ * @return string
+ */
+function get_button_submit(string $float = null): string
+{
+    $newFloat = $float === 'right'
+        ? 'float-right'
+        : ($float === 'left' ? 'float-left' : '');
+    return hook_apply(
+        'button_submit',
+        sprintf(
+            '<button type="submit" class="btn-primary btn admin-submit-button%s">%s</button>',
+            $newFloat ? " {$newFloat}" : '',
+            trans('Submit')
+        ),
+        $float
+    );
+}
+
+/**
+ * @param string|null $float
+ * @return string
+ */
+function get_button_submit_small(string $float = null): string
+{
+    $newFloat = $float === 'right'
+        ? 'float-right'
+        : ($float === 'left' ? 'float-left' : '');
+    return hook_apply(
+        'button_submit_small',
+        sprintf(
+            '<button type="submit" class="btn-primary btn btn-sm admin-submit-button%s">%s</button>',
+            $newFloat ? " {$newFloat}" : '',
+            trans('Submit')
+        ),
+        $float
+    );
+}
+
+/**
+ * @param string|null $float
+ * @return string
+ */
+function get_button_reset(string $float = null): string
+{
+    $newFloat = $float === 'right'
+        ? 'float-right'
+        : ($float === 'left' ? 'float-left' : '');
+    return hook_apply(
+        'button_reset',
+        sprintf(
+            '<button type="reset" class="btn-secondary btn btn-block admin-submit-button%s">%s</button>',
+            $newFloat ? " {$newFloat}" : '',
+            trans('Reset')
+        ),
+        $float
     );
 }
 
 /**
  * @return string
  */
-function get_button_submit(): string
+function get_button_submit_login(): string
 {
     return hook_apply(
-        'button_submit',
+        'button_submit_login',
         sprintf(
             '<button type="submit" class="btn-primary btn btn-block admin-submit-button">%s</button>',
             trans('Sign In')
@@ -288,8 +354,7 @@ function admin_login_form()
                         <i class="icofont icofont-user-alt-3"></i>
                     </label>
                 </div>
-                <input class="form-control" name="username" placeholder="<?php esc_attr_trans_e('Username'); ?>"
-                       type="text" id="username" value="<?=
+                <input class="form-control" name="username" placeholder="<?php esc_attr_trans_e('Username'); ?>" type="text" id="username" value="<?=
                     esc_attr((string)hook_apply('admin_input_username', (string)post('username')));
                 ?>" required>
             </div>
@@ -300,8 +365,7 @@ function admin_login_form()
                         <i class="icofont icofont-lock"></i>
                     </label>
                 </div>
-                <input class="form-control" name="password" placeholder="<?php esc_attr_trans_e('Password'); ?>"
-                       type="password" id="password" value="" required>
+                <input class="form-control" name="password" placeholder="<?php esc_attr_trans_e('Password'); ?>" type="password" id="password" value="" required>
                 <div class="input-group-append">
                     <button type="button" class="input-group-text no-outline btn no-shadow">
                         <i class="icofont icofont-eye" data-target="#password"
@@ -314,8 +378,7 @@ function admin_login_form()
                 <input type="hidden" name="interim" class="hide" value="1">
             <?php endif;?>
             <div class="form-check checkbox-input admin-checkbox-input">
-                <input type="checkbox" name="remember" id="remember" class="form-check-input"
-                       value="yes"<?= hook_apply(
+                <input type="checkbox" name="remember" id="remember" class="form-check-input" value="yes"<?= hook_apply(
                             'remember_me',
                             post('remember') === 'yes') === true ? ' checked' : '';
                        ?>>
@@ -325,32 +388,11 @@ function admin_login_form()
         <?php hook_run('admin_login_form_after'); ?>
 
         <div class="form-group">
-            <?= get_admin_button_submit(); ?>
+            <?= get_admin_button_submit_login(); ?>
         </div>
     </form>
     <script type="text/javascript">
-        ;(function () {
-            try {
-                var $switch = document.querySelector('[data-switch]');
-                var $target = document.querySelector('input' + $switch.getAttribute('data-target')),
-                    sq = JSON.parse($switch.getAttribute('data-switch')),
-                    $current = 0;
-                if (!$target) {
-                    return;
-                }
-                $switch.parentElement.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    $target.setAttribute('type', $current === 0 ? 'text' : 'password');
-                    $switch.classList.replace(
-                        sq[$current],
-                        sq[$current ? 0 : 1]
-                    );
-                    $current = $current ? 0 : 1;
-                });
-            } catch (e) {
-                // pass
-            }
-        })(window);
+<?= get_js_core_by_name('input-switch'); ?>
     </script>
     <?php
 }
@@ -409,7 +451,7 @@ function login_form()
         <?php hook_run('login_form_after'); ?>
 
         <div class="form-group">
-            <?= get_button_submit(); ?>
+            <?= get_button_submit_login(); ?>
         </div>
     </form>
     <script type="text/javascript">

@@ -42,6 +42,15 @@ if (http_method() === 'POST') {
         redirect(get_admin_login_redirect_url(['error' => 'invalid_user']));
         do_exit(0);
     }
+    $status = ($userData['status'] ?? false)?: false;
+    if ($status !== false || in_array(strtolower($status), ['delete', 'deleted'])) {
+        redirect(get_admin_login_redirect_url([
+            'error' => 'invalid_user',
+            'status' => 'user_deleted'
+        ]));
+
+        do_exit(0);
+    }
 
     if (!$user->isPasswordMatch($password)) {
         redirect(get_admin_login_redirect_url(['error' => 'invalid_password']));
@@ -55,6 +64,7 @@ if (http_method() === 'POST') {
             unset($params['redirect']);
             if ($is_interim) {
                 $params['interim'] = 1;
+                $params['login'] = 'success';
                 $params['user_id'] = $user->getId();
             }
             $redirectLoginUrl = NormalizerData::addQueryArgs($params, $redirectLoginUrl);
@@ -66,9 +76,11 @@ if (http_method() === 'POST') {
                 // back compat
                 $redirectLoginUrl = NormalizerData::addQueryArgs([
                     'interim' => 1,
+                    'login' => 'success',
                     'user_id' => $user->getId()
                 ], $redirectLoginUrl);
             }
+
             redirect($redirectLoginUrl);
         } else {
             redirect(get_admin_login_url() . '?error=fail_login' . ($is_interim ? '&interim=1' : ''));

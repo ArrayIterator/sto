@@ -22,5 +22,8 @@ if (is_login_page() && is_student()) {
 }
 
 // add api route
-require __DIR__ . '/routes/api.php';
-require __DIR__ . '/routes/common.php';
+// $routes = require __DIR__ . '/routes/api.php';
+//$routes = require __DIR__ . '/routes/common.php';
+//unset($routes);
+array_map('register_route_api_controller', (array) require __DIR__ . '/routes/api.php');
+array_map('register_route_public_controller', (array) require __DIR__ . '/routes/common.php');
