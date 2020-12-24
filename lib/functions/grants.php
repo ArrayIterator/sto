@@ -18,14 +18,15 @@ function current_supervisor_can(
     }
 
     $is_active = is_admin_active();
+
     $is_deleted = is_admin_deleted();
     $is_banned = is_admin_banned();
     $is_pending = is_admin_pending();
 
     $is_teacher = is_teacher();
+    $is_invigilator = is_invigilator();
 
     $teacher = $is_active && $is_teacher;
-    $is_invigilator = is_invigilator();
     $invigilator = $is_active && $is_invigilator;
     $is_admin = is_admin();
     $admin = $is_active && $is_admin;

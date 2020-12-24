@@ -5,9 +5,10 @@ define('VERSION', '1.0.0');
 define('RELEASE', '1');
 
 // SET MYSQL LIMIT TO 1000
-define('MYSQL_MAX_RESULT_LIMIT', 10000);
+define('MYSQL_MAX_RESULT_LIMIT', 200);
 define('MYSQL_MAX_SEARCH_LIMIT', 100);
-define('MYSQL_DEFAULT_SEARCH_LIMIT', 10);
+define('MYSQL_DEFAULT_DISPLAY_LIMIT', 20);
+define('MYSQL_DEFAULT_SEARCH_LIMIT', 20);
 
 define('DS', DIRECTORY_SEPARATOR);
 define('LIB_DIR', __DIR__);
@@ -16,6 +17,8 @@ define('ROOT_DIR', dirname(__DIR__));
 define('ROOT_TEMPLATES_DIR', __DIR__ . '/templates');
 define('DEFAULT_CACHE_DIR', ROOT_DIR . ' /cache');
 define('DEFAULT_LANGUAGE_DIR', ROOT_DIR . '/languages');
+
+define('DEFAULT_COOKIE_SUCCEED_NAME', '__saved_state_');
 
 define('DEFAULT_API_PATH', '/api');
 define('DEFAULT_LOGIN_PATH', '/login');
@@ -108,3 +111,5 @@ define('VERSION_CHART_JS', 'v2.9.4');
 define('VERSION_MOMENT_JS', '2.29.1');
 define('VERSION_ICOFONT_CSS', '1.0.1');
 define('VERSION_SELECT2', '4.0.13');
+define('VERSION_UNDERSCORE_JS', '1.12.0');
+define('VERSION_CRYPTO_JS', '4.0.0');

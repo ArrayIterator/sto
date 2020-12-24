@@ -47,14 +47,16 @@ function hook_admin_js_header()
 {
 ?>
     <script type="text/javascript">
-        document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
-<?php
-if (!is_admin_login_page()) : ?>
-        const
-            ping_url  = <?= json_encode(get_api_url(StatusController::PING_PATH), JSON_UNESCAPED_SLASHES);?>,
-            login_url = <?= json_encode(get_admin_login_url(), JSON_UNESCAPED_SLASHES);?>,
-            user_id   = <?= get_current_user_id();?>;
+        (function (w, d) {
+            d.remove('no-js');
+            d.add('js');
+<?php if (!is_admin_login_page()) : ?>
+            w.ping_url  = <?= json_encode(get_api_url(StatusController::PING_PATH), JSON_UNESCAPED_SLASHES);?>;
+            w.login_url = <?= json_encode(get_admin_login_url(), JSON_UNESCAPED_SLASHES);?>;
+            w.user_id   = <?= get_current_user_id();?>;
+            w.cookie_domain = <?= json_encode(COOKIE_DOMAIN, JSON_UNESCAPED_SLASHES);?>;
 <?php endif;?>
+        })(window, document.documentElement.classList);
     </script>
 
 <?php

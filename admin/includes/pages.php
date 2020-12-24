@@ -10,6 +10,7 @@ function admin_is_allowed(string $file = null, bool $default = false): bool
     if (is_super_admin()) {
         return true;
     }
+
     $grants = admin_page_grants();
     $base = $file ? basename($file) : get_admin_base_name_file();
     $result = $grants[$base] ?? $default;

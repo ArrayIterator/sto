@@ -298,6 +298,30 @@ function get_super_admin_site_ids_param() : array
 }
 
 /**
+ * @return int[]
+ */
+function get_super_admin_site_ids_params() : array
+{
+    $siteIds = [];
+    if (has_query_param('site_ids')) {
+        $siteIds = get_super_admin_site_ids_param();
+    }
+
+    if (has_query_param('site_id')) {
+        $siteId = get_super_admin_site_id_param();
+        $siteId = $siteId === 0 ? false : $siteId;
+        if ($siteId !== false && !in_array($siteId, $siteIds)) {
+            $siteIds[] = $siteId;
+        }
+    }
+
+    if (!is_super_admin()) {
+        $siteIds = [get_current_site_id()];
+    }
+    return array_values($siteIds);
+}
+
+/**
  * @return array
  */
 function &get_admin_messages() : array

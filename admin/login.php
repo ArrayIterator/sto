@@ -67,14 +67,14 @@ if (http_method() === 'POST') {
                 $params['login'] = 'success';
                 $params['user_id'] = $user->getId();
             }
-            $redirectLoginUrl = NormalizerData::addQueryArgs($params, $redirectLoginUrl);
+            $redirectLoginUrl = add_query_args($params, $redirectLoginUrl);
             $redirectLoginUrl = hook_apply(
                 'redirect_success_login_url',
                 $redirectLoginUrl
             );
             if ($is_interim) {
                 // back compat
-                $redirectLoginUrl = NormalizerData::addQueryArgs([
+                $redirectLoginUrl = add_query_args([
                     'interim' => 1,
                     'login' => 'success',
                     'user_id' => $user->getId()
@@ -92,3 +92,4 @@ if (http_method() === 'POST') {
 }
 
 load_admin_template('login');
+

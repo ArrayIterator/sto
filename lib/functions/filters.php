@@ -1,5 +1,6 @@
 <?php
 
+use ArrayIterator\Helper\NormalizerData;
 use ArrayIterator\Helper\Path;
 use ArrayIterator\Helper\StringFilter;
 
@@ -163,4 +164,92 @@ function array_map_string_empty(array $array) : array
     }
 
     return $array;
+}
+
+/**
+ * @param mixed ...$args
+ * @return string
+ */
+function add_query_args(...$args) : string
+{
+    return NormalizerData::addQueryArgs(...$args);
+}
+
+function remove_query_args($key, $query = false)
+{
+    return NormalizerData::removeQueryArg($key, $query);
+}
+
+/**
+ * @param array|string $data
+ * @param string|null $prefix
+ * @param string|null $sep
+ * @param string $key
+ * @param bool $urlEncode
+ * @return string
+ */
+function build_query(
+    $data,
+    string $prefix = null,
+    string $sep = null,
+    string $key = '',
+    bool $urlEncode = true
+) : string {
+    return NormalizerData::buildQuery($prefix, $sep, $key, $urlEncode);
+}
+
+/**
+ * @param string|array|object $class
+ * @param string $fallback
+ * @return string|string[]|null
+ */
+function normalize_html_class($class, string $fallback = '')
+{
+    if (is_string($class)) {
+        return NormalizerData::normalizeHtmlClass($class, $fallback);
+    }
+
+    if ($class === false || is_bool($class)) {
+        return normalize_html_class($fallback);
+    }
+
+    if (is_array($class) || is_object($class) && $class instanceof Traversable) {
+        foreach ($class as $key => $v) {
+            $class[$key] = normalize_html_class($v);
+        }
+
+        return $class;
+    }
+
+    if (is_numeric($class)) {
+        return normalize_html_class((string) $class, $fallback);
+    }
+
+    if (is_object($class)) {
+        foreach (get_object_vars($class) as $key => $i) {
+            $class->$key = normalize_html_class($i);
+        }
+        return $class;
+    }
+
+    return normalize_html_class($fallback);
+}
+
+/**
+ * @param string $data
+ * @param int $start
+ * @param int|null $end
+ * @param string|null $append
+ * @return false|mixed|string|string[]|null
+ */
+function substr_tag_strip(string $data, int $start = 0, int $end = null, string $append = null)
+{
+    $data = strip_tags($data);
+    $data = preg_replace('#([\s])+#sm', '$1', $data);
+    $newData = substr($data, $start, $end);
+    if ($append && $data !== $newData) {
+        $newData .= $append;
+    }
+
+    return $newData;
 }

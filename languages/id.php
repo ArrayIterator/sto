@@ -108,10 +108,18 @@ return [
     'Method Not Allowed' => 'Metode Tidak Diijinkan',
 
     // INTERACTIVE
+    'Please Enable Javascript' => 'Mohon Aktifkan Javascript',
     'Class %s could not be empty!' => '%s Kelas Tidak Boleh Kosong!',
     'Class name %s is duplicate!' => 'Duplikasi pada nama kelas %s!',
     'Class %s is duplicate! Data has been reverted!' => 'Duplikasi pada %s kelas! Data telah dikembalikan!',
     'Error save data!' => 'Terjadi masalah saat menyimpan data',
     'Search query could not be empty' => 'Kueri pencarian tidak boleh kosong',
-    'Search type is invalid!' => 'Jenis pencarian salah!'
+    'Search type is invalid!' => 'Jenis pencarian salah!',
+    'Data could not be empty' => 'Data tidak boleh kosong',
+    'Invalid format' => 'Format salah',
+    'Data is duplicate' => 'Data duplikat',
+    'Edit Class: %s' => 'Ubah Kelas: %s',
+    'Class Name' => 'Nama Kelas',
+    'Note' => 'Keterangan',
+    'Notes' => 'Keterangan',
 ];

@@ -69,7 +69,7 @@ function get_current_site_meta()
 function get_site_by_id(int $siteId)
 {
     $data= cache_get($siteId, 'sites', $found);
-    if (!$found && ($data instanceof Site || $found === false)) {
+    if (!$found && ($data instanceof Site || $data === false)) {
         return $data;
     }
     $site = site()->findById($siteId);

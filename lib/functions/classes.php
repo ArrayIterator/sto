@@ -7,255 +7,513 @@ function get_classes_table_name() : string
     return 'sto_classes';
 }
 
+function get_classes_teacher_table_name() : string
+{
+    return 'sto_classes_teacher';
+}
+
+
+/**
+ * @param array $data
+ * @return array
+ */
+function get_classes_data_filters(array $data) : array
+{
+    $ids = [];
+    foreach ($data as &$item) {
+        $ids[$item['id']] = true;
+        if (isset($item['site_id']) && is_numeric($item['site_id'])) {
+            $item['site_id'] = (int) $item['site_id'];
+        }
+    }
+    if (empty($data)) {
+        return $data;
+    }
+
+    $implodedIds = implode(',', $ids);
+    $where = count($ids) === 1
+        ? " class_id={$implodedIds} "
+        : "class_id IN ({$implodedIds})";
+
+    $teacher_table = get_classes_teacher_table_name();
+    $site_table = site()->getTableName();
+    $supervisor_table = supervisor()->getTableName();
+    $sql = "
+SELECT
+   sto_classes_teacher.class_id as class_id,
+   ss.id as id,
+   ss.full_name as name,
+   sto_classes_teacher.year as teach_year,
+   ss.site_id as site_id,
+   site.name as site_name
+FROM {$teacher_table}
+    LEFT JOIN {$supervisor_table} ss on sto_classes_teacher.teacher = ss.id
+    LEFT JOIN {$site_table} site on ss.site_id = site.id
+WHERE {$where}
+";
+
+    $stmt = database_unbuffered_query($sql);
+    while ($row = $stmt->fetchAssoc()) {
+        $id = $row['class_id'];
+        unset($row['class_id']);
+        if (!isset($data[$id])) {
+            continue;
+        }
+
+        $row['id'] = (int) $row['id'];
+        if (isset($row['site_id']) && is_numeric($row['site_id'])) {
+            $row['site_id'] = (int)$row['site_id'];
+        }
+
+        $data[$id]['teachers'][] = $row;
+    }
+
+    foreach ($data as $classId => $item) {
+        cache_set_current(
+            trim($item['code']),
+            $item,
+            'classes_code',
+            $item['site_id']
+        );
+        cache_set_current(
+            trim($item['name']),
+            $item,
+            'classes_name',
+            $item['site_id']
+        );
+        cache_set(
+            $classId,
+            $item,
+            'classes'
+        );
+    }
+
+    $stmt->closeCursor();
+    return $data;
+}
+
+/**
+ * @param int|null $limit
+ * @param int|null $offset
+ * @param int[] $siteIds
+ * @return array[]
+ */
+function get_classes_data(
+    int $limit = null,
+    int $offset = null,
+    array $siteIds = null
+) : array {
+
+    $siteIds = get_generate_site_ids($siteIds);
+    $table = get_classes_table_name();
+    $where = 'site_id ';
+    $where .= !empty($siteIds)
+        ? sprintf(count($siteIds) === 1 ? ' = %d ' : 'IN (%s) ', implode(',', $siteIds))
+        : 'IS NOT NULL AND site_id > 0 ';
+    $sql = "SELECT *, count(id) OVER() as total FROM {$table} WHERE ";
+    $limit = $limit < 1 ? MYSQL_MAX_RESULT_LIMIT : $limit;
+    $offset = $offset > 0 ? $offset : 0;
+    $sqlLimit = "LIMIT {$limit}";
+    if ($offset > 0) {
+        $sqlLimit .= " OFFSET {$offset}";
+    }
+
+    $sql .= $where;
+    $sql .= $sqlLimit;
+    $stmt = database_unbuffered_query($sql);
+    $data = [
+        'total'  => 0,
+        'count' => 0,
+        'meta' => [
+            'page' => [
+                'total' => 0,
+                'current' => 0,
+            ],
+            'next' => [
+                'offset' => $offset,
+                'limit' => $limit,
+                'total' => 0
+            ],
+            'query' => [
+                'limit' => $limit,
+                'offset' => $offset,
+                'site_id' => $siteIds,
+            ],
+        ],
+        'results' => []
+    ];
+
+    $result = [];
+    $total = 0;
+    while ($row = $stmt->fetchAssoc()) {
+        $row['teachers'] = [];
+        $id = (int) $row['id'];
+        if ($total === 0) {
+            $total = (int) $row['total'];
+        }
+        unset($row['total']);
+        $row['id'] = (int) $row['id'];
+        $result[$id] = $row;
+    }
+
+    $stmt->closeCursor();
+    if ($total === 0) {
+        $sql = "SELECT count(id) as total FROM {$table} WHERE ";
+        $sql .= $where;
+        try {
+            $stmt = database_unbuffered_query_execute($sql);
+            if ($stmt) {
+                $total = (int) ($stmt->fetchClose(PDO::FETCH_ASSOC)['total']??$total);
+            }
+        } catch (Exception $e) {
+            // passs
+        }
+    }
+
+    if (!empty($result)) {
+        $result = get_classes_data_filters($result);
+        $data['results'] = array_values($result);
+    }
+
+    $data['count'] = count($result);
+    if ($data['count'] > $total) {
+        $total = $data['count'];
+    }
+
+    $calc = calculate_page_query(
+        $limit,
+        $offset,
+        $total,
+        $data['count']
+    );
+
+    $data['total'] = $calc['total'];
+    $meta =& $data['meta'];
+    $meta['page']['total'] = $calc['total_page'];
+    $meta['page']['current'] = $calc['current_page'];
+    $meta['next']['offset'] = $calc['next_offset'];
+    $meta['next']['limit'] = $calc['next_limit'];
+    $meta['next']['total'] = $calc['next_total'];
+    return $data;
+}
+
 /**
  * @param int $id
- * @return array|false
+ * @return array
+ */
+function get_classes_by_id(int $id) : array
+{
+    $cache = cache_get($id, 'classes', $found);
+    if ($found && ($cache === false || is_array($cache))) {
+        return $cache ? [$cache] : [];
+    }
+
+    $table = get_classes_table_name();
+    $sql = "SELECT * FROM {$table} WHERE id={$id} LIMIT 1";
+    $stmt = database_query_execute($sql);
+    $data = [];
+    if ($stmt) {
+        while ($row = $stmt->fetchAssoc()) {
+            $row['teachers'] = [];
+            $id = (int) $row['id'];
+            $row['id'] = (int) $row['id'];
+            $data[$id] = $row;
+        }
+    }
+
+    $data = get_classes_data_filters($data);
+    return array_values($data);
+}
+
+/**
+ * @param int $id
+ * @return false|array
  */
 function get_class_by_id(int $id)
 {
-    $cache = cache_get($id, 'classes', $found);
-    if ($found && ($found === false || is_array($cache))) {
-        return $cache;
-    }
-    $table = get_classes_table_name();
-    $stmt = database_query("SELECT * FROM {$table} WHERE id={$id}");
-    $res = false;
-    if ($stmt) {
-        $res = $stmt->fetchAssoc();
-        $stmt->closeCursor();
-        $res = $res?:false;
-        if ($res) {
-            $res['site_id'] = (int) ($res['site_id']??null);
-            $res['id'] = (int) ($res['id']??null);
-            cache_set(
-                sprintf('%d(%s)', $res['site_id'], trim($res['code'])),
-                $res,
-                'classes_by_code'
-            );
-            cache_set(
-                sprintf('%d(%s)', $res['site_id'], trim($res['name'])),
-                $res,
-                'classes_by_name'
-            );
-        }
-    }
-    cache_set($id, $res, 'classes');
-    return $res;
+    $result = get_classes_by_id($id);
+    return $result[0]??false;
 }
 
 /**
  * @param string $name
- * @param int|null $siteId
+ * @param int[] $siteId
+ * @return array
+ */
+function get_classes_by_name(string $name, array $siteId = null) : array
+{
+    $name = trim($name);
+    $siteIds = get_generate_site_ids($siteId);
+    if (count($siteIds) === 1) {
+        $siteId = reset($siteIds);
+        $cache = cache_get_current(
+            $name,
+            'classes_name',
+            $found,
+            $siteId
+        );
+        if ($found && ($cache === false || is_array($cache))) {
+            return $cache ? [$cache] : [];
+        }
+    }
+
+    $table = get_classes_table_name();
+    if (!empty($siteIds)) {
+        $siteIdWhere = sprintf(
+            count($siteIds) === 1 ? ' =%d ' : ' IN (%s) ',
+            implode(',', $siteIds)
+        );
+    } else {
+        $siteIdWhere = ' IS NOT NULL AND site_id > 0 ';
+    }
+
+    $sql = " SELECT * FROM {$table} WHERE name=? AND site_id{$siteIdWhere}";
+    $stmt = database_prepare_execute($sql, [$name]);
+    $data = [];
+    if ($stmt) {
+        while ($row = $stmt->fetchAssoc()) {
+            $row['id'] = (int) $row['id'];
+            $row['teachers'] = [];
+            $data[$row['id']] = $row;
+        }
+    }
+
+    $data = get_classes_data_filters($data);
+    return array_values($data);
+}
+
+/**
+ * @param string $name
+ * @param int|null $siteIds
+ * @return array|false|mixed
+ */
+function get_class_by_name(string $name, int $siteIds = null)
+{
+    $siteIds = $siteIds??get_current_site_id();
+    $result = get_classes_by_name($name, [$siteIds]);
+    return $result[0]??false;
+}
+
+/**
+ * @param string $code
+ * @param array|null $siteIds
+ * @return array|array[]
+ */
+function get_classes_by_code(string $code, array $siteIds = null) : array
+{
+    $siteIds = get_generate_site_ids($siteIds);
+
+    $code = trim($code);
+    if (count($siteIds) === 1) {
+        $siteId = reset($siteIds);
+        $cache = cache_get_current(
+            $code,
+            'classes_code',
+            $found,
+            $siteId
+        );
+
+        if ($found && ($cache === false || is_array($cache))) {
+            return $cache ? [$cache] : [];
+        }
+    }
+
+    $table = get_classes_table_name();
+    if (!empty($siteIds)) {
+        $siteIdWhere = sprintf(
+            count($siteIds) === 1 ? ' =%d ' : ' IN (%s) ',
+            implode(',', $siteIds)
+        );
+    } else {
+        $siteIdWhere = ' IS NOT NULL AND site_id > 0 ';
+    }
+
+    $sql = " SELECT * FROM {$table} WHERE code=? AND site_id{$siteIdWhere}";
+    $stmt = database_prepare_execute($sql, [$code]);
+    $data = [];
+    if ($stmt) {
+        while ($row = $stmt->fetchAssoc()) {
+            $row['id'] = (int) $row['id'];
+            $row['teachers'] = [];
+            $data[$row['id']] = $row;
+        }
+    }
+
+    $data = get_classes_data_filters($data);
+    return array_values($data);
+}
+
+/**
+ * @param string $code
+ * @param int|null $siteIds
+ * @return array[]|false
+ */
+function get_class_by_code(string $code, int $siteIds = null)
+{
+    $siteIds = $siteIds??get_current_site_id();
+    $result = get_classes_by_code($code, [$siteIds]);
+    return $result[0]?:false;
+}
+
+/**
+ * @param string $type
+ * @param string $name
+ * @param array|null $siteIds
+ * @param int $limit
+ * @param int $offset
+ * @param null $result
  * @return array|false
  */
-function get_class_by_name(string $name, int $siteId = null)
-{
-    $siteId = $siteId??get_current_site_id();
-    $cacheName = sprintf('%d(%s)', $siteId, trim($name));
-    $cache = cache_get(
-        $cacheName,
-        'classes_by_name',
-        $found
-    );
-    if ($found && ($found === false || is_array($cache))) {
-        return $cache;
+function search_classes_by(
+    string $type,
+    string $name,
+    array $siteIds = null,
+    int $limit = MYSQL_DEFAULT_SEARCH_LIMIT,
+    int $offset = 0,
+    &$result = null
+) {
+    $type = trim(strtolower($type));
+    if ($type !== 'name' && $type !== 'code') {
+        return false;
     }
+
+    $siteIds = get_generate_site_ids($siteIds);
+    $limit  = get_generate_max_search_result_limit($limit);
+    $offset = get_generate_min_offset($offset);
+
+    $name = trim($name);
     $table = get_classes_table_name();
-    $stmt = database_prepare(
-        "SELECT * FROM {$table} WHERE site_id={$siteId} AND name=? LIMIT 1"
-    );
-    $res = false;
-    if ($stmt->execute([trim($name)])) {
-        $res = $stmt->fetchAssoc();
-        $stmt->closeCursor();
-        $res = $res?:false;
-        if ($res) {
-            $id = (int) $res['id'];
-            $res['site_id'] = (int) ($res['site_id']??null);
-            $res['id'] = (int) ($res['id']??null);
-            cache_set(
-                sprintf('%d(%s)', $res['site_id'], trim($res['code'])),
-                $res,
-                'classes_by_code'
-            );
-            cache_set(
-                $id,
-                $res,
-                'classes'
-            );
-        }
+
+    $likeSearch = database_quote(sprintf('%%%s%%', $name));
+    $likeLeft = database_quote(sprintf('%s%%', $name));
+    $nameQuery = database_quote($name);
+
+    if (!empty($siteIds)) {
+        $siteIdWhere = sprintf(
+            count($siteIds) === 1 ? ' =%d ' : ' IN (%s) ',
+            implode(',', $siteIds)
+        );
+    } else {
+        $siteIdWhere = ' IS NOT NULL AND site_id > 0 ';
     }
-    cache_set($cacheName, $res, 'classes_by_name');
-    return $res;
+
+    $data = [
+        'total'  => 0,
+        'count' => 0,
+        'meta' => [
+            'page' => [
+                'total' => 0,
+                'current' => 0,
+            ],
+            'next' => [
+                'offset' => $offset,
+                'limit' => $limit,
+                'total' => 0
+            ],
+            'query' => [
+                'limit' => $limit,
+                'offset' => $offset,
+                'site_id' => $siteIds,
+            ],
+        ],
+        'results' => []
+    ];
+
+    $stmt = database_prepare_execute(
+        "
+        SELECT count(class.id) as total FROM {$table} as class
+            WHERE class.site_id {$siteIdWhere} AND class.name LIKE {$likeSearch}
+                ORDER BY
+                    IF(class.name = {$nameQuery}, 2, IF(class.name LIKE {$likeLeft},1,0)) 
+    "
+    );
+
+    $res = $stmt ? $stmt->fetchClose(PDO::FETCH_ASSOC) : false;
+    $total = $res ? abs($res['total']??0) : 0;
+    unset($res);
+
+    $stmt = database_unbuffered_query_execute(
+        "
+SELECT *
+    FROM {$table} as class
+        WHERE class.site_id {$siteIdWhere} AND class.{$type} LIKE {$likeSearch}
+        ORDER BY 
+             IF(class.{$type} = {$nameQuery}, 2, IF(class.{$type} LIKE {$likeLeft},1,0))
+                DESC LIMIT {$limit} OFFSET {$offset}
+    "
+    );
+
+    $result = [];
+    while ($row = $stmt->fetchAssoc()) {
+        $row['teachers'] = [];
+        $id = (int) $row['id'];
+        unset($row['total']);
+        $row['id'] = (int) $row['id'];
+        $result[$id] = $row;
+    }
+
+    $stmt->closeCursor();
+
+    if (!empty($result)) {
+        $result = get_classes_data_filters($result);
+        $data['results'] = array_values($result);
+    }
+
+    $data['count'] = count($result);
+    if ($data['count'] > $total) {
+        $total = $data['count'];
+    }
+
+    $calc = calculate_page_query(
+        $limit,
+        $offset,
+        $total,
+        $data['count']
+    );
+    $data['total'] = $calc['total'];
+    $meta =& $data['meta'];
+    $meta['page']['total'] = $calc['total_page'];
+    $meta['page']['current'] = $calc['current_page'];
+    $meta['next']['offset'] = $calc['next_offset'];
+    $meta['next']['limit'] = $calc['next_limit'];
+    $meta['next']['total'] = $calc['next_total'];
+    return $data;
 }
 
 /**
  * @param string $name
- * @param int|null $siteId
+ * @param int[] $siteIds
  * @param int $limit
+ * @param int $offset
+ * @param $result
  * @return array
  */
 function search_class_by_name(
     string $name,
-    int $siteId = null,
-    int $limit = MYSQL_DEFAULT_SEARCH_LIMIT
+    array $siteIds = null,
+    int $limit = MYSQL_DEFAULT_SEARCH_LIMIT,
+    int $offset = 0,
+    &$result = null
 ) : array {
-    $siteId = $siteId??get_current_site_id();
-    $name = trim($name);
-    $limit = $limit <= 1 ? 1 : (
-        $limit > MYSQL_MAX_SEARCH_LIMIT
-            ? MYSQL_MAX_SEARCH_LIMIT
-            : $limit
-    );
-    $table = get_classes_table_name();
-    $like = database_quote(sprintf('%%%s%%', $name));
-    $likeL = database_quote(sprintf('%s%%', $name));
-    $nameQ = database_quote($name);
-    $stmt = database_prepare(
-        "SELECT * FROM {$table} 
-            WHERE site_id={$siteId} 
-              AND name LIKE {$like}
-            ORDER BY IF(name = {$nameQ}, 2, IF(name LIKE {$likeL},1,0)) DESC LIMIT {$limit}
-    "
-    );
-    $data = [];
-    if ($stmt->execute([trim($name)])) {
-        while($res = $stmt->fetchAssoc()) {
-            $id = (int)$res['id'];
-            $res['site_id'] = (int)($res['site_id'] ?? null);
-            $res['id'] = (int)($res['id'] ?? null);
-            $res['code'] = trim((string)($res['code'] ?? null));
-            cache_set(
-                sprintf('%d(%s)', $res['site_id'], $res['code']),
-                $res,
-                'classes_by_code'
-            );
-            cache_set(
-                sprintf('%d(%s)', $res['site_id'], $res['name']),
-                $res,
-                'classes_by_name'
-            );
-            cache_set(
-                $id,
-                $res,
-                'classes'
-            );
-            $data[] = $res;
-        }
-        $stmt->closeCursor();
-    }
-
-    unset($stmt);
-
-    return $data;
+    return search_classes_by('name', $name, $siteIds, $limit, $offset, $result);
 }
 
 /**
  * @param string $code
- * @param int|null $siteId
- * @return array|false
- */
-function get_class_by_code(string $code, int $siteId = null)
-{
-    $siteId = $siteId??get_current_site_id();
-    $cacheName = sprintf('%d(%s)', $siteId, trim($code));
-    $cache = cache_get(
-        $cacheName,
-        'classes_by_code',
-        $found
-    );
-    if ($found && ($found === false || is_array($cache))) {
-        return $cache;
-    }
-    $table = get_classes_table_name();
-    $stmt = database_prepare(
-        "SELECT * FROM {$table} WHERE site_id={$siteId} AND code=? LIMIT 1"
-    );
-
-    $res = false;
-    if ($stmt->execute([trim($code)])) {
-        $res = $stmt->fetchAssoc();
-        $stmt->closeCursor();
-        $res = $res?:false;
-        if ($res) {
-            $id = (int) $res['id'];
-            $res['site_id'] = (int) ($res['site_id']??null);
-            $res['id'] = (int) ($res['id']??null);
-            cache_set(
-                sprintf('%d(%s)', $res['site_id'], trim($res['name'])),
-                $res,
-                'classes_by_name'
-            );
-            cache_set(
-                $id,
-                $res,
-                'classes'
-            );
-        }
-    }
-    cache_set($cacheName, $res, 'classes_by_code');
-    return $res;
-}
-
-/**
- * @param string $code
- * @param int|null $siteId
+ * @param array|null $siteIds
  * @param int $limit
+ * @param int $offset
+ * @param null $result
  * @return array
  */
 function search_class_by_code(
     string $code,
-    int $siteId = null,
-    int $limit = MYSQL_DEFAULT_SEARCH_LIMIT
+    array $siteIds = null,
+    int $limit = MYSQL_DEFAULT_SEARCH_LIMIT,
+    int $offset = 0,
+    &$result = null
 ) : array {
-    $siteId = $siteId??get_current_site_id();
-    $code = trim($code);
-    $limit = $limit <= 1 ? 1 : (
-    $limit > MYSQL_MAX_SEARCH_LIMIT
-        ? MYSQL_MAX_SEARCH_LIMIT
-        : $limit
-    );
-    $table = get_classes_table_name();
-    $like = database_quote(sprintf('%%%s%%', $code));
-    $likeL = database_quote(sprintf('%s%%', $code));
-    $codeQ = database_quote($code);
-    $stmt = database_prepare(
-        "SELECT * FROM {$table} 
-            WHERE site_id={$siteId} 
-              AND code LIKE {$like}
-            ORDER BY IF(code = {$codeQ}, 2, IF(code LIKE {$likeL},1,0)) DESC LIMIT {$limit}
-    "
-    );
-    $data = [];
-    if ($stmt->execute([trim($code)])) {
-        while($res = $stmt->fetchAssoc()) {
-            $id = (int)$res['id'];
-            $res['site_id'] = (int)($res['site_id'] ?? null);
-            $res['id'] = (int)($res['id'] ?? null);
-            $res['code'] = trim((string)($res['code'] ?? null));
-            cache_set(
-                sprintf('%d(%s)', $res['site_id'], $res['code']),
-                $res,
-                'classes_by_code'
-            );
-            cache_set(
-                sprintf('%d(%s)', $res['site_id'], $res['name']),
-                $res,
-                'classes_by_name'
-            );
-            cache_set(
-                $id,
-                $res,
-                'classes'
-            );
-            $data[] = $res;
-        }
-        $stmt->closeCursor();
-    }
-
-    unset($stmt);
-
-    return $data;
+    return search_classes_by('code', $code, $siteIds, $limit, $offset, $result);
 }
 
 /**
@@ -288,8 +546,8 @@ function update_class_data(int $classId, array $classes)
     if ($classes['code'] === null) {
         unset($classes['code']);
     } else {
-        $before = get_class_by_code($classes['code']);
-        if ($before && (int) $before['id'] <> $classId) {
+        $before = get_class_by_code($classes['code'], $siteId);
+        if ($before && ((int) $before['id']) <> $classId) {
             return -2;
         }
     }
@@ -299,7 +557,7 @@ function update_class_data(int $classId, array $classes)
     if ($classes['name'] === null) {
         unset($classes['name']);
     } else {
-        $before = get_class_by_name($classes['name']);
+        $before = get_class_by_name($classes['name'], $siteId);
         if ($before && (int) $before['id'] <> $classId) {
             return -1;
         }
@@ -336,25 +594,17 @@ function update_class_data(int $classId, array $classes)
         $data[$key] = $item;
     }
 
+    $res = false;
     $set = implode(', ', $newClass);
     $sql = "UPDATE {$table} SET {$set} WHERE id={$classId}";
     try {
-        $stmt = database_prepare($sql);
-        if (($res = $stmt->execute($args))) {
-            $stmt->closeCursor();
-            cache_set($classId, $data, 'classes');
-            cache_set(
-                sprintf('%d(%s)', $data['site_id'], trim($data['name'])),
-                $res,
-                'classes_by_name'
-            );
-            cache_set(
-                sprintf('%d(%s)', $data['site_id'], trim($data['code'])),
-                $res,
-                'classes_by_code'
-            );
+        $stmt = database_prepare_execute($sql, $args);
+        if ($stmt) {
+            cache_delete($classId, 'classes');
+            get_class_by_id($classId);
+            $res = true;
         }
-
+        $stmt && $stmt->closeCursor();
     } catch (Exception $e) {
         return false;
     }
@@ -425,14 +675,12 @@ function insert_class_data(array $classes)
     $val = implode(', ', array_keys($args));
     $sql = "INSERT INTO {$table} ({$columns}) VALUE({$val})";
     try {
-        $stmt = database_prepare($sql);
-        if (($res = $stmt->execute($args))) {
+        $stmt = database_prepare_execute($sql);
+        if (($stmt)) {
             $stmt->closeCursor();
-            $keyCode = sprintf('%d(%s)', $site_id, $code);
-            $keyName = sprintf('%d(%s)', $site_id, $name);
-            cache_delete($keyCode, 'classes_by_code');
-            cache_delete($keyName, 'classes_by_name');
-            return get_class_by_code($code, $site_id);
+            cache_delete_current($code, 'classes_code', $site_id);
+            cache_delete_current($name, 'classes_name', $site_id);
+            return get_class_by_code($code, [$site_id]);
         }
 
     } catch (Exception $e) {

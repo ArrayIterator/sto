@@ -1,7 +1,5 @@
 <?php
 
-use ArrayIterator\Helper\NormalizerData;
-use ArrayIterator\Helper\Path;
 use ArrayIterator\Info\Module;
 use ArrayIterator\Info\Theme;
 use GuzzleHttp\Psr7\Uri;
@@ -151,10 +149,10 @@ function get_admin_logout_redirect_url(array $query = []) : string
         if (!empty($exp)) {
             $baseName .= '?'.implode('?', $exp);
         }
-        $uri = NormalizerData::addQueryArgs(['redirect' => $baseName], $loginUrl);
+        $uri = add_query_args(['redirect' => $baseName], $loginUrl);
     }
 
-    return NormalizerData::addQueryArgs($query, $uri);
+    return add_query_args($query, $uri);
 }
 
 function get_admin_login_redirect_url(array $query = []) : string
@@ -162,7 +160,7 @@ function get_admin_login_redirect_url(array $query = []) : string
     static $uri;
     if ($uri) {
         $uri = hook_apply('admin_login_redirect_url', $uri);
-        return NormalizerData::addQueryArgs($query, $uri);
+        return add_query_args($query, $uri);
     }
 
     $redirectUri = get_admin_base_name_file();
@@ -200,7 +198,7 @@ function get_admin_login_redirect_url(array $query = []) : string
 
     $query = array_merge($params, $query);
     $uri = hook_apply('admin_login_redirect_url', $uri);
-    return NormalizerData::addQueryArgs($query, $loginUrl);
+    return add_query_args($query, $loginUrl);
 }
 
 /**
@@ -271,9 +269,9 @@ function get_current_admin_login_url(array $query = []) : string
     $params = get_admin_param_redirect();
     unset($params['error'], $params['logout']);
 
-    $uri = NormalizerData::addQueryArgs($params, $login_uri);
+    $uri = add_query_args($params, $login_uri);
     $uri = hook_apply('current_admin_login_redirect_uri', $uri);
-    return NormalizerData::addQueryArgs($query, $uri);
+    return add_query_args($query, $uri);
 }
 
 /**
@@ -288,7 +286,7 @@ function get_admin_redirect_url(array $query = []) : string
     $params   = array_merge($params, $query);
     unset($params['redirect'], $params['logout']);
 
-    return NormalizerData::addQueryArgs($params, get_admin_url($redirect));
+    return add_query_args($params, get_admin_url($redirect));
 }
 
 /**

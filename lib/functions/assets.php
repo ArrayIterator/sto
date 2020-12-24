@@ -412,19 +412,43 @@ function assets_default_scripts(Scripts $scripts)
             [],
             VERSION_MOMENT_JS
         ],
+        'underscore' => [
+            null,
+            ['underscore-js']
+        ],
+        'underscore-js' => [
+            '/assets/js/underscore.js',
+            [],
+            VERSION_MOMENT_JS
+        ],
+        'crypto' => [
+            null,
+            ['crypto-js'],
+            VERSION_MOMENT_JS
+        ],
+        'crypto-js' => [
+            '/assets/js/crypto.js',
+            [],
+            VERSION_MOMENT_JS
+        ],
         'select2' => [
             '/assets/vendor/select2/select2.js',
             [],
             VERSION_SELECT2
         ],
+        'core' => [
+            '/assets/js/core.js',
+            [],
+            VERSION
+        ],
         'admin' => [
             '/assets/js/admin.js',
-            ['jquery', 'bootstrap'],
+            ['jquery', 'crypto', 'core', 'bootstrap', 'underscore'],
             VERSION
         ],
         'admin-login' => [
             '/assets/js/login.js',
-            ['jquery', 'bootstrap'],
+            ['jquery', 'core', 'bootstrap'],
             VERSION
         ]
     ];

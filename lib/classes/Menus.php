@@ -39,6 +39,21 @@ class Menus implements Serializable
     protected $menus = [];
 
     /**
+     * @var array[] Temporary Data classes links
+     */
+    protected $class_links = [];
+
+    /**
+     * @var array[] Temporary Data classes menus
+     */
+    protected $class_menus = [];
+
+    /**
+     * @var bool
+     */
+    protected $has_current_active_menu = false;
+
+    /**
      * Menus constructor.
      * @param string|null $siteUrl
      * @param int $max_depth
@@ -300,6 +315,8 @@ class Menus implements Serializable
         }
 
         $classesLink = array_filter(array_unique($classesLink));
+        $this->class_links[] = $classesLink;
+
         $linkAttrString = '';
         $linkAttr = [
             'href' => htmlspecialchars($url, ENT_QUOTES | ENT_COMPAT),
@@ -356,12 +373,31 @@ class Menus implements Serializable
             }
         }
 
-        if (!empty($this->matches) && $deep === 0) {
-            $classes[] = 'has-active-submenu';
-        }
+        if ($deep === 0) {
+            $has_active = false;
+            foreach ($this->class_links as $item => $items) {
+                if (in_array('current-menu', $items)
+                    || in_array('has-active-submenu', $items)
+                ) {
+                    $has_active = true;
+                    break;
+                }
+            }
 
-        if ($deep === 0 && in_array('has-active-submenu', $classes)) {
-            $classes[] = 'current-has-active-submenu';
+            $this->class_links = [];
+            if ($has_active || in_array('has-active-submenu', $classes)) {
+                $classes[] = 'has-active-submenu';
+                $classes[] = 'current-has-active-submenu';
+            } else {
+                foreach ($this->class_menus as $item => $items) {
+                    if (in_array('has-active-submenu', $items)) {
+                        $classes[] = 'has-active-submenu';
+                        break;
+                    }
+                }
+                $this->class_menus = [];
+            }
+
         }
 
         if ($deep > 0) {
@@ -374,6 +410,9 @@ class Menus implements Serializable
         }
 
         $classes = array_filter(array_unique($classes));
+        if ($deep > 0) {
+            $this->class_menus[] = $classes;
+        }
         $attrs['class'] = implode(' ', $classes);
         $icon = $attrs['icon']??'';
         if (!is_string($icon)) {
@@ -541,6 +580,8 @@ class Menus implements Serializable
                 $found = true;
                 $html[] = $menu;
             }
+            $this->class_links = [];
+            $this->class_menus = [];
         }
 
         // fallback found
@@ -610,6 +651,9 @@ class Menus implements Serializable
      */
     public function fromArray(array $menus): Menus
     {
+        $this->class_menus = [];
+        $this->class_links = [];
+
         $clones = clone $this;
         $clones->menus = [];
         foreach ($menus as $key => $item) {

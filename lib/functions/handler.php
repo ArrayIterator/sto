@@ -10,6 +10,7 @@ use ArrayIterator\Route;
 function shutdown_handler()
 {
     $error = error_get_last();
+
     if (!$error || !in_array($error['type'], [E_ERROR, E_PARSE])) {
         return;
     }
@@ -25,6 +26,7 @@ function shutdown_handler()
     if (!defined('CLEAN_BUFFER_ERROR') || CLEAN_BUFFER_ERROR !== false) {
         clean_buffer();
     }
+
     if (!headers_sent()) {
         set_content_type('text/html; charset=utf-8', 500);
     }
@@ -137,6 +139,7 @@ function do_exit(...$args)
         echo $message;
     }
 
+    hook_run_once('do_exit');
     exit($code);
 }
 

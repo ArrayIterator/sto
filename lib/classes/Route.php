@@ -20,6 +20,7 @@ class Route
     protected $notFoundHandler;
     protected $notAllowedHandler;
     protected $dispatched = false;
+    protected $dispatchedOnly = false;
     protected $routeParser;
     protected $generator;
 
@@ -55,6 +56,14 @@ class Route
     public function isDispatched(): bool
     {
         return $this->dispatched;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDispatchedOnly(): bool
+    {
+        return $this->dispatchedOnly;
     }
 
     public function getRouteInfo()
@@ -175,15 +184,13 @@ class Route
     /**
      * @param $httpMethod
      * @param string|null $uri
-     * @param Hooks|null $hook
      * @return array|mixed[]
      */
-    public function dispatch(
+    public function dispatchOnly(
         $httpMethod,
-        string $uri = null,
-        Hooks $hook = null
+        string $uri = null
     ): array {
-        $this->dispatched = true;
+        $this->dispatchedOnly = true;
         if (!$this->routeInfo) {
             $httpMethod = strtoupper($httpMethod);
             $uri = $uri ?? $_SERVER['REQUEST_URI'];
@@ -194,6 +201,26 @@ class Route
 
             $uri = rawurldecode($uri);
             $this->routeInfo = $this->getDispatcher()->dispatch($httpMethod, $uri);
+        }
+
+        return $this->routeInfo;
+    }
+
+    /**
+     * @param $httpMethod
+     * @param string|null $uri
+     * @param Hooks|null $hook
+     * @return array|mixed[]
+     */
+    public function dispatch(
+        $httpMethod,
+        string $uri = null,
+        Hooks $hook = null
+    ): array {
+        $this->dispatchOnly($httpMethod, $uri);
+        if (!$this->dispatched) {
+            $this->dispatched = true;
+            $this->dispatchedOnly = false;
             $routeInfo = $this->routeInfo[0];
             $route = $hook ? $hook->apply('route_info', $this->routeInfo, $this) : $this->routeInfo;
             if (!is_array($route)
@@ -245,7 +272,6 @@ class Route
                     break;
             }
         }
-
         return $this->routeInfo;
     }
 }

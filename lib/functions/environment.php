@@ -154,10 +154,11 @@ function query_param_int(string $key) : int
  */
 function clean_buffer(bool $recreate = true): array
 {
+
     $c = 4;
     $data = [];
     $cleaned = false;
-    while (ob_get_length() && $c-- > 0) {
+    while (ob_get_level() > 0 && $c-- > 0) {
         $data[] = ob_get_clean();
         if ($recreate && !$cleaned) {
             $cleaned = true;
@@ -295,6 +296,7 @@ function cookie_multi_domain(): string
     if (filter_var($host, FILTER_VALIDATE_DOMAIN)) {
         $host = \ArrayIterator\Helper\NormalizerData::splitCrossDomain($host);
     }
+
     return hook_apply('cookie_domain', $host, get_host());
 }
 
@@ -375,6 +377,28 @@ function delete_cookie(string $name)
     $ex = time() - 3600 * 24 * 7;
     setcookie($name, '', $ex);
     create_cookie($name, '', $ex);
+}
+
+/**
+ * @return bool
+ */
+function has_cookie_succeed() : bool
+{
+    static $cookie = null;
+    if ($cookie === null) {
+        $cookie = cookie(DEFAULT_COOKIE_SUCCEED_NAME) === 'true';
+        delete_cookie(DEFAULT_COOKIE_SUCCEED_NAME);
+    }
+
+    return $cookie;
+}
+
+/**
+ *
+ */
+function create_cookie_succeed()
+{
+    create_cookie(DEFAULT_COOKIE_SUCCEED_NAME, 'true');
 }
 
 /**
@@ -590,4 +614,113 @@ function get_error_string_by_code(int $code): string
 function init()
 {
     !hook_has_run('init') && hook_run('init');
+}
+
+/**
+ * @param int $limit
+ * @param int $offset
+ * @param int $total_data
+ * @param int $total_result
+ * @return array
+ */
+function calculate_page_query(
+    int $limit,
+    int $offset,
+    int $total_data,
+    int $total_result
+) : array {
+    $total_page = 0;
+    $current_page = null;
+    $currentOffset = $offset + $total_result;
+    $currentOffset = $currentOffset > 0 ? $currentOffset : 0;
+    $limit = $limit > 0 ? $limit : 0;
+
+    if ($total_data > 0) {
+        if ($limit > 0) {
+            $total_page = (int) ($limit >= $total_data ? 1 : ceil($total_data / $limit));
+        }
+
+        if ($total_page > 0 && $total_result > 0) {
+            $current_page = (int) (ceil($currentOffset/$limit));
+        }
+    }
+
+    $nextTotal = $total_data - $currentOffset;
+    $nextLimit = null;
+    $nextOffset = null;
+    if ($nextTotal > 0) {
+        $nextOffset = $offset+$total_result;
+        $nextLimit = $nextTotal > $limit ? $limit : $nextTotal;
+    }
+
+    return [
+        'total_page' => $total_page,
+        'current_page' => $current_page,
+        'next_limit' => $nextLimit,
+        'next_offset' => $nextOffset,
+        'next_total' => $nextTotal,
+        'total_result' => $total_result,
+        'total' => $total_data,
+        'limit' => $limit,
+        'offset' => $offset,
+    ];
+}
+
+/**
+ * @param array|null $siteIds
+ * @return array
+ */
+function get_generate_site_ids(array $siteIds = null) : array
+{
+    $currentSiteId = get_current_site_id();
+    if ($siteIds === null) {
+        $siteIds = [$currentSiteId];
+    }
+
+    foreach ($siteIds as $key => $item) {
+        if (!is_numeric($item) || !is_int(abs($item))) {
+            unset($siteIds[$key]);
+            continue;
+        }
+
+        $item = (int) $item;
+        if ($item < 1) {
+            continue;
+        }
+        $siteIds[$key] = $item;
+    }
+
+    $siteIds = empty($siteIds) ? (
+        is_super_admin()
+        ? []
+        : [$currentSiteId]
+    ) : $siteIds;
+
+    return $siteIds;
+}
+
+/**
+ * @param int $limit
+ * @return int
+ */
+function get_generate_max_search_result_limit(int $limit) : int
+{
+    $limit = $limit <= 1 ? 1 : (
+    $limit > MYSQL_MAX_SEARCH_LIMIT
+        ? MYSQL_MAX_SEARCH_LIMIT
+        : $limit
+    );
+
+    return $limit < 1 || $limit > MYSQL_MAX_RESULT_LIMIT
+        ? MYSQL_MAX_RESULT_LIMIT
+        : $limit;
+}
+
+/**
+ * @param int $offset
+ * @return int
+ */
+function get_generate_min_offset(int $offset) : int
+{
+    return $offset > 0 ? $offset : 0;
 }

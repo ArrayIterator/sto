@@ -298,7 +298,7 @@ function upload_avatar(AbstractUserModel $model, string $name = 'avatar')
             'width' => $width,
             'height' => $height,
         ];
-        cache_set(
+        cache_set_current(
             sprintf('%s(%d)', $model->getUserRoleType(), $model->getId()),
             $data,
             'avatars'
@@ -361,11 +361,11 @@ function get_user_avatar(AbstractUserModel $model)
         }
     }
     $key = sprintf('%s(%d)', $model->getUserRoleType(), $model->getId());
-    $cache = cache_get($key, 'avatars', $found);
+    $cache = cache_get_current($key, 'avatars', $found);
     if ($found && (!is_array($cache) || $cache === false)) {
         return $cache;
     }
-    cache_set($key, false, 'avatars');
+    cache_set_current($key, false, 'avatars');
     $avatar = $model->get('avatar');
     if (!is_string($avatar) || trim($avatar) === '') {
         return false;
@@ -385,7 +385,7 @@ function get_user_avatar(AbstractUserModel $model)
         'width' => $width,
         'height' => $height,
     ];
-    cache_set($key, $data, 'avatars');
+    cache_set_current($key, $data, 'avatars');
     return $data;
 }
 
@@ -650,7 +650,7 @@ function upload_logo(string $name = 'logo', int $siteId = null)
             'width' => $width,
             'height' => $height,
         ];
-        cache_set($siteId, $data, 'site_logo');
+        cache_set_current($siteId, $data, 'site_logo');
         return $siteLogo;
     } catch (Throwable $e) {
         if (file_exists($fileTarget)) {
@@ -671,11 +671,11 @@ function get_site_logo(int $siteId = null)
     if (!$site) {
         return false;
     }
-    $cache = cache_get($siteId, 'site_logo', $found);
+    $cache = cache_get_current($siteId, 'site_logo', $found);
     if ($found && (is_array($cache) || $cache === false)) {
         return $cache;
     }
-    cache_set($siteId, false, 'site_logo');
+    cache_set_current($siteId, false, 'site_logo');
 
     $logo = $site->get('logo');
     if (!$logo || !is_string($logo)) {
@@ -697,6 +697,6 @@ function get_site_logo(int $siteId = null)
         'width' => $width,
         'height' => $height,
     ];
-    cache_set($siteId, $data, 'site_logo');
+    cache_set_current($siteId, $data, 'site_logo');
     return $data;
 }

@@ -12,24 +12,22 @@ use ArrayIterator\Info\Theme;
  */
 function get_option(string $name, $default = null, int $siteId = null, &$found = null)
 {
-    $cacheSiteId = cache_get_site_id();
     $siteId = $siteId === null ? get_current_site_id() : $siteId;
-    $switched = $cacheSiteId !== $siteId;
-    if ($switched) {
-        cache_switch_to($siteId);
-    }
-    $cache = cache_get($name, 'site_options', $found);
+
+    $cache = cache_get_current($name, 'site_options', $found, $siteId);
     if ($found) {
-        $switched && cache_switch_to($cacheSiteId);
         return hook_apply('options_' . $name, $cache, $name, $default, $siteId);
     }
 
     $data = option()->value($name, $default, $siteId, $found);
     if ($found) {
-        cache_set($name, $data, 'site_options');
+        $optionSiteId = $data['site_id']??null;
+        if (is_int($optionSiteId) && $optionSiteId && $siteId !== $optionSiteId) {
+            cache_set_current($name, $data, 'site_options', $optionSiteId);
+        }
+        cache_set_current($name, $data, 'site_options', $siteId);
     }
 
-    $switched && cache_switch_to($cacheSiteId);
     return hook_apply('options_' . $name, $data, $name, $default, $siteId);
 }
 
@@ -41,14 +39,8 @@ function get_option(string $name, $default = null, int $siteId = null, &$found =
  */
 function update_option(string $name, $value, int $siteId = null): bool
 {
-    $cacheSiteId = cache_get_site_id();
     $siteId = $siteId === null ? get_current_site_id() : $siteId;
-    $switched = $cacheSiteId !== $siteId;
-    if ($switched) {
-        cache_switch_to($siteId);
-    }
-    cache_set($name, $value, 'site_options');
-    $switched && cache_switch_to($cacheSiteId);
+    cache_set_current($name, $value, 'site_options', $siteId);
     return option()->set($name, $value, $siteId);
 }
 
@@ -59,7 +51,17 @@ function update_option(string $name, $value, int $siteId = null): bool
  */
 function get_options(int $siteId = null, ...$args): ArrayGetter
 {
-    return option()->values($siteId, ...$args);
+    $siteId = $siteId === null ? get_current_site_id() : $siteId;
+    $data = option()->values($siteId, ...$args);
+    $cacheId = cache_get_site_id();
+    $is_switched = $siteId !== $cacheId;
+    $is_switched && cache_switch_to($siteId);
+    foreach ($data as $key => $item) {
+        object_cache()->set($key, $item, 'site_options');
+    }
+
+    $is_switched && cache_switch_to($cacheId);
+    return $data;
 }
 
 /**
@@ -73,12 +75,10 @@ function update_options(array $value, int $siteId = null): bool
         return false;
     }
 
-    $cacheSiteId = cache_get_site_id();
     $siteId = $siteId === null ? get_current_site_id() : $siteId;
+    $cacheSiteId = cache_get_site_id();
     $switched = $cacheSiteId !== $siteId;
-    if ($switched) {
-        cache_switch_to($siteId);
-    }
+    $switched && cache_switch_to($siteId);
 
     $options = option();
     $value = [];
@@ -147,10 +147,7 @@ function delete_option(string $name, int $siteId = null): bool
     $cacheSiteId = cache_get_site_id();
     $siteId = $siteId === null ? get_current_site_id() : $siteId;
     $switched = $cacheSiteId !== $siteId;
-    if ($switched) {
-        cache_switch_to($siteId);
-    }
-
+    $switched && cache_switch_to($siteId);
     cache_delete($name, 'site_options');
     $switched && cache_switch_to($cacheSiteId);
 
@@ -173,19 +170,24 @@ function delete_options(array $name, int $siteId = null): bool
     $cacheSiteId = cache_get_site_id();
     $siteId = $siteId === null ? get_current_site_id() : $siteId;
     $switched = $cacheSiteId !== $siteId;
-    if ($switched) {
-        cache_switch_to($siteId);
-    }
+    $switched && cache_switch_to($siteId);
+    $deleted = [];
     foreach ($name as $key => $item) {
         unset($name[$key]);
+        $deleted[] = $key;
         if (!is_string($item)) {
             continue;
         }
         cache_delete($item, 'site_options');
         $name[$item] = '?';
     }
-
     $switched && cache_switch_to($cacheSiteId);
+    if ($switched) {
+        foreach ($deleted as $item) {
+            cache_delete($item, 'site_options');
+        }
+    }
+
     if (empty($name)) {
         return false;
     }
@@ -213,14 +215,15 @@ function delete_options(array $name, int $siteId = null): bool
 
 function get_site_option(string $optionName, $default = null)
 {
-    $cache = cache_get($optionName, 'site_options', $found);
+    $siteId = get_current_site_id();
+    $cache = cache_get_current($optionName, 'site_options', $found, $siteId);
     if ($found) {
         return $cache;
     }
 
-    $res = get_option($optionName, $default, get_current_site_id(), $found);
+    $res = get_option($optionName, $default, $siteId, $found);
     if ($found) {
-        cache_set($optionName, $res, 'site_options');
+        cache_set_current($optionName, $res, 'site_options', $siteId);
     }
     return $res;
 }
@@ -364,7 +367,8 @@ function get_all_active_modules(): array
  */
 function get_active_theme(): Theme
 {
-    $theme = get_option('active_theme', null, get_current_site_id(), $found);
+    $site_id = get_current_site_id();
+    $theme = get_option('active_theme', null, $site_id, $found);
     if ($theme) {
         $theme = get_theme($theme);
     }
@@ -373,7 +377,7 @@ function get_active_theme(): Theme
         $themes = get_all_themes();
         $theme = key($themes);
         if ($theme) {
-            update_option('active_theme', $theme, get_current_site_id());
+            update_option('active_theme', $theme, $site_id);
         }
 
         $theme = $themes[$theme];
@@ -395,7 +399,7 @@ function get_current_theme(): Theme
  */
 function allow_student_reset_password() : bool
 {
-    $allowed = cache_get('allow_student_forgot_password', 'site_options', $found);
+    $allowed = cache_get_current('allow_student_forgot_password', 'site_options', $found);
     if (!$found) {
         $allowed = get_site_option('allow_student_forgot_password');
         $allowed = $allowed === null ? 'no' : $allowed;

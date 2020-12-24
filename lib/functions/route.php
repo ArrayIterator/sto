@@ -87,12 +87,23 @@ function route_any(string $pattern, callable $callable)
  */
 function route_dispatch(string $httpMethod, string $uri = null): array
 {
+    $is_admin_page = is_admin_page();
     $uri = $uri ?? request_uri();
     $dispatched = route()->isDispatched();
+    if ($is_admin_page && !$dispatched) {
+        $dispatched = route()->isDispatchedOnly();
+    }
+
     if (!$dispatched) {
         hook_run('before_dispatch');
     }
-    $routeInfo = route()->dispatch($httpMethod, $uri, hooks());
+
+    // use dispatch only on admin page
+    // but it will allowed run dispatch on another case
+    $routeInfo = $is_admin_page
+        ? route()->dispatchOnly($httpMethod, $uri)
+        : route()->dispatch($httpMethod, $uri, hooks());
+
     if (!$dispatched) {
         hook_run('after_dispatch');
     }

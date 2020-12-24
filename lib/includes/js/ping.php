@@ -2,11 +2,10 @@
 if (!defined('ROOT_DIR')) {
     return;
 }
-use ArrayIterator\Helper\NormalizerData;
 
 return (function () {
     $login_url = json_encode(
-        NormalizerData::addQueryArgs(
+        add_query_args(
             ['interim' => 1],
             is_admin_page() ? get_admin_login_url() : get_login_url()
         ),

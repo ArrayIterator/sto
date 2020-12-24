@@ -5,36 +5,12 @@
 
     /*! META
      * ----------------------*/
-    var currentHref = window.location.href;
-    function setCookie(name, value, days) {
-        var expires = "";
-        if (days) {
-            var date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        document.cookie = name + "=" + (value || "") + expires + "; path=/";
-    }
-
-    function getCookie(name) {
-        var nameEQ = name + "=";
-        var ca = document.cookie.split(';');
-        for (var i = 0; i < ca.length; i++) {
-            var c = ca[i];
-            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-        }
-        return null;
-    }
-
-    function deleteCookie(name) {
-        document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    }
-
     $(document).ready(function () {
-        var $c = $('.navbar-account'); //' input[type=checkbox]');
-        var $n = $('#navigation-top');
-        var $p = $('#page');
+        var Sto = window.Sto,
+            $c = $('.navbar-account'), //' input[type=checkbox]');
+            $n = $('#navigation-top'),
+            $p = $('#page');
+
         $(document).on('click', function (event) {
             var $c = $('.navbar-account input[type=checkbox]:checked').parent();
             if (!$(event.target).closest($c).length) {
@@ -81,12 +57,60 @@
             e.preventDefault();
             var $leftArea = $('#page');// $('#left-area');
             if ($leftArea.hasClass('sidebar-closed')) {
-                deleteCookie('sidebar_closed');
+                Sto.cookie.delete('sidebar_closed');
                 $leftArea.removeClass('sidebar-closed');
             } else {
                 $leftArea.addClass('sidebar-closed');
-                setCookie('sidebar_closed', 'true');
+                Sto.cookie.set('sidebar_closed', 'true');
             }
         });
+        var checkBoxAll = $('input[type=checkbox][data-action=check]');
+        checkBoxAll.on('change', function () {
+            var $this = $(this),
+                is_checked = this.checked,
+                target = $this.attr('data-target');
+            if (!target) {
+                return;
+            }
+            var selector = 'input[type=checkbox][data-source='+$.escapeSelector(target)+']';
+            var $target = $(selector);
+            $target
+                .unbind('change')
+                .on('change', function (e) {
+                    $this[0].checked = false;
+                    if ($(selector + ':checked').length === $target.length) {
+                        checkBoxAll.each(function () {
+                            this.checked = true;
+                        });
+                    } else {
+                        checkBoxAll.each(function () {
+                            this.checked = false;
+                        });
+                    }
+                });
+            $target.each(function (e) {this.checked = is_checked;});
+            checkBoxAll.not($this).each(function () {this.checked = is_checked;});
+        });
+
+        if ($.fn.select2) {
+            $('select[data-change=true]').on('change', function () {
+                $(this).closest('form').submit();
+            });
+
+            $('select[data-select=select2]').each(function () {
+                var $this = $(this);
+                var config = {};
+                var placeholder = $this.data('placeholder');
+                var allowClear = $this.data('clear');
+                if (placeholder) {
+                    config['placeholder'] = placeholder;
+                }
+                if (allowClear === '1' || allowClear === 'yes' || allowClear === 'true') {
+                    config['allowClear'] = true;
+                }
+                $this.select2(config);
+            })
+        }
     });
+
 })(window.jQuery);

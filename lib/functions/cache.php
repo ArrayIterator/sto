@@ -51,6 +51,24 @@ function cache_set($key, $data, string $group = ObjectCache::DEFAULT_GROUP, int 
     return object_cache()->add($key, $data, $group, $exp);
 }
 
+function cache_set_current($key, $data, string $group = ObjectCache::DEFAULT_GROUP, int $exp = 0, int $siteId = null): bool
+{
+    $site_id = get_current_site_id();
+    $siteId = $siteId === null ? $site_id : $siteId;
+    $cache_set_id = cache_get_site_id();
+
+    $is_switched = $siteId !== $cache_set_id;
+    if (!$is_switched) {
+        return cache_set($key, $data, $group, $exp);
+    }
+
+    cache_switch_to($siteId);
+    $res = cache_set($key, $data, $group, $exp);
+    cache_switch_to($cache_set_id);
+
+    return $res;
+}
+
 /**
  * @param string|int|float $key
  * @param string $group
@@ -60,6 +78,34 @@ function cache_set($key, $data, string $group = ObjectCache::DEFAULT_GROUP, int 
 function cache_get($key, string $group = ObjectCache::DEFAULT_GROUP, &$found = null)
 {
     return object_cache()->get($key, $group, $found);
+}
+
+/**
+ * @param $key
+ * @param string $group
+ * @param null $found
+ * @param int|null $siteId
+ */
+function cache_get_current($key, string $group = ObjectCache::DEFAULT_GROUP, &$found = null, int $siteId = null)
+{
+    static $site_id = null;
+    if ($site_id === null) {
+        $site_id = get_current_site_id();
+    }
+
+    $siteId = $siteId === null ? $site_id : $siteId;
+    $cache_set_id = cache_get_site_id();
+
+    $is_switched = $siteId !== $cache_set_id;
+    if (!$is_switched) {
+        return cache_get($key, $group, $found);
+    }
+
+    cache_switch_to($siteId);
+    $res = cache_get($key, $group, $found);
+    cache_switch_to($cache_set_id);
+
+    return $res;
 }
 
 /**
@@ -75,6 +121,33 @@ function cache_delete($key, string $group = ObjectCache::DEFAULT_GROUP): bool
 /**
  * @param $key
  * @param string $group
+ * @param int|null $siteId
+ * @return bool
+ */
+function cache_delete_current($key, string $group = ObjectCache::DEFAULT_GROUP, int $siteId = null): bool
+{
+    static $site_id = null;
+    if ($site_id === null) {
+        $site_id = get_current_site_id();
+    }
+
+    $siteId = $siteId === null ? $site_id : $siteId;
+    $cache_set_id = cache_get_site_id();
+
+    $is_switched = $siteId !== $cache_set_id;
+    if (!$is_switched) {
+        return cache_delete($key, $group);
+    }
+
+    cache_switch_to($siteId);
+    $res = cache_delete($key, $group);
+    cache_switch_to($cache_set_id);
+    return $res;
+}
+
+/**
+ * @param $key
+ * @param string $group
  * @return bool
  */
 function cache_exist($key, string $group = ObjectCache::DEFAULT_GROUP): bool
@@ -85,9 +158,63 @@ function cache_exist($key, string $group = ObjectCache::DEFAULT_GROUP): bool
 /**
  * @param $key
  * @param string $group
+ * @param int|null $siteId
+ * @return bool
+ */
+function cache_exist_current($key, string $group = ObjectCache::DEFAULT_GROUP, int $siteId = null): bool
+{
+    static $site_id = null;
+    if ($site_id === null) {
+        $site_id = get_current_site_id();
+    }
+
+    $siteId = $siteId === null ? $site_id : $siteId;
+    $cache_set_id = cache_get_site_id();
+
+    $is_switched = $siteId !== $cache_set_id;
+    if (!$is_switched) {
+        return cache_exist($key, $group);
+    }
+
+    cache_switch_to($siteId);
+    $res = cache_exist($key, $group);
+    cache_switch_to($cache_set_id);
+    return $res;
+}
+
+/**
+ * @param $key
+ * @param string $group
  * @return bool
  */
 function cache_exists($key, string $group = ObjectCache::DEFAULT_GROUP): bool
 {
     return cache_exist($key, $group);
+}
+
+/**
+ * @param $key
+ * @param string $group
+ * @param int|null $siteId
+ * @return bool
+ */
+function cache_exists_current($key, string $group = ObjectCache::DEFAULT_GROUP, int $siteId = null): bool
+{
+    static $site_id = null;
+    if ($site_id === null) {
+        $site_id = get_current_site_id();
+    }
+
+    $siteId = $siteId === null ? $site_id : $siteId;
+    $cache_set_id = cache_get_site_id();
+
+    $is_switched = $siteId !== $cache_set_id;
+    if (!$is_switched) {
+        return cache_exists($key, $group);
+    }
+
+    cache_switch_to($siteId);
+    $res = cache_exists($key, $group);
+    cache_switch_to($cache_set_id);
+    return $res;
 }

@@ -263,12 +263,12 @@ function get_current_student()
  */
 function get_student_by_id(int $id)
 {
-    $key = 'student('.$id.')';
-    $user = cache_get($key, 'users', $found);
+    $key = $id;
+    $user = cache_get($key, 'students', $found);
     if ($found && ($user === false || $found instanceof Student)) {
         return $user;
     }
-    cache_set($key, false, 'users');
+    cache_set($key, false, 'students');
     $res = student()->findById($id);
     if ($res) {
         /**
@@ -276,10 +276,10 @@ function get_student_by_id(int $id)
          */
         $user = $res->fetch();
         $res->closeCursor();
-        cache_set($key, $user, 'users');
+        cache_set($key, $user, 'students');
         if ($user) {
-            $key = 'student('.strtolower($user->get('username')).')';
-            cache_set($key, $user, 'users');
+            $key = trim(strtolower($user->get('username')));
+            cache_set($key, $user, 'students');
         }
         return $user;
     }
@@ -293,20 +293,20 @@ function get_student_by_id(int $id)
  */
 function get_supervisor_by_id(int $id)
 {
-    $key = 'supervisor('.$id.')';
-    $user = cache_get($key, 'users', $found);
+    $key = $id;
+    $user = cache_get($key, 'supervisors', $found);
     if ($found && ($user === false || $found instanceof Supervisor)) {
         return $user;
     }
-    cache_set($key, false, 'users');
+    cache_set($key, false, 'supervisors');
     $res = supervisor()->findById($id);
     if ($res) {
         $user = $res->fetch();
         $res->closeCursor();
-        cache_set($key, $user, 'users');
+        cache_set($key, $user, 'supervisors');
         if ($user) {
-            $key = 'supervisor('.strtolower($user->get('username')).')';
-            cache_set($key, $user, 'users');
+            $key = trim(strtolower($user->get('username')));
+            cache_set($key, $user, 'supervisors');
         }
         return $user;
     }
@@ -322,19 +322,19 @@ function get_supervisor_by_username(string $username)
     if (trim($username) === '') {
         return false;
     }
-    $key = 'supervisor('.strtolower($username).')';
-    $user = cache_get($key, 'users', $found);
+
+    $key = trim(strtolower($username));
+    $user = cache_get($key, 'supervisors', $found);
     if ($found && ($user === false || $found instanceof Student)) {
         return $user;
     }
-    cache_set($key, false, 'users');
+    cache_set($key, false, 'supervisors');
     $res = supervisor()->findOneByUsername($username);
     if ($res) {
         $user = $res->fetch();
-        cache_set($key, $user, 'users');
+        cache_set($key, $user, 'supervisors');
         if ($user) {
-            $key = 'supervisor('.$user->getId().')';
-            cache_set($key, $user, 'users');
+            cache_set($user->getId(), $user, 'supervisors');
         }
         $res->closeCursor();
         return $user;
@@ -352,19 +352,18 @@ function get_student_by_username(string $username)
     if (trim($username) === '') {
         return false;
     }
-    $key = 'student('.strtolower($username).')';
-    $user = cache_get($key, 'users', $found);
+    $key = trim(strtolower($username));
+    $user = cache_get($key, 'students', $found);
     if ($found && ($user === false || $found instanceof Student)) {
         return $user;
     }
-    cache_set($key, false, 'users');
+    cache_set($key, false, 'students');
     $res = supervisor()->findOneByUsername($username);
     if ($res) {
         $user = $res->fetch();
-        cache_set($key, $user, 'users');
+        cache_set($key, $user, 'students');
         if ($user) {
-            $key = 'student('.$user->getId().')';
-            cache_set($key, $user, 'users');
+            cache_set($user->getId(), $user, 'students');
         }
         $res->closeCursor();
         return $user;

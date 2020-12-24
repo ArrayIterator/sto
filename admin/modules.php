@@ -1,8 +1,6 @@
 <?php
 require __DIR__ . '/init.php';
 
-use ArrayIterator\Helper\NormalizerData;
-
 if (!admin_is_allowed(__FILE__)) {
     return load_admin_denied();
 }
@@ -35,7 +33,7 @@ $moduleSearch = !is_string($moduleSearch) ? '' : trim($moduleSearch);
 $moduleStatusesLists = (array)hook_apply('module_status_list', ['active', 'inactive']);
 $url = get_current_url();
 if ($moduleStatus) {
-    $url = NormalizerData::addQueryArgs(
+    $url = add_query_args(
         $url,
         [$moduleInputStatusName => $moduleStatus]
     );
@@ -68,7 +66,7 @@ foreach (modules()->getModules() as $name => $module) {
     }
     $originalId = sprintf(
         'module-mod-%s',
-        NormalizerData::normalizeHtmlClass($name)
+        normalize_html_class($name)
     );
     $id = $originalId;
     $c = 0;

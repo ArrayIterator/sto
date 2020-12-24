@@ -292,7 +292,7 @@ function object_cache(): ObjectCache
         $cache = new ObjectCache(get_current_site_id());
     }
 
-    return $cache;
+    return hook_apply('object_cache', $cache, $cache->getSiteId());
 }
 
 /**

@@ -7,6 +7,41 @@ use ArrayIterator\Route;
 use ArrayIterator\RouteStorage;
 use Exception;
 
+/*
+SELECT
+    class.*,
+    supervisor.*,
+    COUNT(class.id) OVER() AS total
+FROM
+    sto_classes as class
+
+LEFT JOIN
+	(
+        SELECT
+        	sto_classes_teacher.class_id as class_id,
+        	sto_classes_teacher.year as class_year,
+        	sto_supervisor.id as teacher_id,
+        	sto_supervisor.full_name as teacher_full_name,
+        	sto_supervisor.role as teacher_role,
+	        sto_supervisor.site_id as teacher_site_id
+        FROM
+        	sto_classes_teacher
+        LEFT JOIN sto_supervisor ON
+        	sto_supervisor.role = 'teacher' AND sto_classes_teacher.teacher = sto_supervisor.id
+        WHERE role = 'teacher'
+        	AND (sto_supervisor.status = '' OR sto_supervisor.status = 'active')
+    ) as supervisor
+    	ON supervisor.teacher_site_id = class.site_id
+        AND supervisor.class_id = class.id
+
+WHERE
+    class.site_id IS NOT NULL AND class.site_id > 0
+
+ORDER BY
+    class.id,
+    class.site_id
+LIMIT 10
+ */
 /**
  * Class ClassesController
  * @package ArrayIterator\Controller\Api
@@ -24,112 +59,104 @@ class ClassesController extends BaseController
             json(401, trans('Access Denied'));
             return;
         }
-
         $limit  = query_param_int('limit');
         $offset = query_param_int('offset');
-        $siteIds = [];
-        $hasSiteIds = false;
+        $siteIds = get_super_admin_site_ids_params();
+        $hasSiteIds = is_super_admin() && has_query_param('site_ids');
+        $originalLimit = $limit;
 
-        if (has_query_param('site_ids')) {
-            $hasSiteIds = true;
-            $siteIds = get_super_admin_site_ids_param();
-        }
-
-        if (has_query_param('site_id')) {
-            $siteId = get_super_admin_site_id_param();
-            $siteId = $siteId === 0 ? false : $siteId;
-            if ($siteId !== false && !in_array($siteId, $siteIds)) {
-                $siteIds[] = $siteId;
+        $filter = query_param('filter');
+        $filter = !is_string($filter) ? null : trim($filter);
+        $filter = $filter ? explode(',', $filter) : [];
+        foreach ($filter as $key => $item) {
+            if (!in_array($item, ['code', 'name', 'id', 'note', 'teachers', 'site_id'])) {
+                unset($filter[$key]);
             }
         }
-        if (!is_super_admin()) {
-            $hasSiteIds = false;
-            $siteIds = [get_current_site_id()];
-        }
 
-        $table = get_classes_table_name();
-        $sql = "SELECT * FROM {$table} ";
-        $where = 'WHERE site_id ';
-        $where .= !empty($siteIds)
-            ? sprintf('IN (%s) ', implode(',', $siteIds))
-            : 'IS NOT NULL AND site_id != 0 ';
-        $sql .= $where;
-
-        $originalLimit = $limit;
-        $limit = $limit < 1 ? MYSQL_DEFAULT_SEARCH_LIMIT : $limit;
-        $sql .= "ORDER BY id LIMIT {$limit}";
-        $offset = $offset > 0 ? $offset : 0;
-        if ($offset > 0) {
-            $sql .= " OFFSET {$offset}";
-        }
-        $countSQL = "SELECT count(id) as total FROM {$table} ";
-        $countSQL .= $where;
-        $totalities = null;
-        try {
-            $st = database_unbuffered_query($countSQL);
-            $totalities = $st->fetchAssoc();
-            $st->closeCursor();
-            $totalities = $totalities ? ($totalities['total']??null) : null;
-            $totalities = $totalities !== null ? abs($totalities) : null;
-        } catch (Exception $e) {
-            $totalities = null;
-        }
+        $filter = array_values($filter);
+        $filter = array_flip($filter);
 
         $data = [
-            'total' => $totalities,
-            'page_total' => 0,
-            'current_page' => 0,
-            'site_id' => $siteIds,
-            'limit' => $limit,
-            'offset' => $offset,
+            'total' => 0,
             'count' => 0,
+            'page' => [
+                'total' => 0,
+                'current' => 0,
+            ],
             'next' => [
                 'offset' => null,
                 'limit' => null,
                 'url' => null,
             ],
+            'query' => [
+                'site_id' => $siteIds,
+                'limit' => $limit,
+                'offset' => $offset,
+                'query' => null,
+                'type' => null,
+                'filters' => array_keys($filter)
+            ],
             'results' => []
         ];
+
         try {
-            $count =& $data['count'];
-            $st = database_unbuffered_query($sql);
-            if (!$st) {
-                json(200, $data);
-            }
-
-            while ($row = $st->fetchAssoc()) {
-                if ($count++ === 0) {
-                    // $data['total'] = (int) ($row['total']);
-                    $data['page_total'] = 1;
-                    $data['current_page'] = 1;
+            $data = get_classes_data($limit, $offset);
+            $offset = $data['meta']['query']['offset'];
+            if (!empty($filter)) {
+                foreach ($data['results'] as $key => &$item) {
+                    foreach ($item as $keyName => $v) {
+                        /**
+                         * @var string $keyName
+                         */
+                        if ($keyName !== 'id' && !isset($filter[$keyName])) {
+                            unset($item[$keyName]);
+                        }
+                    }
                 }
-
-                $data['results'][] = [
-                    'id' => (int) $row['id'],
-                    'site_id' => (int) $row['site_id'],
-                    'code' => $row['code'],
-                    'name' => $row['name'],
-                    'note' => $row['note'],
-                ];
             }
-            $st->close();
+            $meta = $data['meta'];
+            $data = [
+                'total' => $data['total'],
+                'count' => $data['count'],
+                'page' => [
+                    'total' => 0,
+                    'current' => 0,
+                ],
+                'next' => [
+                    'offset' => null,
+                    'limit' => null,
+                    'url' => null,
+                ],
+                'pagination' => null,
+                'query' => [
+                    'site_id' => $siteIds,
+                    'limit' => $meta['query']['limit'],
+                    'offset' => $meta['query']['offset'],
+                    'query' => null,
+                    'type' => null,
+                    'filters' => array_keys($filter)
+                ],
+                'results' => $data['results']
+            ];
+
             if ($data['total'] === null) {
-                $data['total'] = $count;
+                $data['total'] = $data['count'];
             }
 
             $total = $data['total'];
-            $offset = $offset+$count;
+            $offset = $offset+$data['count'];
             $nextTotal = $total - $offset;
-            $dataLimit = $data['limit'];
+            $dataLimit = $meta['query']['limit'];
             if ($originalLimit !== $limit && $dataLimit > $total) {
-                $data['limit'] = $data['total'];
+                $data['query']['limit'] = $data['total'];
             }
 
             if ($total > 0) {
                 $page_total = $dataLimit >= $total ? 1 : ceil($total / $dataLimit);
-                $data['page_total'] = $page_total;
+                $data['page']['total'] = $page_total;
                 $current_page = $page_total - ceil($total / $offset) + 1;
-                $data['current_page'] = $current_page;
+                $data['page']['current'] = $current_page;
             }
 
             if ($nextTotal > 0) {
@@ -145,14 +172,12 @@ class ClassesController extends BaseController
                 $data['next']['url'] = sprintf(
                     '%s?%s',
                     get_current_uri()->getPath(),
-                    NormalizerData::buildQuery($args)
+                    build_query($args)
                 );
             }
         } catch (Exception $e) {
-            echo $e;
-            exit;
+            json(500, $e);
         }
-
         json(200, $data, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
     }
 
@@ -171,32 +196,39 @@ class ClassesController extends BaseController
             json(401, trans('Access Denied'));
             return;
         }
-
-        $id = $params['id']??null;
-        $id = is_numeric($id) ? abs($id) : $id;
-        if (!is_int($id)) {
+        $siteIds = get_super_admin_site_ids_params();
+        $method = null;
+        if (isset($params['id'])) {
+            $method = 'get_class_by_id';
+            $param = $params['id']??null;
+            $param = is_numeric($param) ? abs($param) : $param;
+            if (!is_int($param)) {
+                route_not_found();
+            }
+        } elseif (isset($params['name'])) {
+            $method = 'get_class_by_name';
+            $param = is_string($params['name']) ? trim($params['name']) : null;
+            $param = $param !== '' ? $param : null;
+        } elseif (isset($params['code'])) {
+            $method = 'get_class_by_code';
+            $param = is_string($params['code']) ? trim($params['code']) : null;
+            $param = $param !== '' ? $param : null;
+        } else {
             route_not_found();
+            return;
         }
 
-        $site_id = !is_super_admin() ? get_current_site_id() : null;
-        $result = get_class_by_id($id);
-
-        if (empty($result)
-            || $site_id !== null && $site_id <> $result['site_id']
-        ) {
-            json(200, []);
+        $result = $method($param, $siteIds);
+        $currentSiteId = get_current_site_id();
+        if (!is_super_admin()) {
+            foreach ($result as $i => $item) {
+                if ($item['site_id'] <> $currentSiteId) {
+                    unset($result[$i]);
+                }
+            }
         }
 
-        $result = [
-            'id' => (int) $result['id'],
-            'site_id' => (int) $result['site_id'],
-            'code' => $result['code'],
-            'name' => $result['name'],
-            'note' => $result['note'],
-        ];
-
-
-        json(200, $result, JSON_PRETTY_PRINT);
+        json(200, $result);
     }
 
     /**
@@ -228,7 +260,7 @@ class ClassesController extends BaseController
         $id = is_numeric($id) ? abs($id) : $id;
 
         $is_update = $action === 'edit';
-        $original = is_int($id) && $id > 0 ? get_class_by_id($id) : null;
+        $original = is_int($id) && $id > 0 ? get_classes_by_id($id) : null;
         if (empty($original)) {
             if ($is_update && $id !== null) {
                 json(412, trans_sprintf(
@@ -241,6 +273,7 @@ class ClassesController extends BaseController
             $is_update = false;
         }
 
+        unset($original);
         if ($is_update) {
             // prevent update
             if (!current_supervisor_can('edit_class')) {
@@ -253,7 +286,10 @@ class ClassesController extends BaseController
             // succeed
             if ($response === true || $response === 1) {
                 $data['success'] = true;
-                $data['text'] = trans_sprintf('Class %s successfully updated!', post('code'));
+                $data['text'] = trans_sprintf(
+                    'Class %s successfully updated!',
+                    post('code')
+                );
                 $data['result'] = get_class_by_id($id);
                 json(200, $data);
                 return;
@@ -267,7 +303,9 @@ class ClassesController extends BaseController
             $response = insert_class_data(posts());
             $data['success'] = false;
             if (is_array($response)) {
-                $data['text'] = trans_sprintf('Class %s successfully saved!', $response['code']);
+                $data['text'] = trans_sprintf(
+                    'Class %s successfully saved!', $response['code']
+                );
                 $data['success'] = true;
                 $data['result'] = $response;
                 unset($response);
@@ -325,26 +363,41 @@ class ClassesController extends BaseController
             json(428, trans('Search query could not be empty!'));
             return;
         }
-        $siteId = get_current_site_id();
-        if (is_super_admin()) {
-            $sId = query_param('site_id');
-            $sId = is_string($sId) ? trim($sId) : $sId;
-            $sId = is_numeric($sId) ? abs($sId) : $siteId;
-            $sId = is_int($sId) ? ($sId) : $siteId;
-            $siteId = $sId;
+
+        $siteIds = [];
+        $hasSiteIds = false;
+
+        if (has_query_param('site_ids')) {
+            $hasSiteIds = true;
+            $siteIds = get_super_admin_site_ids_param();
         }
+
+        if (has_query_param('site_id')) {
+            $siteId = get_super_admin_site_id_param();
+            $siteId = $siteId === 0 ? false : $siteId;
+            if ($siteId !== false && !in_array($siteId, $siteIds)) {
+                $siteIds[] = $siteId;
+            }
+        }
+        if (!is_super_admin()) {
+            $hasSiteIds = false;
+            $siteIds = [get_current_site_id()];
+        }
+
         $filter = query_param('filter');
         $filter = !is_string($filter) ? null : trim($filter);
         $filter = $filter ? explode(',', $filter) : [];
         foreach ($filter as $key => $item) {
-            if (!in_array($item, ['code', 'name', 'id', 'note'])) {
+            if (!in_array($item, ['code', 'name', 'id', 'note', 'teachers', 'site_id'])) {
                 unset($filter[$key]);
             }
         }
 
         $filter = array_values($filter);
         $filter = array_flip($filter);
+        $offset = query_param_int('offset');
         $limit = query_param('limit');
+        $originalLimit = $limit;
         $limit = !is_numeric($limit) ? MYSQL_DEFAULT_SEARCH_LIMIT : abs(intval($limit));
         $limit = $limit <= 1 ? 1 : (
             $limit > MYSQL_MAX_SEARCH_LIMIT
@@ -353,10 +406,10 @@ class ClassesController extends BaseController
             );
 
         $data = $type === 'name'
-            ? search_class_by_name($search, $siteId, $limit)
-            : search_class_by_code($search, $siteId, $limit);
+            ? search_class_by_name($search, $siteIds, $limit, $offset)
+            : search_class_by_code($search, $siteIds, $limit, $offset);
         if (!empty($filter)) {
-            foreach ($data as $key => &$item) {
+            foreach ($data['results'] as $key => &$item) {
                 foreach ($item as $k => $v) {
                     if (!isset($filter[$k]) && $k !== 'id') {
                         unset($item[$k]);
@@ -365,15 +418,48 @@ class ClassesController extends BaseController
             }
         }
 
-        json(200, [
-            'count' => count($data),
-            'site_id' => [$siteId],
-            'type' => $type,
-            'query' => $search,
-            'limit' => $limit,
-            'filters' => array_keys($filter),
-            'result' => $data
-        ], JSON_PRETTY_PRINT);
+        $nextTotal = $data['meta']['next']['total'];
+        $data = [
+            'total' => $data['total'],
+            'count' => $data['count'],
+            'page' => [
+                'total' => $data['meta']['page']['total'],
+                'current' => $data['meta']['page']['current'],
+            ],
+            'current' => [
+                'site_id' => $siteIds,
+                'limit' => $data['meta']['query']['limit'],
+                'offset' => $data['meta']['query']['offset'],
+                'query' => $search,
+                'type' => $type,
+                'filters' => array_keys($filter),
+            ],
+            'next' => [
+                'offset' => $data['meta']['next']['offset'],
+                'limit' => $data['meta']['next']['limit'],
+                'url' => null,
+            ],
+            'results' => $data['results']
+        ];
+
+
+        if ($nextTotal > 0) {
+            $args = $data['next'];
+            unset($args['url']);
+            if (!empty($siteIds)) {
+                $key = $hasSiteIds ? 'site_id' : 'site_ids';
+                $args[$key] = implode(',', $siteIds);
+            }
+            $args['type'] = $type;
+            $args['q'] = $search;
+            $data['next']['url'] = sprintf(
+                '%s?%s',
+                get_current_uri()->getPath(),
+                NormalizerData::buildQuery($args)
+            );
+        }
+
+        json(200, $data, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
     }
 
     protected function registerController(RouteStorage $route)
@@ -392,7 +478,15 @@ class ClassesController extends BaseController
         );
 
         $route->get(
-            '/classes/{id: [0-9]+}[/]',
+            '/classes/id/{id: [0-9]+}[/]',
+            [$this, 'getClass']
+        );
+        $route->get(
+            '/classes/name/{name: .+}[/]',
+            [$this, 'getClass']
+        );
+        $route->get(
+            '/classes/code/{name: .+}[/]',
             [$this, 'getClass']
         );
 

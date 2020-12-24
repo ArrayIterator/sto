@@ -36,8 +36,10 @@ require_once __DIR__ . '/functions/classes.php';
 require_once __DIR__ . '/functions/user.php';
 require_once __DIR__ . '/functions/options.php';
 
-if (ob_get_level() < 1) {
-    ob_start();
+// use buffer
+if (ob_get_level() < 1 || ob_get_level() === 1 && ob_get_length() === 0) {
+    ob_end_clean();
+    ob_start(null, 0, PHP_OUTPUT_HANDLER_REMOVABLE | PHP_OUTPUT_HANDLER_REMOVABLE);
 }
 
 register_shutdown_function('shutdown_handler');
@@ -126,7 +128,8 @@ if (defined('COOKIE_MULTI_DOMAIN') && COOKIE_MULTI_DOMAIN) {
 unset($configBaseName);
 
 cache_add_global_groups([
-    'users',
+    'students',
+    'supervisors',
     'site_options',
     'sites',
     'languages'
@@ -202,7 +205,6 @@ if (!is_admin_page()) {
     // do init
     init();
 }
-
 
 if (get_current_site_id() === 0) {
     route_not_found();

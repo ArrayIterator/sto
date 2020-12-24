@@ -17,9 +17,10 @@ function get_admin_html_attributes(): string
         'lang' => get_selected_site_language(),
         'class' => implode(
             ' ',
-            array_map('ArrayIterator\Helper\NormalizerData::normalizeHtmlClass', $html_class)
+            normalize_html_class($html_class)
         ),
     ];
+
     $attribute = hook_apply('admin_html_attribute', $attribute);
     $attr = '';
     foreach ((array)$attribute as $key => $item) {
@@ -45,7 +46,7 @@ function get_admin_login_form_attributes(): string
     $attribute = [
         'class' => implode(
             ' ',
-            array_map('ArrayIterator\Helper\NormalizerData::normalizeHtmlClass', $body_class)
+            normalize_html_class($body_class)
         ),
         'id' => 'login-form',
         'method' => 'post',
@@ -54,7 +55,7 @@ function get_admin_login_form_attributes(): string
 
     $attribute = hook_apply('admin_login_form_attributes', $attribute);
     if (isset($attribute['id'])) {
-        $attribute['id'] = NormalizerData::normalizeHtmlClass($attribute['id']);
+        $attribute['id'] = normalize_html_class($attribute['id']);
     }
     $attr = '';
     foreach ((array)$attribute as $key => $item) {
@@ -78,9 +79,10 @@ function get_admin_body_attributes(): string
 {
     $body_class = [];
     $isLogin = is_login();
+    $userId = $isLogin ? get_current_user_id() : null;
     if ($isLogin) {
         $body_class[] = 'logged';
-        $body_class[] = sprintf('user-id-%d', get_current_user_id());
+        $body_class[] = sprintf('user-id-%d', $userId);
         $body_class[] = sprintf('user-%s', get_current_user_type());
         $body_class[] = sprintf('user-status-%s', get_current_user_status());
         if (is_admin_page()) {
@@ -101,11 +103,13 @@ function get_admin_body_attributes(): string
     $attribute = [
         'class' => implode(
             ' ',
-            array_map('ArrayIterator\Helper\NormalizerData::normalizeHtmlClass', $body_class)
+            normalize_html_class($body_class)
         ),
         'data-site-id' => $siteId,
     ];
-
+    if ($isLogin) {
+        $attribute['data-user-id'] = $userId;
+    }
     $attribute = hook_apply('body_attributes', $attribute);
     $attr = '';
     foreach ((array)$attribute as $key => $item) {
@@ -154,6 +158,12 @@ function get_admin_header_template(bool $reLoad = false)
     static $loaded;
     if (!$reLoad && $loaded) {
         return;
+    }
+
+    if (!$loaded) {
+        ob_start(function ($e, $y) {
+            return hook_apply('ob_header', $e, $y);
+        });
     }
 
     $loaded = true;
@@ -511,7 +521,7 @@ function get_html_attributes(): string
         'lang' => get_selected_site_language(),
         'class' => implode(
             ' ',
-            array_map('ArrayIterator\Helper\NormalizerData::normalizeHtmlClass', $html_class)
+            normalize_html_class($html_class)
         ),
     ];
 
@@ -536,9 +546,11 @@ function get_html_attributes(): string
 function get_body_attributes(): string
 {
     $body_class = [];
-    if (is_login()) {
+    $isLogin = is_login();
+    $userId = $isLogin ? get_current_user_id() : null;
+    if ($isLogin) {
         $body_class[] = 'logged';
-        $body_class[] = sprintf('user-id-%d', get_current_user_id());
+        $body_class[] = sprintf('user-id-%d', $userId);
         $body_class[] = sprintf('user-%s', get_current_user_type());
         $body_class[] = sprintf('user-status-%s', get_current_user_status() ?: 'unknown');
     } else {
@@ -559,10 +571,14 @@ function get_body_attributes(): string
     $attribute = [
         'class' => implode(
             ' ',
-            array_map('ArrayIterator\Helper\NormalizerData::normalizeHtmlClass', $body_class)
+            normalize_html_class($body_class)
         ),
         'data-site-id' => $siteId,
     ];
+    if ($isLogin) {
+        $attribute['data-user-id'] = $userId;
+    }
+
     $attribute = hook_apply('body_attributes', $attribute);
     $attr = '';
     foreach ((array)$attribute as $key => $item) {
@@ -589,7 +605,7 @@ function get_login_form_attributes(): string
     $attribute = [
         'class' => implode(
             ' ',
-            array_map('ArrayIterator\Helper\NormalizerData::normalizeHtmlClass', $body_class)
+            normalize_html_class($body_class)
         ),
         'id' => 'login-form',
         'method' => 'post',
@@ -597,7 +613,7 @@ function get_login_form_attributes(): string
     ];
     $attribute = hook_apply('login_form_attributes', $attribute);
     if (isset($attribute['id'])) {
-        $attribute['id'] = NormalizerData::normalizeHtmlClass($attribute['id']);
+        $attribute['id'] = normalize_html_class($attribute['id']);
     }
     $attr = '';
     foreach ((array)$attribute as $key => $item) {
@@ -712,4 +728,122 @@ function body_open()
 function html_footer()
 {
     hook_run('html_footer');
+}
+
+/* -------------------------------------------------
+ *                     HELPER
+ * ------------------------------------------------*/
+
+/**
+ * @param int $total_page
+ * @param int $current_page
+ * @param int $max_shown
+ * @return array
+ */
+function calculate_get_page_list(
+    int $total_page,
+    int $current_page,
+    int $max_shown
+) : array {
+    if ($total_page <= $max_shown) {
+        // no breaks in list
+        return range(1, $total_page);
+    }
+
+    if ($current_page <= $max_shown - 5) {
+        // no break on left of page
+        return array_merge(range(1, $max_shown-3), array(0, $total_page-1, $total_page));
+    }
+    if ($current_page >= $total_page - $max_shown + 6) {
+        // no break on right of page
+        return array_merge(
+            [1, 2, null],
+            range($total_page - $max_shown + 4, $total_page)
+        );
+    }
+
+    // breaks on both sides
+    $size = $max_shown - 6;
+    $first = $current_page - floor(($size-1)/2);
+    return array_merge(
+        [1, 2, null],
+        range($first, $first + $size - 1),
+        [null, $total_page-1, $total_page]
+    );
+}
+
+/**
+ * @param int $current_page
+ * @param int $total_page
+ * @param string $url
+ * @param string $page
+ * @param int $max_shown
+ * @return string
+ */
+function html_pagination(
+        int $total_page,
+        int $current_page,
+        string $url,
+        string $page = 'page',
+        int $max_shown = 4
+) : string {
+
+    $html = sprintf(
+        '<li class="navigator-prev page-item%s" data-page="%d">',
+        ($current_page <= 1 ? ' disabled' : ''),
+        ($current_page <= 1 ? 1 : $current_page-1)
+    );
+    $currentUrl = $current_page > 1
+        ? esc_attr(add_query_args([$page => $current_page-1], $url))
+        : esc_attr(add_query_args([$page => 1], $url));
+
+    $html .= sprintf(
+        '<a class="page-link" href="%s" aria-label="%s">',
+        $currentUrl,
+        trans('Previous')
+    );
+    $html .= sprintf(
+        '<i class="icofont-arrow-left"></i><span class="sr-only">%s</span></a></li>',
+        trans('Previous')
+    );
+    $calc = calculate_get_page_list($total_page, $current_page, $max_shown);
+    $sets = [];
+    foreach ($calc as $item => $current_loop) {
+        if (!$current_loop) {
+            $html .= '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            continue;
+        }
+        if (isset($sets[$current_loop])) {
+            continue;
+        }
+        $sets[$current_loop] = true;
+        $html .= sprintf(
+            '<li class="page-item%s" data-page="%d"><a class="page-link" href="%s">%d</a></li>',
+            $current_loop === $current_page ? ' active' : '',
+            $current_loop,
+            esc_attr(add_query_args(['page' => $current_loop], $url)),
+            $current_loop
+        );
+    }
+
+    $html .= sprintf(
+        '<li class="navigator-next page-item%s" data-page="%d">',
+        $current_page >= $total_page ? ' disabled' : '',
+        $current_page >= $total_page ? $total_page : $current_page+1
+    );
+    $currentUrl = $current_page >= $total_page
+        ? add_query_args(['page' => $total_page], $url)
+        : add_query_args(['page' => $current_page+1], $url);
+
+    $html .= sprintf(
+        '<a class="page-link" href="%s" aria-label="%s">',
+        $currentUrl,
+        trans('Next')
+    );
+
+    $html .= sprintf(
+        '<i class="icofont-arrow-right"></i><span class="sr-only">%s</span></a></li>',
+        trans('Next')
+    );
+    return $html;
 }
