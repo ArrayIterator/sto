@@ -46,7 +46,15 @@ if (!is_admin_login_page()) {
     $referer = get_referer() ?: '';
     $login_page = explode('?', get_admin_login_url())[0];
     if ($is_interim && $is_success && preg_match('#' . preg_quote($login_page) . '#', get_admin_login_url())) {
-        do_exit(trans('Login Success'));
+        set_status_header(200);
+        render(
+            '<!DOCTYPE html><html><head>'
+            . '<script>try {if (parent && parent.call_iframe_stat.call_iframe_stat) parent.call_iframe_stat(this.location.href, true)} catch (e) {if (!parent || parent === window) {window.location.href = window.location.href.replace(/([\?|&])interim=[^&]+&?/gi, "$1");}}</script>'
+            . '<style>body{padding:0;margin:0}.load{position:absolute;height:100px;width:100px;top:50%;margin-top:-50px;left:50%;margin-left:-50px}.loading{height:100%;width:100%;position:relative;text-align:center}.loading .lds-dual-ring{position:absolute;z-index:20;display:block;'
+            . 'width:90px;height:90px;overflow:hidden;margin:-40px 0 0 -40px;top:50%;left:50%}.loading .lds-dual-ring::after{content:"";display:block;width:64px;height:64px;margin:8px;border-radius:50%;animation:lds-dual-ring 1.2s linear infinite;border:6px solid #343a40;border-right-color:transparent;border-left-color:transparent}@keyframes lds-dual-ring{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}</style>'
+            .'</head><body><div class="load"><div class="loading"><div class="lds-dual-ring"></div></div></div></body></html>',
+            true
+        );
     }
 
     unset($is_interim, $is_success, $referer, $login_page);

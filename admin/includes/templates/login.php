@@ -70,7 +70,7 @@ get_admin_header_template();
                             left: 2px;
                             border: 0;
                             border-radius: 50%;
-                            box-shadow: 0 0px 1px rgba(0,0,0, 0.1), inset -1px 3px 3px rgba(0,0,0,0.3);
+                            box-shadow: 0 0 1px rgba(0,0,0, 0.1), inset -1px 3px 3px rgba(0,0,0,0.3);
                             font-family: monospace;
                         }
                         .clock-digit .digit-second {
@@ -161,8 +161,8 @@ get_admin_header_template();
                             $message_error = count(cookies()) === 0 ? trans('Please Enable Cookie') : trans('Could Not Authenticated Cookie');
                             break;
                     }
-
-                    if ($message_error !== null) {
+                    $is_cookie_exists = has_cookie_succeed();
+                    if ($is_cookie_exists && $message_error !== null) {
                         $message_err = hook_apply('login_message_error', $message_error, query_param('error'));
                         $message_err = !is_string($message_err) ? $message_error : $message_err;
                         printf(
@@ -175,6 +175,24 @@ get_admin_header_template();
                 </div>
             </div>
         </div>
+        <?php if ($is_interim) {?>
+            <script>
+            (function($) {
+                var $form = $('form'),
+                    $wrap = $('.login-form-wrap'),
+                    inSubmit = false;
+                $(window).on('beforeunload', function () {
+                    if (inSubmit) {
+                        $wrap.hide();
+                        $wrap.before('<div class="overlay-fixed"><div class="loading loading-dark"><div class="lds-dual-ring"></div></div></div>');
+                    }
+                });
+                $form.on('submit', function (e) {
+                    inSubmit = true;
+                });
+            })(window.jQuery);
+            </script>
+        <?php } ?>
     </div>
 <?php
 get_admin_footer_template();

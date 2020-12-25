@@ -128,7 +128,7 @@ function esc_attr(string $message) : string
  */
 function esc_attr_e(string $message)
 {
-    echo htmlspecialchars($message, ENT_QUOTES|ENT_COMPAT);
+    render(htmlspecialchars($message, ENT_QUOTES|ENT_COMPAT));
 }
 
 /**
@@ -144,7 +144,7 @@ function esc_html(string $message) : string
 
 function esc_html_e(string $message)
 {
-    echo esc_html($message);
+    render(esc_html($message));
 }
 
 /**

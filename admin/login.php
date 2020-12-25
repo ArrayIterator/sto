@@ -15,6 +15,8 @@ if (http_method() === 'POST') {
     $password = post('password');
     $remember = !!post('remember');
     $is_interim = isset($_REQUEST['interim']);
+
+    create_cookie_succeed();
     if (empty($cookie)) {
         $cookie = [];
         redirect(get_admin_login_redirect_url(['error' => 'cookie_disabled']));
@@ -64,14 +66,16 @@ if (http_method() === 'POST') {
             unset($params['redirect']);
             if ($is_interim) {
                 $params['interim'] = 1;
-                $params['login'] = 'success';
-                $params['user_id'] = $user->getId();
             }
+
+            $params['login'] = 'success';
+            $params['user_id'] = $user->getId();
             $redirectLoginUrl = add_query_args($params, $redirectLoginUrl);
             $redirectLoginUrl = hook_apply(
                 'redirect_success_login_url',
                 $redirectLoginUrl
             );
+
             if ($is_interim) {
                 // back compat
                 $redirectLoginUrl = add_query_args([
@@ -80,7 +84,6 @@ if (http_method() === 'POST') {
                     'user_id' => $user->getId()
                 ], $redirectLoginUrl);
             }
-
             redirect($redirectLoginUrl);
         } else {
             redirect(get_admin_login_url() . '?error=fail_login' . ($is_interim ? '&interim=1' : ''));

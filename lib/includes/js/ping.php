@@ -68,6 +68,35 @@ return (function () {
                 interimIframe = jq('<iframe id="iframe-interim-login" class="iframe-interim" src="' + log + '?interim=1"></iframe>');
                 interimLayout.html(interimIframe);
                 _page.append(interimLayout);
+                var call_iframe_stat = function (href, close) {
+                    if (!interimIframe) {
+                        return;
+                    }
+                    if (close === true) {
+                        interimLayout.remove();
+                        interimIframe.remove(function () {
+                           interimIframe = null; 
+                        });
+                        setTimeout(account_loop_check, checkSucceed);
+                        return;
+                    }
+                    if (/\?login=success(?:&.*|$)/.test(href)) {
+                        if (typeof user_id === "number") {
+                            var _match = href.match(/user_id=([0-9]+)(?:&|$)/);
+                            var id = parseInt(_match[1]);
+                            if (id !== user_id) {
+                                window.location.reload();
+                                return;
+                            }
+                        }
+                        interimLayout.remove();
+                        interimIframe.remove(function () {
+                           interimIframe = null; 
+                        });
+                        setTimeout(account_loop_check, checkSucceed);
+                    }
+                }
+                interimIframe[0].contentWindow.call_iframe_stat = call_iframe_stat;
                 interimIframe.on('load', function () {
                     try {
                         var href = this.contentWindow.location.href;
@@ -77,22 +106,7 @@ return (function () {
                     } catch (e) {
                         return;
                     }
-
-                    if (href.match(/\?login=success(?:&.*|$)/)) {
-                        interimIframe = null;
-                        if (typeof user_id === "number") {
-                            var _match = href.match(/user_id=([0-9]+)(?:&|$)/);
-                            var id = parseInt(_match[1]);
-                            if (id !== user_id) {
-                                window.location.reload();
-                                return;
-                            }
-                        }
-
-                        interimLayout.remove();
-                        interimIframe.remove();
-                        setTimeout(account_loop_check, checkSucceed);
-                    }
+                    call_iframe_stat(href);
                 });
                 setTimeout(account_loop_check, checkFail);
             },

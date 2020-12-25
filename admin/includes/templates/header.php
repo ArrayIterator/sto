@@ -9,9 +9,7 @@ if (!defined('ADMIN_AREA')) {
     <?php admin_html_head(); ?>
 </head>
 <body<?= get_admin_body_attributes(); ?>>
-<div id="page"<?php if (cookie('sidebar_closed') === 'true') {
-    echo ' class="sidebar-closed"';
-} ?>>
+<div id="page"<?= (cookie('sidebar_closed') === 'true') ? ' class="sidebar-closed"': '';?>>
     <?php admin_body_open(); ?>
     <?php if (!is_admin_login_page()) : ?>
     <div id="left-area">

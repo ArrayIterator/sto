@@ -198,7 +198,7 @@ function trans(string $message, &$found = null): string
  */
 function trans_e(string $message, &$found = null)
 {
-    echo trans($message, $found);
+    render(trans($message, $found));
 }
 
 /**
@@ -247,12 +247,12 @@ function esc_html_trans_sprintf(string $message, ...$args): string
  */
 function esc_html_trans_printf(string $message, ...$args)
 {
-    echo esc_html_trans_sprintf($message, ...$args);
+    render(esc_html_trans_sprintf($message, ...$args));
 }
 
 function esc_html_trans_e(string $code, &$found = null)
 {
-    echo esc_html_trans($code, $found);
+    render(esc_html_trans($code, $found));
 }
 
 /**
@@ -283,7 +283,7 @@ function esc_attr_trans_sprintf(string $code, ...$args): string
 
 function esc_attr_trans_printf(string $code, ...$args)
 {
-    echo esc_attr(trans_sprintf($code, ...$args));
+    render(esc_attr(trans_sprintf($code, ...$args)));
 }
 
 function esc_attr_trans_sprintf_e(string $code, ...$args)
@@ -297,5 +297,5 @@ function esc_attr_trans_sprintf_e(string $code, ...$args)
  */
 function esc_attr_trans_e(string $code, &$found = null)
 {
-    echo esc_attr_trans($code, $found);
+    render(esc_attr_trans($code, $found));
 }

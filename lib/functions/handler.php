@@ -136,7 +136,7 @@ function do_exit(...$args)
 
     $code = $code ?? 0;
     if ($message) {
-        echo $message;
+        render($message);
     }
 
     hook_run_once('do_exit');
@@ -194,9 +194,9 @@ function return_array(): array
  */
 function render(string $data, bool $exit = false)
 {
-    hook_run('before_render');
+    hook_run('before_render', $data, $exit);
     echo $data;
-    hook_run('after_render');
+    hook_run('after_render', $data, $exit);
     unset($data);
     if ($exit) {
         do_exit();

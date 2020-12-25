@@ -122,4 +122,5 @@ return [
     'Class Name' => 'Nama Kelas',
     'Note' => 'Keterangan',
     'Notes' => 'Keterangan',
+    'User Does Not Exists' => 'Pengguna Tidak Ada',
 ];

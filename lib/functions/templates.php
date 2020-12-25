@@ -242,7 +242,7 @@ function set_admin_title(string $admin_title)
 function render_admin_title_tag()
 {
     $title = get_admin_title();
-    echo '<title>' . esc_html_trans($title) . '</title>' . "\n";
+    render('<title>' . esc_html_trans($title) . '</title>' . "\n");
 }
 
 /**
@@ -708,7 +708,7 @@ function set_title(string $the_title)
 function render_title_tag()
 {
     $title = get_title();
-    echo '<title>' . esc_html_trans($title) . "</title>\n";
+    render('<title>' . esc_html_trans($title) . "</title>\n");
 }
 
 /* -------------------------------------------------

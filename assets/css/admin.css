@@ -38,7 +38,19 @@ body {
 .card-body {
     position: relative;
 }
-
+.overlay-fixed,
+.overlay-absolute {
+    position: absolute;
+    z-index: 99;
+    display: block;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+.overlay-fixed {
+    position: fixed;
+}
 /*! MISC
  ------------------------ */
 /*! LOADING */
@@ -47,23 +59,29 @@ body {
     height:100%;
     width:100%;
     position:relative;
-    overflow:hidden;
     text-align:center;
+}
+.overlay-fixed .loading {
+    width: 100px;
+    height: 100px;
+    display: inline-block;
+    margin-left: -50px;
+    text-align: center;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-top: -50px;
 }
 .loading .lds-dual-ring {
     position: absolute;
     z-index: 20;
     display: block;
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
+    overflow: hidden;
     margin:-40px 0 0 -40px;
     top: 50%;
     left: 50%;
-}
-.table-responsive thead,
-.table-responsive tbody {
-    width: 100%;
-    display: table;
 }
 .loading .lds-dual-ring::after {
     content: " ";
@@ -1022,6 +1040,11 @@ label.custom-label-radio input[type=radio]:checked + span {}
 
 /*! TABLE LIST
  ------------------------ */
+.table-responsive thead,
+.table-responsive tbody {
+    width: 100%;
+    display: table;
+}
 table.table-list {
     overflow:hidden;
     margin-bottom: 0;
@@ -1101,6 +1124,7 @@ table.table-list .row-action {
 table.table-list *:hover > .row-action {
     left: 0;
 }
+
 /*! OVERLAY */
 #overlay-result-class {
     position:absolute;
@@ -1118,6 +1142,34 @@ table.table-list *:hover > .row-action {
  * !COLORING
  * ------------------------------------------------------------------------
  */
+
+/*! LOADING COLOR
+ ------------------------ */
+
+.loading .lds-dual-ring::after {
+    border-color: #fff transparent;
+}
+.loading.loading-dark .lds-dual-ring::after {
+    border-color: #343a40 transparent;
+}
+.loading.loading-pink .lds-dual-ring::after {
+    border-color: #e83e8c transparent;
+}
+.loading.loading-orange .lds-dual-ring::after {
+    border-color: #fd7e14 transparent;
+}
+.loading.loading-red .lds-dual-ring::after {
+    border-color: #dc3545 transparent;
+}
+.loading.loading-blue .lds-dual-ring::after {
+    border-color: #007bff transparent;
+}
+.loading.loading-gray .lds-dual-ring::after {
+    border-color: #6c757d transparent;
+}
+.loading.loading-primary .lds-dual-ring::after {
+    border-color: #007bff transparent;
+}
 
 /*! LOGIN FORM COLOR
  ------------------------ */

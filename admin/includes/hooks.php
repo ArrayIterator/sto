@@ -30,15 +30,13 @@ function hook_admin_login_js()
     if (!is_string($js)) {
         return;
     }
-?>
-<script type="text/javascript">
-<?= $js; ?>
-
-</script>
-<?php
+    render("<script type=\"text/javascript\">{$js}</script>");
     unset($js);
 }
 
+/**
+ * Render Admin JS Footer
+ */
 function hook_admin_js_footer()
 {
     if (!is_admin_login_page()) {
@@ -46,25 +44,41 @@ function hook_admin_js_footer()
     }
 }
 
+/**
+ * Admin JS Header
+ */
 function hook_admin_js_header()
 {
     $tz   = timezone()->getDateTime('UTC');
     $time = (int) ceil(abs($tz->getTimestamp().$tz->format('.u'))*1000);
-?>
+    $ping_url = json_ns(get_api_url(StatusController::PING_PATH));
+    $login_url = json_ns(get_admin_login_url());
+    $user_id = get_current_user_id();
+    $cookie_domain = json_ns(COOKIE_DOMAIN);
+    $time_utc = json_ns($time);
+    $rendered = '';
+    $current_utc_date = json_ns($tz->format('c'));
+    $timezone_name = json_ns(timezone_convert()->getName());
+    if (!is_admin_login_page()) {
+        $rendered = <<<JS
+
+            w.ping_url  = {$ping_url};
+            w.login_url = {$login_url};
+            w.user_id   = $user_id;
+JS;
+
+    }
+    render(<<<JS
+
     <script type="text/javascript">
         (function (w, d) {
             d.remove('no-js');
-            d.add('js');
-<?php if (!is_admin_login_page()) : ?>
-            w.ping_url  = <?= json_ns(get_api_url(StatusController::PING_PATH));?>;
-            w.login_url = <?= json_ns(get_admin_login_url());?>;
-            w.user_id   = <?= get_current_user_id();?>;
-<?php endif;?>
-            w.cookie_domain = <?= json_ns(COOKIE_DOMAIN);?>;
-            w.time_start_utc = <?= json_ns($time);?>;
+            d.add('js');{$rendered}
+            w.cookie_domain = {$cookie_domain};
+            w.time_start_utc = {$time_utc};
             w.current_gmt_time = time_start_utc;
-            w.current_date_string = <?= json_ns($tz->format('c'));?>;
-            w.timezone_string = <?= json_ns(timezone_convert()->getName());?>;
+            w.current_date_string = {$current_utc_date};
+            w.timezone_string = {$timezone_name};
             w.interval_time_stop = false;
             var _int = setInterval(function () {
                 w.current_gmt_time += 1000;
@@ -75,16 +89,42 @@ function hook_admin_js_header()
         })(window, document.documentElement.classList);
     </script>
 
-<?php
+JS
+    );
 }
 
 function hook_admin_meta_header()
 {
-?>
+    render(<<<HTML
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style type="text/css">.hide-if-js{display:none}</style>
-<?php
+HTML
+    );
+}
+
+/**
+ * Hook Add Login Notice
+ */
+function hook_admin_init_login()
+{
+    hook_remove('admin_init', 'hook_admin_init_login');
+    $is_exists = has_cookie_succeed();
+    if (!$is_exists
+        || query_param('login') !== 'success'
+        || !is_numeric(query_param('user_id'))
+    ) {
+        return;
+    }
+
+    $user_id = query_param_int('user_id');
+    $current_id = get_current_user_id();
+    if ($current_id > 0 && $user_id === $current_id) {
+        add_admin_success_message(
+            'login_success',
+            trans('You have successfully logged in')
+        );
+    }
 }
 
 // add admin render
@@ -93,3 +133,4 @@ hook_add('admin_html_head', 'hook_admin_js_header', 1);
 hook_add('assets_admin_enqueue_scripts', 'hook_admin_default_assets');
 hook_add('admin_html_footer', 'hook_admin_js_footer');
 hook_add('admin_top_message', 'render_admin_message');
+hook_add('admin_init', 'hook_admin_init_login');
