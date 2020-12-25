@@ -408,7 +408,7 @@ function assets_default_scripts(Scripts $scripts)
             ['moment-js']
         ],
         'moment-js' => [
-            '/assets/js/moment-with-locales.js',
+            '/assets/js/moment-locales-timezone.js',
             [],
             VERSION_MOMENT_JS
         ],
@@ -438,7 +438,9 @@ function assets_default_scripts(Scripts $scripts)
         ],
         'core' => [
             '/assets/js/core.js',
-            [],
+            [
+                'crypto'
+            ],
             VERSION
         ],
         'admin' => [

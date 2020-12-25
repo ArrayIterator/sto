@@ -325,10 +325,10 @@ get_admin_header_template();
     <script type="text/javascript">
         (function () {
             var $form = $('form#form-edit-class'),
-                search_url = <?= json_encode(get_api_url('/classes/search/'), JSON_UNESCAPED_SLASHES);?>,
-                data_empty_text = <?= json_encode(trans('Data could not be empty'));?>,
-                data_invalid_text = <?= json_encode(trans('Invalid format'));?>,
-                data_duplicate_text = <?= json_encode(trans('Data is duplicate'));?>,
+                search_url = <?= json_ns(get_api_url('/classes/search/'));?>,
+                data_empty_text = <?= json_ns(trans('Data could not be empty'));?>,
+                data_invalid_text = <?= json_ns(trans('Invalid format'));?>,
+                data_duplicate_text = <?= json_ns(trans('Data is duplicate'));?>,
                 submitBtn = $('form [type=submit]'),
                 regexVal = {
                     'code' : /^[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9]+)?$/g,
@@ -411,7 +411,7 @@ get_admin_header_template();
                         }
                     }
                     if (formChange) {
-                        return <?= json_encode(trans('Do you really want to leave this page?'));?>
+                        return <?= json_ns(trans('Do you really want to leave this page?'));?>
                     }
                 }
                 dataStorage = {};

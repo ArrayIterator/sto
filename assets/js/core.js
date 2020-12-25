@@ -74,6 +74,10 @@
         return Str;
     }
 
+    function Clock() {
+        return Clock;
+    }
+
     /* UUID */
     function Uuid() {
         return Uuid;
@@ -88,12 +92,14 @@
     Str.prototype.constructor = new Str();
     Hash.prototype.constructor = new Hash();
     Url.prototype.constructor = new Url();
+    Clock.prototype.constructor = new Clock();
 
     Cookie.prototype.Cookie = Cookie.prototype.cookie = Cookie;
     Cookie.prototype.uuid = Cookie.prototype.Uuid = Cookie;
     Str.prototype.string = Str.prototype.str = Str.prototype.Str = Str;
     Hash.prototype.Hash = Hash.prototype.hash = Hash;
     Hash.prototype.Url = Hash.prototype.url = Url;
+    Clock.prototype.Clock = Hash.prototype.clock = Clock;
 
     Url.parse = function (url) {
         url = url.split('?')[1] || '';
@@ -885,6 +891,36 @@
         return CryptoJS.HMAC(algo, convert_compat_string(val));
     }
 
+    Clock.calculate = function (hours, minutes, seconds)
+    {
+        seconds = (360 / 100) * ((seconds / 60) * 100);
+        minutes = (360 / 100) * ((minutes / 60) * 100);
+        hours = (360 / 100) * ((hours / 12) * 100);
+        var secondsAngle = seconds,
+            minutesAngle = minutes,
+            hoursAngle = hours;
+        return {
+            second: {
+                '-webkit-transform' : 'rotate('+ secondsAngle +'deg)',
+                '-moz-transform' : 'rotate('+ secondsAngle +'deg)',
+                '-ms-transform' : 'rotate('+ secondsAngle +'deg)',
+                'transform' : 'rotate('+ secondsAngle +'deg)'
+            },
+            minutes: {
+                '-webkit-transform' : 'rotate('+ minutesAngle +'deg)',
+                '-moz-transform' : 'rotate('+ minutesAngle +'deg)',
+                '-ms-transform' : 'rotate('+ minutesAngle +'deg)',
+                'transform' : 'rotate('+ minutesAngle +'deg)'
+            },
+            hours: {
+                '-webkit-transform' : 'rotate('+ hoursAngle +'deg)',
+                '-moz-transform' : 'rotate('+ hoursAngle +'deg)',
+                '-ms-transform' : 'rotate('+ hoursAngle +'deg)',
+                'transform' : 'rotate('+ hoursAngle +'deg)'
+            }
+        }
+    }
+
     Sto.href = w.location.href;
     Sto.cookie = Cookie;
     Sto.hash = Hash;
@@ -893,6 +929,7 @@
     Sto.hash = Hash;
     Sto.uuid = Uuid;
     Sto.url = Url;
+    Sto.clock = Clock;
 
     w.Sto = Sto;
 });

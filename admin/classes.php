@@ -60,7 +60,7 @@ get_admin_header_template();
                 <tbody data-content="table">
                 <?php foreach ($result as $row) :
                         $identifier = 'class-id-'.$row['id'];
-                        // data-teachers="<?= json_encode($row['teachers'], JSON_UNESCAPED_SLASHES);
+                        // data-teachers="<?= json_ns($row['teachers']);
                     ?>
                     <tr id="<?= $identifier;?>" data-site-id="<?= $row['site_id']; ?>" data-id="<?= $row['id']; ?>">
                         <td class="row-checkbox">
@@ -231,7 +231,7 @@ get_admin_header_template();
             total_data = <?= $total_data;?>,
             total_result = <?= $total_result;?>,
             current_page = <?= $page;?>,
-            class_url = <?= json_encode(get_api_url('/classes/'));?>,
+            class_url = <?= json_ns(get_api_url('/classes/'));?>,
             InProgress = null;
         var storage_data = {};
         $(window).bind('beforeunload', function(){
@@ -330,7 +330,9 @@ get_admin_header_template();
 
             _current_page = _current_page > total_page ? total_page : _current_page;
             _current_page = _current_page < 1 ? 1 : _current_page;
-            _per_page = _per_page > total_data ? total_data : _per_page;
+            _per_page = _per_page > total_data
+                ? (<?= MYSQL_DEFAULT_DISPLAY_LIMIT;?> > _per_page ? _per_page : <?= MYSQL_DEFAULT_DISPLAY_LIMIT;?>)
+                : _per_page;
             _per_page = _per_page < 1 ? 1 : _per_page;
             if (_per_page >= total_data) {
                 _current_page = 1;

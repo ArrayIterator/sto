@@ -297,7 +297,7 @@ function admin_sidebar_menu_array(): array
                     'icon' => 'power',
                     'attr' => [
                         'class' => 'logout color-red',
-                        'onclick' => 'return confirm(' . json_encode(trans('Are You Sure ... ?')) . ');'
+                        'onclick' => 'return confirm(' . json_ns(trans('Are You Sure ... ?')) . ');'
                     ],
                     'position' => 1100
                 ],

@@ -6,9 +6,6 @@ if (!defined('ADMIN_AREA')) {
 ?><!DOCTYPE html>
 <html<?= get_admin_html_attributes(); ?>>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style type="text/css">.hide-if-js{display:none}</style>
     <?php admin_html_head(); ?>
 </head>
 <body<?= get_admin_body_attributes(); ?>>
@@ -66,8 +63,8 @@ if (!defined('ADMIN_AREA')) {
                         <ul>
                             <li class="profile-picture">
                                 <div class="img-avatar">
-                                    <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png"
-                                         alt="avatar">
+<!--                                    <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png"-->
+<!--                                         alt="avatar">-->
                                 </div>
                             </li>
                             <li>
@@ -75,7 +72,7 @@ if (!defined('ADMIN_AREA')) {
                             </li>
                             <li>
                                 <a class="logout-link" href="<?= get_admin_url('logout.php'); ?>"
-                                   onclick="return confirm(<?= esc_attr(json_encode(trans('Are You Sure ... ?'))); ?>)"><?= trans('Logout'); ?></a>
+                                   onclick="return confirm(<?= esc_attr(json_ns(trans('Are You Sure ... ?'))); ?>)"><?= trans('Logout'); ?></a>
                             </li>
                         </ul>
                     </li>

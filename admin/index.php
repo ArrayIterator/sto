@@ -8,4 +8,8 @@ if (!admin_is_allowed(__FILE__)) {
 set_admin_title('Dashboard');
 
 get_admin_header_template();
+?>
+<?php
+list($hours, $minutes, $seconds) = calculate_clock_delay();
+
 get_admin_footer_template();

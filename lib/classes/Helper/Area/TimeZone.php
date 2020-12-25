@@ -4816,6 +4816,15 @@ final class TimeZone
     }
 
     /**
+     * @param mixed $offset
+     * @return DateTimeImmutable|false
+     */
+    public function getDateTime($offset)
+    {
+        return (new DateTimeImmutable())->setTimezone($this->getTimeZone($offset));
+    }
+
+    /**
      * @param int|DateTimeInterface|DateTimeZone $time
      * @return DateTimeZone[]
      */

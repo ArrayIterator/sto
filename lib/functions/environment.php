@@ -724,3 +724,36 @@ function get_generate_min_offset(int $offset) : int
 {
     return $offset > 0 ? $offset : 0;
 }
+
+/**
+ * @param null $date
+ * @param int $addSecond
+ * @return float[]|int[]
+ */
+function calculate_clock_delay($date = null, int $addSecond = 0) : array
+{
+    if ($date === null) {
+        $time = (int) ((microtime(true) - MICRO_TIME_FLOAT));
+        $datetime = timezone_convert()->getCurrentTime();
+        if ($time > 0) {
+            $datetime = $datetime->modify(sprintf('+%d seconds', $time));
+        }
+    } else {
+        $date = $date??timezone_convert()->getTimezone();
+        try {
+            $datetime = timezone()->getDateTime($date);
+        } catch (Exception $e) {
+            $datetime = timezone_convert()->getCurrentTime();
+        }
+    }
+    // add 1 second
+    $addSecond > 0
+        && $datetime = $datetime->modify(sprintf('+%d seconds', $addSecond));
+
+    $diff    = strtotime($datetime->format('Y-m-d H:i:s')) - strtotime($datetime->format('Y-m-d'));
+    $seconds = (60 * fmod($diff / 60, 1)) * -1;
+    $minutes = (3600 * fmod($diff / 3600, 1)) * -1;
+    $hours   = (43200 * fmod($diff / 43200, 1)) * -1;
+
+    return [$hours, $minutes, $seconds];
+}

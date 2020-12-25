@@ -4,17 +4,16 @@ if (!defined('ROOT_DIR')) {
 }
 
 return (function () {
-    $login_url = json_encode(
+    $login_url = json_ns(
         add_query_args(
             ['interim' => 1],
             is_admin_page() ? get_admin_login_url() : get_login_url()
-        ),
-        JSON_UNESCAPED_SLASHES
+        )
     );
 
-    $ping_url = json_encode(get_api_url('/ping'), JSON_UNESCAPED_SLASHES);
-    $reconnect_text = json_encode(trans('Reconnecting...'));
-    $offline_text = json_encode(trans('You seem to be offline'));
+    $ping_url = json_ns(get_api_url('/ping'));
+    $reconnect_text = json_ns(trans('Reconnecting...'));
+    $offline_text = json_ns(trans('You seem to be offline'));
     return <<<JS
     (function (jq) {
         if (!jq) {

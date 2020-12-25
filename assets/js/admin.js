@@ -3,9 +3,18 @@
         return;
     }
 
+    var currentLanguage = document.documentElement.lang;
+    if (!currentLanguage || typeof currentLanguage !== "string") {
+        currentLanguage = 'en';
+    }
+
     /*! META
      * ----------------------*/
     $(document).ready(function () {
+        if (typeof moment !== 'undefined' && typeof moment.locale === "function") {
+            moment.locale(currentLanguage);
+        }
+
         var Sto = window.Sto,
             $c = $('.navbar-account'), //' input[type=checkbox]');
             $n = $('#navigation-top'),
@@ -111,6 +120,27 @@
                 $this.select2(config);
             })
         }
+        $('[data-clock]').each(function () {
+            var $this = $(this);
+            var time = window.current_gmt_time;
+            var current_date_string = window.current_date_string;
+            var time_zone = window.timezone_string;
+            var moment_js = moment.unix(time/1000).tz('Europe/London');
+            var format = $this.attr('data-format') || 'D MMMM YYYY [-] H:mm:ss [(%location%)]';
+            if (typeof format !== 'string') {
+                format = 'D MMMM YYYY [-] H:mm:ss [(%location%)]';
+            }
+            if (time_zone) {
+                moment_js = moment_js.tz(time_zone);
+            }
+            format = format.replace(/%location%/, moment_js.tz());
+            function update() {
+                moment_js.add(1, 'seconds');
+                $this.html(moment_js.format(format));
+            }
+            $this.html(moment_js.format(format));
+            setInterval(update, 1000);
+        });
     });
 
 })(window.jQuery);

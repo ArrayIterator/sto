@@ -847,3 +847,43 @@ function html_pagination(
     );
     return $html;
 }
+
+/**
+ * @param int|null $size
+ * @param $date
+ * @return string
+ */
+function create_indicator_clock(int $size = null, $date = null) : string
+{
+    list($hours, $minutes, $seconds) = calculate_clock_delay($date);
+    $style = '';
+    if ($size !== null && $size > 0) {
+        $style = " style=\"width: {$size}px;height: {$size}px\"";
+    }
+
+    $html = "<div class=\"clock-indicator\"{$style}>"
+        . "<div class=\"clock-indicator-hour\" style=\"animation-delay:{$hours}s\"></div>"
+        . "<div class=\"clock-indicator-minute\" style=\"animation-delay:{$minutes}s\"></div>"
+        . "<div class=\"clock-indicator-second\" style=\"animation-delay:{$seconds}s\"></div>"
+        . "<div class=\"clock-indicator-step\">";
+    foreach(range(1, 60) as $item) {
+        $html .= "<section class=\"clock-indicator-indicator\" style=\"transform:rotateZ(calc(6deg * {$item}));\"></section>";
+    }
+    $html .= '</div></div>';
+    return $html;
+}
+
+function create_no_indicator_clock(int $size = null, $date = null) : string
+{
+    list($hours, $minutes, $seconds) = calculate_clock_delay($date);
+    $style = '';
+    if ($size !== null && $size > 0) {
+        $style = " style=\"width: {$size}px;height: {$size}px\"";
+    }
+    return "<div class=\"clock-no-indicator\" {$style}>
+    <div class=\"clock-no-indicator-hour\" style=\"animation-delay:{$hours}s\"></div>
+    <div class=\"clock-no-indicator-minute\" style=\"animation-delay:{$minutes}s\"></div>
+    <div class=\"clock-no-indicator-second\" style=\"animation-delay:{$seconds}s\"></div>
+</div>
+";
+}

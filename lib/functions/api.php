@@ -79,6 +79,20 @@ function json(int $code, ...$data)
 }
 
 /**
+ * @param $data
+ * @param bool $pretty
+ * @return false|string
+ */
+function json_ns($data, $pretty = false)
+{
+    $flags = JSON_UNESCAPED_SLASHES;
+    if ($pretty === true) {
+        $flags |= JSON_PRETTY_PRINT;
+    }
+    return json_encode($data, $flags);
+}
+
+/**
  * @return bool
  */
 function is_route_api(): bool

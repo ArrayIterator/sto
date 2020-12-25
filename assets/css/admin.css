@@ -35,6 +35,196 @@ body {
 .no-shadow:visited {
     box-shadow: none !important;
 }
+.card-body {
+    position: relative;
+}
+
+/*! MISC
+ ------------------------ */
+/*! LOADING */
+
+.loading {
+    height:100%;
+    width:100%;
+    position:relative;
+    overflow:hidden;
+    text-align:center;
+}
+.loading .lds-dual-ring {
+    position: absolute;
+    z-index: 20;
+    display: block;
+    width: 80px;
+    height: 80px;
+    margin:-40px 0 0 -40px;
+    top: 50%;
+    left: 50%;
+}
+.table-responsive thead,
+.table-responsive tbody {
+    width: 100%;
+    display: table;
+}
+.loading .lds-dual-ring::after {
+    content: " ";
+    display: block;
+    width: 64px;
+    height: 64px;
+    margin: 8px;
+    border-radius: 50%;
+    animation: lds-dual-ring 1.2s linear infinite;
+    border: 6px solid #fff;
+    border-right-color: transparent;
+    border-left-color: transparent;
+}
+@keyframes lds-dual-ring {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/*! CLOCK NO INDICATOR */
+.clock-no-indicator {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(34, 34, 34, 0.3),inset 0 1px 3px rgba(34, 34, 34, 0.3);
+    border: 5px solid;
+    margin: auto;
+}
+
+.clock-no-indicator::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    display: block;
+    z-index:4;
+}
+.clock-no-indicator-hour,
+.clock-no-indicator-minute,
+.clock-no-indicator-second {
+    position: absolute;
+    width: 0;
+    height: 0;
+    top: 50%;
+    left: 50%;
+    z-index:2;
+    -ms-transform-origin: 50% 100%;
+    transform-origin: 50% 100%;
+    border-radius: 5px 5px 0 0;
+}
+.clock-no-indicator-hour,
+.clock-no-indicator-minute {
+    margin: -40% -2px 0;
+    padding: 40% 2px 0;
+    -webkit-animation: rotate_second 3600s linear infinite;
+    animation: rotate_second 3600s linear infinite;
+}
+.clock-no-indicator-hour {
+    padding: 30% 3px 0;
+    margin: -30% 0 0 -3px;
+    -webkit-animation: rotate_second 43200s linear infinite;
+    animation: rotate_second 43200s linear infinite;
+}
+.clock-no-indicator-second {
+    margin: -40% -1px 0 0;
+    padding: 40% 1px 0;
+    -webkit-animation: rotate_second 60s infinite steps(60);
+    animation: rotate_second 60s infinite steps(60);
+}
+
+/*! CLOCK INDICATOR */
+.clock-indicator {
+    position: relative;
+    height: 200px;
+    width: 200px;
+    display: flex;
+    border-radius: 50%;
+    justify-content: center;
+    padding: 5px;
+    margin: auto;
+}
+.clock-indicator::after {
+    content:'';
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 6px;
+    border-radius: 50%;
+    position: absolute;
+    z-index: 4;
+    top: calc(50% - 6px);
+}
+.clock-indicator-second,
+.clock-indicator-minute,
+.clock-indicator-hour,
+.clock-indicator-indicator {
+    position: absolute;
+    left: calc(50% - 1px);
+    top: 2px;
+    width: 0;
+    z-index: 2;
+    border: 0;
+    border-radius: 2px;
+    transform-origin: bottom center;
+    border-left: 2px solid;
+}
+.clock-indicator-second {
+    height: 42%;
+    margin-top: calc(8% - 1px);
+    z-index: 3;
+    background: rgba(255,255, 255, 1);
+    -webkit-animation: rotate_second 60s infinite steps(60);
+    animation: rotate_second 60s infinite steps(60);
+}
+.clock-indicator-minute {
+    height: 33%;
+    margin-top: calc(17% - 1px);
+    opacity: 0.75;
+    -webkit-animation: rotate_second 3600s linear infinite;
+    animation: rotate_second 3600s linear infinite;
+}
+.clock-indicator-hour {
+    height: 25%;
+    opacity: 6;
+    margin-top: calc(25% - 1px);
+    -webkit-animation: rotate_second 43200s linear infinite;
+    animation: rotate_second 43200s linear infinite;
+}
+.clock-indicator-indicator {
+    height: 46%;
+    top: calc(4% - 1px);
+    opacity: .7;
+    border-left: 0;
+    border-top-style: solid;
+    border-top-width: 6px;
+    width: 1%;
+    border-radius: 0;
+}
+.clock-indicator-indicator:nth-of-type(5n) {
+    opacity: 1;
+    border-top-width: 10px;
+}
+@-webkit-keyframes rotate_second {
+    to {
+        transform: rotateZ(360deg);
+    }
+}
+
+@keyframes rotate_second {
+    to {
+        transform: rotateZ(360deg);
+    }
+}
 
 /*! BOTTOM
  ------------------------ */
@@ -820,6 +1010,99 @@ label.custom-label-radio input[type=radio]:checked + span {}
     }
 }
 
+/*! TABLE LIST
+ ------------------------ */
+table.table-list {
+    overflow:hidden;
+    margin-bottom: 0;
+}
+table.table-list > tbody > tr > td.row-checkbox,
+table.table-list > thead > tr > th.row-checkbox,
+table.table-list > tfoot > tr > th.row-checkbox {
+    width: 60px;
+    table-layout: fixed;
+    text-align: center;
+}
+table.table-list > tbody > tr > td.row-checkbox input[type=checkbox],
+table.table-list > thead > tr > th.row-checkbox input[type=checkbox] {
+    margin-left: auto;
+    margin-right: auto;
+}
+/* .card.card-list .card-header {
+    border-bottom: 0;
+    padding:0;
+} */
+body table.table-list thead.thead-light tr th,
+body table.table-list tfoot.thead-light tr th {
+    border: none;
+    border-bottom: 1px solid;
+}
+body table.table-list tfoot.thead-light tr th {
+    border-bottom: 0;
+    border-top: 1px solid;
+}
+
+table.table-list input[type=checkbox] {
+    display: inline-block;
+    outline: 0;
+    width: 1rem;
+    height: 1rem;
+    clear: none;
+    cursor: pointer;
+    padding: 0!important;
+    text-align: center;
+    /*vertical-align: top;*/
+    vertical-align: middle;
+    width: 1rem;
+    min-width: 1rem;
+    -webkit-appearance: none;
+    border: 1px solid;
+    border-radius: 4px;
+    transition: .05s border-color ease-in-out;
+}
+table.table-list input[type=checkbox]:checked::before {
+    content: '\eed6';
+    font-family: 'IcoFont' !important;
+    margin: -.5rem 0 0 -.1rem;
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 18px;
+}
+table.table-list .cell-title {
+    vertical-align:top;
+}
+table.table-list .row-title {
+    display: block;
+    font-weight: 500;
+    font-size: 1.1em;
+}
+table.table-list .row-title a {
+    text-decoration:none;
+}
+table.table-list .row-title a:hover {
+}
+table.table-list .row-action {
+    position: relative;
+    font-size: 13px;
+    padding: 7px 0 0;
+    left: -9999em;
+    transition: none;
+}
+table.table-list *:hover > .row-action {
+    left: 0;
+}
+/*! OVERLAY */
+#overlay-result-class {
+    position:absolute;
+    z-index:9;
+    display: block;
+    top:0;
+    right:0;
+    bottom:0;
+    left:0;
+    background-color: rgba(0,0,0,.3);
+}
+
 /*
  * ------------------------------------------------------------------------
  * !COLORING
@@ -995,6 +1278,38 @@ label.custom-label-radio input[type=radio]:checked + span {
     color:#fff;
 }
 
+/*! TABLE LIST
+ ------------------------ */
+body table.table-list thead.thead-light tr th,
+body table.table-list tfoot.thead-light tr th {
+    background-color: rgba(0,0,0,.03);
+    border-bottom-color: #ccd0d4;
+    color: #555;
+}
+body table.table-list tfoot.thead-light tr th {
+    border-color: #ccd0d4;
+}
+table.table-list input[type=checkbox] {
+    border-color: #7e8993;
+    background: #fff;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+}
+table.table-list input[type=checkbox]:checked::before {
+    color: #196fcc;
+}
+table.table-list .row-title a {
+    color: #388fec;
+}
+table.table-list .row-title a:hover {
+    color: #196fcc;
+}
+table.table-list .row-action {
+    color: #ddd;
+}
+#overlay-result-class {
+    background-color: rgba(0,0,0,.3);
+}
+
 /*! SELECT 2
  ------------------------ */
 
@@ -1017,155 +1332,24 @@ label.custom-label-radio input[type=radio]:checked + span {
     color: #999;
     font-size: 14px;
 }
-.card-body {
-    position: relative;
-}
 
+/*! CLOCK
+ ------------------------ */
+.clock-no-indicator {
+    background: #3076b1;
+    border-color: #fff;
+}
+.clock-no-indicator-hour,
+.clock-no-indicator-minute,
+.clock-no-indicator-second,
+.clock-no-indicator::after {
+    background-color: #fff;
+}
+.clock-indicator::after,
+.clock-indicator-second,
+.clock-indicator-minute,
+.clock-indicator-hour,
+.clock-indicator-indicator {
+    border-color: #3076b1;
+}
 /*!END*/
-#overlay-result-class {
-    position:absolute;
-    display: block;
-    top:0;
-    right:0;
-    bottom:0;
-    left:0;
-    background-color: rgba(0,0,0,.3);
-    z-index:9;
-}
-
-/*! TABLE */
-table.table-list {
-    overflow:hidden;
-    margin-bottom: 0;
-}
-
-table.table-list > tbody > tr > td.row-checkbox,
-table.table-list > thead > tr > th.row-checkbox,
-table.table-list > tfoot > tr > th.row-checkbox {
-    width: 60px;
-    table-layout: fixed;
-    text-align: center;
-}
-table.table-list > tbody > tr > td.row-checkbox input[type=checkbox],
-table.table-list > thead > tr > th.row-checkbox input[type=checkbox] {
-    margin-left: auto;
-    margin-right: auto;
-}
-/* .card.card-list .card-header {
-    border-bottom: 0;
-    padding:0;
-} */
-
-body table.table-list thead.thead-light tr th {
-    border: none;
-    border-bottom: 1px solid #ccd0d4;
-    background-color: rgba(0,0,0,.03);
-}
-
-body table.table-list tfoot.thead-light tr th {
-    border: none;
-    border-top: 1px solid #ccd0d4;
-    background-color: rgba(0,0,0,.03);
-}
-
-table.table-list input[type=checkbox] {
-    border: 1px solid #7e8993;
-    border-radius: 4px;
-    background: #fff;
-    color: #555;
-    width: 1rem;
-    height: 1rem;
-    display: inline-block;
-    vertical-align: top;
-    clear: none;
-    cursor: pointer;
-    outline: 0;
-    padding: 0!important;
-    text-align: center;
-    vertical-align: middle;
-    width: 1rem;
-    min-width: 1rem;
-    -webkit-appearance: none;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
-    transition: .05s border-color ease-in-out;
-}
-table.table-list input[type=checkbox]:checked::before {
-    margin: -.5rem 0 0 -.1rem;
-    display: inline-block;
-    vertical-align: middle;
-    font-size: 18px;
-    color: #196fcc;
-    content: '\eed6';
-    font-family: 'IcoFont' !important;
-}
-table.table-list .cell-title {
-    vertical-align:top;
-}
-
-table.table-list .row-title {
-    display: block;
-    font-weight: 500;
-    font-size: 1.1em;
-}
-
-table.table-list .row-title a {
-    color: #388fec;
-    text-decoration:none;
-}
-table.table-list .row-title a:hover {
-    color: #196fcc;
-}
-table.table-list .row-action {
-    color: #ddd;
-    font-size: 13px;
-    padding: 7px 0 0;
-    position: relative;
-    left: -9999em;
-}
-
-table.table-list *:hover > .row-action {
-    left: 0;
-}
-/*! MISC */
-
-.loading {
-    height:100%;
-    width:100%;
-    position:relative;
-    overflow:hidden;
-    text-align:center;
-}
-.loading .lds-dual-ring {
-    position: absolute;
-    z-index: 20;
-    display: block;
-    width: 80px;
-    height: 80px;
-    margin:-40px 0 0 -40px;
-    top: 50%;
-    left: 50%;
-}
-.table-responsive thead,
-.table-responsive tbody {
-    width: 100%;
-    display: table;
-}
-.loading .lds-dual-ring::after {
-    content: " ";
-    display: block;
-    width: 64px;
-    height: 64px;
-    margin: 8px;
-    border-radius: 50%;
-    border: 6px solid #fff;
-    border-color: #fff transparent #fff transparent;
-    animation: lds-dual-ring 1.2s linear infinite;
-}
-@keyframes lds-dual-ring {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}

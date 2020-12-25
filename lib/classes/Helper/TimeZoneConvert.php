@@ -65,6 +65,14 @@ class TimeZoneConvert
     }
 
     /**
+     * @param DateTimeZone $timezone
+     */
+    public function setTimezone(DateTimeZone $timezone)
+    {
+        $this->timezone = $timezone;
+    }
+
+    /**
      * @return DateTimeImmutable
      */
     public function getCurrentTime(): DateTimeImmutable

@@ -9,7 +9,43 @@ get_admin_header_template();
         <?php if (!$is_interim) : ?>
             <div class="col-lg-8 col-md-6 login-form-wrap-col-left">
                 <?php
-                hook_run('admin_login_form_left');
+                    if (hook_exist('admin_login_form_left')) {
+                    hook_run('admin_login_form_left');
+                    } else {
+                ?>
+                    <style>
+                        .clock-indicator,
+                        .clock-indicator-indicator,
+                        .clock-indicator-hour,
+                        .clock-indicator-minute {
+                            border-color: #0b2e13;
+                        }
+                        .clock-indicator::after,
+                        .clock-indicator-second {
+                            border-color: #d42626;
+                        }
+                        .clock-section {
+                            margin: 25% auto  auto;
+                            text-align: center;
+                        }
+                        .text-quote {
+                            font-weight: lighter;
+                            margin: auto auto 0;
+                            padding: 10px;
+                            display: inline-block;
+                            text-align: center;
+                            vertical-align: middle;
+                            background: #d42626;
+                            color: #fff;
+                            letter-spacing: 2px;
+                        }
+                    </style>
+                    <div class="clock-section hidden d-md-block">
+                        <?= create_indicator_clock();?>
+                        <p class="text-quote text-center text-uppercase mt-3 mb-3"><?php esc_html_trans_e('Time Is Money');?></p>
+                    </div>
+                <?php
+                    }
                 ?>
             </div>
         <?php endif; ?>

@@ -42,11 +42,12 @@ CREATE TABLE `sto_attachments`
 
 CREATE TABLE `sto_classes`
 (
-    `id`      bigint(20)   NOT NULL,
-    `site_id` bigint(20) DEFAULT 1,
-    `code`    varchar(60)  NOT NULL,
-    `name`    varchar(255) NOT NULL,
-    `note`    longtext     DEFAULT NULL
+    `id`      bigint(20)    NOT NULL,
+    `site_id` bigint(20)    DEFAULT 1,
+    `code`    varchar(60)   NOT NULL,
+    `name`    varchar(255)  NOT NULL,
+    `note`    longtext      DEFAULT NULL,
+    `status`  varchar(60)   DEFAULT 'active' COMMENT 'active, trash, deleted, draft'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 

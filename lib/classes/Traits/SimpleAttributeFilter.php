@@ -33,7 +33,7 @@ trait SimpleAttributeFilter
             $value = (string)$value;
         } elseif (is_object($value)) {
             if ($value instanceof JsonSerializable) {
-                $value = json_encode($value, JSON_UNESCAPED_SLASHES);
+                $value = json_ns($value);
             } elseif (method_exists($value, '__tostring')) {
                 $value = (string)$value;
             }

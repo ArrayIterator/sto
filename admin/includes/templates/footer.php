@@ -8,6 +8,9 @@ if (!defined('ADMIN_AREA')) {
 <?php if (!is_admin_login_page()) : ?>
     <footer id="footer-bottom">
         <div class="copy">
+            <div class="float-left clock-time">
+                <span data-clock="standard" data-format="D MMMM YYYY [-] H:mm:ss [(%location%)]"></span>
+            </div>
             <p class="text-muted">
                 <small><strong><?= APP_NAME;?></strong> - <?= trans('Version');?> : <?= VERSION;?></small>
             </p>

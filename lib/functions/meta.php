@@ -81,9 +81,26 @@ function get_uri(): UriInterface
 /**
  * @return TimeZoneConvert
  */
-function timezone_convert(): TimeZoneConvert
+function timezone_convert() : TimeZoneConvert
 {
-    return application()->getTimeZoneConvert();
+    $timezone = application()->getTimeZoneConvert();
+    $tzString = get_option('timezone', $timezone->getName(), null, $found);
+    if ($found) {
+        if (!is_string($tzString) || trim($tzString) === '') {
+            $tzString = $timezone->getName();
+            update_option('timezone', $tzString);
+        }
+        try {
+            $tz = new DateTimeZone($tzString);
+            $timezone->setTimezone($tz);
+        } catch (Exception $e) {
+            // pass
+        }
+    } else {
+        update_option('timezone', $timezone->getName());
+    }
+
+    return $timezone;
 }
 
 /**

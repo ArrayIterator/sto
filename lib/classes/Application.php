@@ -130,7 +130,8 @@ class Application
     public function getTimeZoneConvert(): TimeZoneConvert
     {
         if (!$this->timeZoneConvert) {
-            $this->timeZoneConvert = new TimeZoneConvert(\TIMEZONE);
+            $tz = defined('TIMEZONE') ? \TIMEZONE : date_default_timezone_get();
+            $this->timeZoneConvert = new TimeZoneConvert($tz);
         }
 
         return $this->timeZoneConvert;

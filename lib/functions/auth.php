@@ -254,7 +254,7 @@ function create_json_auth_user(int $userId, string $type, bool $recreate = false
     }
 
     $hash = create_security_hash(serialize($hashArray));
-    $hash = json_encode([$hashArray, $hash], JSON_UNESCAPED_SLASHES);
+    $hash = json_ns([$hashArray, $hash]);
     cache_set($cacheName, $hash, 'cookie_json');
     return $hash;
 }

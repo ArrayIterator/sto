@@ -99,7 +99,7 @@ foreach (modules()->getModules() as $name => $module) {
         <?php
 
         ?>
-        var modules = <?= json_encode($modules, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);?>;
+        var modules = <?= json_ns($modules, true);?>;
 
     </script>
 */
@@ -218,7 +218,7 @@ foreach (modules()->getModules() as $name => $module) {
             if (!$) {
                 return;
             }
-            var $chosen_status = <?= json_encode($chosenSearchStatus, JSON_UNESCAPED_SLASHES);?>;
+            var $chosen_status = <?= json_ns($chosenSearchStatus);?>;
             var $card_area = $('.card-area');
             var $form = $('form.module-form');
             var $formSearch = $form.find(' #module-form-search-input');
