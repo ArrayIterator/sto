@@ -25,25 +25,102 @@ get_admin_header_template();
                             border-color: #d42626;
                         }
                         .clock-section {
-                            margin: 25% auto  auto;
+                            margin: 25% auto;
                             text-align: center;
+                        }
+                        .clock-section .position-relative {
+                            margin: auto;
                         }
                         .text-quote {
                             font-weight: lighter;
                             margin: auto auto 0;
-                            padding: 10px;
-                            display: inline-block;
+                            display: block;
                             text-align: center;
                             vertical-align: middle;
-                            background: #d42626;
                             color: #fff;
                             letter-spacing: 2px;
                         }
+                        .text-quote> div {
+                            display: inline-block;
+                            margin: auto;
+                            background: #d42626;
+                            padding: 10px;
+                        }
+                        .clock-digit {
+                            position: absolute;
+                            text-align: center;
+                            margin: 0 auto;
+                            z-index: 1;
+                            display: block;
+                            left: calc(50% - 50px);
+                            top: 25%;
+                            user-select: none;
+                            appearance: none;
+                        }
+                        .clock-digit .digit-hour,
+                        .clock-digit .digit-minute,
+                        .clock-digit .digit-second {
+                            position: relative;
+                            display: inline-block;
+                            padding: 4px 0;
+                            background: rgba(255, 255,255,.2);
+                            color: #666;
+                            margin-right: 3px;
+                            width: 30px;
+                            left: 2px;
+                            border: 0;
+                            border-radius: 50%;
+                            box-shadow: 0 0px 1px rgba(0,0,0, 0.1), inset -1px 3px 3px rgba(0,0,0,0.3);
+                            font-family: monospace;
+                        }
+                        .clock-digit .digit-second {
+                            margin-right: 0;
+                        }
                     </style>
-                    <div class="clock-section hidden d-md-block">
-                        <?= create_indicator_clock();?>
-                        <p class="text-quote text-center text-uppercase mt-3 mb-3"><?php esc_html_trans_e('Time Is Money');?></p>
+                    <div class="clock-section hidden d-md-block clock-fast">
+                        <div class="position-relative d-inline-block">
+                            <?= create_indicator_clock();?>
+                            <div class="clock-digit"></div>
+                        </div>
+                        <div class="text-quote text-center text-uppercase mt-3 mb-3">
+                            <div><?php esc_html_trans_e('Time Is Money');?></div>
+                        </div>
                     </div>
+                    <script type="text/javascript">
+                        (function (s) {
+                            if (!s || !s.clock) {
+                                return;
+                            }
+                            var hour = document.querySelector('.clock-section .clock-indicator-hour'),
+                                minute = document.querySelector('.clock-section .clock-indicator-minute'),
+                                second = document.querySelector('.clock-section .clock-indicator-second'),
+                                digit = document.querySelector('.clock-section .clock-digit'),
+                                date = new Date();
+                            if (hour && minute && second) {
+                                var calc = s.clock.calculate_delay();
+                                date = calc.date;
+                                function update_clock()
+                                {
+                                    date.setSeconds(date.getSeconds() + 1);
+                                    var sec = date.getSeconds(),
+                                        min = date.getMinutes();
+                                    sec = sec < 10 ? '0' + sec : sec;
+                                    min = min < 10 ? '0' + min : min;
+                                    digit.innerHTML = '<span class="digit-hour">'+ date.getHours() + '</span>'
+                                        + '<span class="digit-minute">'+ min + '</span>'
+                                        + '<span class="digit-second">'+ sec + '</span>';
+                                }
+                                date.setSeconds(date.getSeconds() - 1);
+                                update_clock();
+                                hour.setAttribute('style', Object.join(calc.hours, ';', ':'));
+                                minute.setAttribute('style', Object.join(calc.minutes, ';', ':'));
+                                second.setAttribute('style', Object.join(calc.seconds, ';', ':'));
+                                if (digit) {
+                                    setInterval(update_clock, 1000);
+                                }
+                            }
+                        })(window.Sto);
+                    </script>
                 <?php
                     }
                 ?>

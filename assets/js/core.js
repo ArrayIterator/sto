@@ -27,6 +27,21 @@
             return size;
         };
     }
+    if (typeof Object.join !== "function") {
+        Object.join = function (obj, splitter, sep) {
+            if (obj === null || typeof obj !== 'object') {
+                return obj;
+            }
+            sep = sep || ':';
+            splitter = splitter || '';
+            var res = '', key;
+            for (key in obj) {
+                if (!obj.hasOwnProperty(key)) continue;
+                res += key + sep + obj[key] + splitter;
+            }
+            return res;
+        };
+    }
 
     if (typeof String.prototype.format !== "function") {
         String.prototype.format = function () {
@@ -891,7 +906,7 @@
         return CryptoJS.HMAC(algo, convert_compat_string(val));
     }
 
-    Clock.calculate = function (hours, minutes, seconds)
+    Clock.calculate_second = function (hours, minutes, seconds)
     {
         seconds = (360 / 100) * ((seconds / 60) * 100);
         minutes = (360 / 100) * ((minutes / 60) * 100);
@@ -917,6 +932,55 @@
                 '-moz-transform' : 'rotate('+ hoursAngle +'deg)',
                 '-ms-transform' : 'rotate('+ hoursAngle +'deg)',
                 'transform' : 'rotate('+ hoursAngle +'deg)'
+            }
+        }
+    };
+    Clock.calculate_delay = function (hours, minutes, seconds)
+    {
+
+        var date_1 = new Date();
+        if (arguments.length < 3) {
+            seconds = date_1.getSeconds();
+        }
+        if (arguments.length < 2) {
+            minutes = date_1.getMinutes();
+        }
+        if (arguments.length < 1) {
+            hours = date_1.getHours();
+        }
+
+        date_1 = new Date(date_1.getFullYear(), date_1.getMonth(), date_1.getDay());
+        var date = new Date(
+                date_1.getFullYear(),
+                date_1.getMonth(),
+                date_1.getDay(),
+                hours,
+                minutes,
+                seconds
+            ),
+            diff = (date.getTime() - date_1.getTime())/1000;
+            seconds = (60 * ((diff / 60) % 1)) * -1;
+            minutes = (3600 * ((diff / 3600) % 1)) * -1;
+            hours   = (43200 * ((diff / 43200) % 1)) * -1;
+        return {
+            date,
+            seconds: {
+                '-webkit-animation-delay' : seconds + 's',
+                '-moz-animation-delay' : seconds + 's',
+                '-ms-animation-delay' : seconds + 's',
+                'animation-delay' : seconds + 's',
+            },
+            minutes: {
+                '-webkit-animation-delay' : minutes + 's',
+                '-moz-animation-delay' : minutes + 's',
+                '-ms-animation-delay' : minutes + 's',
+                'animation-delay' : minutes + 's',
+            },
+            hours: {
+                '-webkit-animation-delay' : hours + 's',
+                '-moz-animation-delay' : hours + 's',
+                '-ms-animation-delay' : hours + 's',
+                'animation-delay' : hours + 's',
             }
         }
     }

@@ -186,6 +186,14 @@ body {
     -webkit-animation: rotate_second 60s infinite steps(60);
     animation: rotate_second 60s infinite steps(60);
 }
+.clock-fast .clock-indicator-second {
+    height: 42%;
+    margin-top: calc(8% - 1px);
+    z-index: 3;
+    background: rgba(255,255, 255, 1);
+    -webkit-animation: rotate_second 60s infinite steps(600);
+    animation: rotate_second 60s infinite steps(600);
+}
 .clock-indicator-minute {
     height: 33%;
     margin-top: calc(17% - 1px);
@@ -200,6 +208,7 @@ body {
     -webkit-animation: rotate_second 43200s linear infinite;
     animation: rotate_second 43200s linear infinite;
 }
+
 .clock-indicator-indicator {
     height: 46%;
     top: calc(4% - 1px);
@@ -214,6 +223,7 @@ body {
     opacity: 1;
     border-top-width: 10px;
 }
+
 @-webkit-keyframes rotate_second {
     to {
         transform: rotateZ(360deg);
