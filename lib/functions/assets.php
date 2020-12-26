@@ -433,7 +433,7 @@ function assets_default_scripts(Scripts $scripts)
         ],
         'select2' => [
             '/assets/vendor/select2/select2.js',
-            [],
+            ['jquery'],
             VERSION_SELECT2
         ],
         'core' => [

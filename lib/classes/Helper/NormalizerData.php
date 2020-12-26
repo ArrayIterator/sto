@@ -601,4 +601,156 @@ final class NormalizerData
 
         return $slug;
     }
+
+    /**
+     * @param string $fileName
+     * @param string $directory
+     * @param bool $allowedSpace
+     * @return string|false false if directory does not exists,
+     *                      returning full path for save.
+     */
+    public static function resolveFileDuplication(
+        string $fileName,
+        string $directory,
+        bool $allowedSpace = false
+    ) {
+        if (!is_dir($directory)) {
+            return false;
+        }
+
+        $directory = self::normalizeSeparator($directory);
+        $directory = realpath($directory)?:rtrim($directory, DIRECTORY_SEPARATOR);
+        $directory .= DIRECTORY_SEPARATOR;
+        $paths = explode('.', $fileName);
+        $extension = null;
+        if (count($paths) > 1) {
+            $extension = array_pop($paths);
+        }
+        $fileName = implode($paths);
+        if ($extension && !preg_match('/^[a-z0-9A-Z\_\-]+$/', $extension)) {
+            $extension = null;
+        }
+        $extension = $extension?: null;
+        $fileName = self::normalizeFileName($fileName);
+        if (!$allowedSpace) {
+            $fileName = str_replace(' ', '-', $fileName);
+        }
+        $c = 1;
+        $filePath = $extension? "{$fileName}.{$extension}": $fileName;
+        while (file_exists($directory . $filePath)) {
+            $newFile = $fileName ."-". $c++;
+            $filePath = $extension? "{$newFile}.{$extension}": $newFile;
+        }
+
+        clearstatcache(true);
+
+        return $directory . $filePath;
+    }
+
+    /**
+     * Convert number of bytes largest unit bytes will fit into.
+     *
+     * It is easier to read 1 kB than 1024 bytes and 1 MB than 1048576 bytes. Converts
+     * number of bytes to human readable number by taking the number of that unit
+     * that the bytes will go into it. Supports TB value.
+     *
+     * Please note that integers in PHP are limited to 32 bits, unless they are on
+     * 64 bit architecture, then they have 64 bit size. If you need to place the
+     * larger size then what PHP integer type will hold, then use a string. It will
+     * be converted to a double, which should always have 64 bit length.
+     *
+     * Technically the correct unit names for powers of 1024 are KiB, MiB etc.
+     *
+     * @param int|string $bytes         Number of bytes. Note max integer size for integers.
+     * @param int        $decimals      Optional. Precision of number of decimal places. Default 0.
+     * @param string     $decimal_point Optional decimal point
+     * @param string     $thousands_sep Optional thousand separator
+     *
+     * @return string|false False on failure. Number string on success.
+     */
+    public static function sizeFormat(
+        $bytes,
+        $decimals = 0,
+        string $decimal_point = '.',
+        $thousands_sep = ','
+    ) {
+        $quanta = [
+            // ========================= Origin ====
+            'TB' => 1099511627776,  // pow( 1024, 4)
+            'GB' => 1073741824,     // pow( 1024, 3)
+            'MB' => 1048576,        // pow( 1024, 2)
+            'kB' => 1024,           // pow( 1024, 1)
+            'B'  => 1,              // pow( 1024, 0)
+        ];
+        /**
+         * Check and did
+         */
+        foreach ($quanta as $unit => $mag) {
+            if (doubleval($bytes) >= $mag) {
+                return number_format(
+                        ($bytes / $mag),
+                        abs(intval($decimals)),
+                        $decimal_point,
+                        $thousands_sep
+                    ). ' ' . $unit;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $size
+     * @return int
+     */
+    public static function returnBytes(string $size) : int
+    {
+        $size = trim($size) ?: 0;
+        if (!$size) {
+            return 0;
+        }
+
+        $last = strtolower(substr($size, -1));
+        $size = intval($size);
+        switch ($last) {
+            case 't':
+                $size *= 1024;
+                $size *= 1024;
+                $size *= 1024;
+                $size *= 1024;
+                break;
+            case 'g':
+                $size *= 1024;
+                $size *= 1024;
+                $size *= 1024;
+                break;
+            case 'm':
+                $size *= 1024;
+                $size *= 1024;
+                break;
+            case 'k':
+                $size *= 1024;
+        }
+
+        return intval($size);
+    }
+
+    /**
+     * @return int
+     */
+    public static function getMaxUploadSize() : int
+    {
+        $data = [
+            self::returnBytes(ini_get('post_max_size')),
+            self::returnBytes(ini_get('upload_max_filesize')),
+            (self::returnBytes(ini_get('memory_limit')) - 2048),
+        ];
+        foreach ($data as $key => $v) {
+            if ($v <= 0) {
+                unset($data[$key]);
+            }
+        }
+
+        return min($data);
+    }
 }

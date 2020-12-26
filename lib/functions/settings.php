@@ -20,6 +20,40 @@ function get_current_site_id(): int
 }
 
 /**
+ * @return Site|false
+ */
+function get_current_site()
+{
+    return get_site_by_id(get_current_user_id());
+}
+
+/**
+ * @return Site[]
+ */
+function get_all_sites() : array
+{
+    $sites = cache_get('site_ids', 'sites_all', $found);
+    if ($found && is_array($sites)) {
+        return $sites;
+    }
+    cache_set('site_ids', [], 'sites_all');
+    $stmt = site()->getAllStmt();
+    if (!$stmt) {
+        return [];
+    }
+
+    $data = [];
+    while ($row = $stmt->fetch()) {
+        $siteId = $row->getSiteId();
+        $data[$siteId] = $row;
+        cache_set($siteId, $data, 'sites');
+    }
+    cache_set('site_ids', $data, 'sites_all');
+
+    return $data;
+}
+
+/**
  * @return bool
  */
 function enable_multisite(): bool

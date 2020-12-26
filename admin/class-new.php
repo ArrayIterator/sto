@@ -43,6 +43,10 @@ if (is_method_get() && query_param('action') === 'edit' && has_query_param('id')
     }
 }
 
+// if cannot edit
+if ($is_edit && !current_supervisor_can('edit_class', query_param('id'))) {
+    return load_admin_denied();
+}
 
 if (is_method_post()) {
     if (($posts['action']??null) === 'edit') {
@@ -278,6 +282,34 @@ get_admin_header_template();
                     <div class="text-muted small"><?php trans_e(get_admin_title());?></div>
                 </div>
                 <div class="card-body">
+                    <?php if (is_super_admin()) { ?>
+                    <div class="form-group row">
+                        <div class="col-sm-3">
+                            <label for="class-site-id"><?php esc_html_trans_e('Site Id');?></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <select id="class-site-id" class="custom-select custom-select-sm" data-select="select2" data-tag="true" data-options="{tags: true}" name="site_id" data-info-text="<?= esc_attr_trans('Host:');?>" data-change="true" data-target=".target-host" data-template="<div class='message-inner'><span class='message-name'><%= data.infoText %></span><span class='message-value'><code><%= data.host %></code></span></div>">
+                                <option selected disabled><?php esc_html_e('Select Site');?></option>
+                            <?php
+                                $selectedHost = '';
+                                foreach (get_all_sites() as $siteId => $site) {
+                                    $selected = $current_site_id  === $siteId ? ' selected' : '';
+                                    if ($current_site_id === $siteId) {
+                                        $selectedHost = $site->get('host');
+                                    }
+                            ?>
+                                <option value="<?= $siteId;?>"<?=$selected;?> data-host="<?= $site->get('host');?>" data-site-id="<?= $site->getSiteId();?>" data-name="<?= esc_attr($site->get('name'));?>" data-template="<span class='site-id-sep'><%= data['site-id'] || '' %></span><span class='site-name-sep'><%= data.name || ''%></span>">[ <?= $site->getSiteId();?> ] <?php esc_html_e($site->get('name')??'');?></option>
+                            <?php } ?>
+                            </select>
+                            <div class="target-host message-render form-text text-muted">
+                                <div class='message-inner'>
+                                    <span class='message-name'><?= esc_attr_trans('Host:');?></span>
+                                    <span class='message-value'><code><?= esc_html($selectedHost);?></code></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php } ?>
                     <div class="form-group row">
                         <div class="col-sm-3">
                             <label for="class-code"><?php esc_html_trans_e('Class Code');?></label>

@@ -99,3 +99,6 @@ node_modules/
 /uploads/*/*
 !/modules/example/
 /modules/*/
+
+# just php ini file
+.user.ini

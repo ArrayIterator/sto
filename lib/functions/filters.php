@@ -118,16 +118,23 @@ function un_slash_it(string $path): string
  * @param string $message
  * @return string
  */
-function esc_attr(string $message) : string
+function esc_attr(string $message = null) : string
 {
+    if ($message === null) {
+        return '';
+    }
     return htmlspecialchars($message, ENT_QUOTES|ENT_COMPAT);
 }
 
 /**
  * @param string $message
  */
-function esc_attr_e(string $message)
+function esc_attr_e(string $message = null)
 {
+    if ($message === null) {
+        return '';
+    }
+
     render(htmlspecialchars($message, ENT_QUOTES|ENT_COMPAT));
 }
 
@@ -135,15 +142,21 @@ function esc_attr_e(string $message)
  * @param string $message
  * @return string
  */
-function esc_html(string $message) : string
+function esc_html(string $message = null) : string
 {
+    if ($message === null) {
+        return '';
+    }
     $message = StringFilter::sanitizeInvalidUtf8FromString( $message );
     $message = esc_attr( $message );
     return $message;
 }
 
-function esc_html_e(string $message)
+function esc_html_e(string $message = null)
 {
+    if ($message === null) {
+        return '';
+    }
     render(esc_html($message));
 }
 

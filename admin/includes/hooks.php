@@ -13,14 +13,14 @@ function hook_admin_default_assets()
 {
     hook_remove('assets_admin_enqueue_scripts', __FUNCTION__);
     $is_login_page = is_admin_login_page();
+    if (!$is_login_page) {
+        assets_style_enqueue('select2');
+        assets_script_enqueue('select2');
+    }
     assets_style_enqueue('admin');
     assets_script_enqueue($is_login_page ? 'admin-login' : 'admin');
     if (!$is_login_page) {
         assets_script_enqueue('moment');
-    }
-    if (!$is_login_page) {
-        assets_style_enqueue('select2');
-        assets_script_enqueue('select2');
     }
 }
 
@@ -59,12 +59,14 @@ function hook_admin_js_header()
     $rendered = '';
     $current_utc_date = json_ns($tz->format('c'));
     $timezone_name = json_ns(timezone_convert()->getName());
+    $upload_file_size_limit = get_max_upload_file_size();
     if (!is_admin_login_page()) {
         $rendered = <<<JS
 
             w.ping_url  = {$ping_url};
             w.login_url = {$login_url};
             w.user_id   = $user_id;
+            w.max_upload_size = {$upload_file_size_limit};
 JS;
 
     }
@@ -134,3 +136,6 @@ hook_add('assets_admin_enqueue_scripts', 'hook_admin_default_assets');
 hook_add('admin_html_footer', 'hook_admin_js_footer');
 hook_add('admin_top_message', 'render_admin_message');
 hook_add('admin_init', 'hook_admin_init_login');
+
+// class hooks
+require_once __DIR__ .'/hooks/classes.php';

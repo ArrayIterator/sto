@@ -558,13 +558,41 @@ final class StringFilter
 
         return $email;
     }
+    /**
+     * @param string $data
+     * @return array
+     */
+    public static function parseImageFromString(string $data) : array
+    {
+        preg_match_all(
+            '/<img.*?src\=\s*[\'\"](?P<images>[^\"\']+)/smix',
+            $data,
+            $match
+        );
+        $data = [];
+        if (!empty($match)) {
+            $match = array_filter($match, 'is_string', ARRAY_FILTER_USE_KEY);
+            $match = isset($match['images'])
+                ? array_filter(array_unique($match['images']))
+                : [];
+            $match = array_map(function ($data) {
+                if (!preg_match('/(?:\.png|jpe?g|bmp|tiff|svg)?(?:\?(?:.+)?)?$/i', $data)) {
+                    return false;
+                }
+                return $data;
+            }, array_values($match));
+            $data = array_filter($match);
+        }
+
+        return $data;
+    }
 
     /**
      * Validate RegexP
      * @param string $regexP
      * @return bool|string
      */
-    public static function regexP(string $regexP)
+    public static function isValidRegExP(string $regexP)
     {
         if (@preg_match($regexP, '') === false) {
             $last = error_get_last();

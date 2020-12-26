@@ -3,7 +3,7 @@
 
 /*
  * ------------------------------------------------------------------------
- * !STRUCTURES
+ * !STRUCTURES / BASE
  * ------------------------------------------------------------------------
  */
 
@@ -670,6 +670,55 @@ body.login-page .interim .admin-login-text {
     clear:both;
 }
 
+/*! SELECT 2
+ ------------------------ */
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    border-radius: 2px;
+}
+.select2-container .select2-selection--single .select2-selection__rendered:focus,
+.select2-container--default .select2-search--dropdown .select2-search__field,
+.select2-container--default .select2-selection--single:focus,
+.select2-container--default .select2-selection--single:active {
+    outline:none;
+}
+.select2-container--default .select2-results__option[aria-disabled=true] {
+    font-size: 14px;
+}
+.select2-results__option.select2-results__message {
+    font-size: 14px;
+}
+.select2-container .select2-selection--single {
+    box-sizing: border-box;
+    cursor: pointer;
+    display: block;
+    height: 34px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.select2-container .select2-selection--single .select2-selection__rendered {
+    display: block;
+    padding-left: 8px;
+    padding-right: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 32px;
+}
+.select2-results .site-id-sep,
+.select2-selection__rendered .site-id-sep {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 80%;
+    padding: 3px 10px;
+    border-radius: 4px;
+    line-height: normal;
+}
+
+.select2-results  .site-name-name {
+
+}
+
+
 /*! TOP BAR
  ------------------------ */
 .admin-top-bar {
@@ -1181,9 +1230,11 @@ body.login-page .login-form-wrap-col-right {
     border-left-color: #ddd;
 }
 .form-control:focus,
+.custom-select:focus,
 .admin-login-form input[type=text]:focus,
 .admin-login-form input[type=password]:focus {
     border-color: #999;
+    box-shadow:none;
 }
 .admin-checkbox-input input[type=checkbox]:checked::after {
     left: 16px;
@@ -1278,7 +1329,7 @@ body.login-page .login-form-wrap-col-right {
     box-shadow: inset 0 0 3px #021f38;
 }
 
-/*! RIGHT AREA
+/*! RIGHT AREA COLOR
  ------------------------ */
 #right-area {
     background-color: #f1f1f1;
@@ -1318,7 +1369,7 @@ body.login-page .login-form-wrap-col-right {
     background-color: #fff;
 }
 
-/*! CONTENT PAGE
+/*! CONTENT PAGE COLOR
  ------------------------ */
 .admin-title {
     border-bottom: 3px solid #999;
@@ -1340,7 +1391,7 @@ label.custom-label-radio input[type=radio]:checked + span {
     color:#fff;
 }
 
-/*! TABLE LIST
+/*! TABLE LIST COLOR
  ------------------------ */
 body table.table-list thead.thead-light tr th,
 body table.table-list tfoot.thead-light tr th {
@@ -1372,27 +1423,30 @@ table.table-list .row-action {
     background-color: rgba(0,0,0,.3);
 }
 
-/*! SELECT 2
+/*! SELECT 2 COLOR
  ------------------------ */
-
-.select2-container--default .select2-search--dropdown .select2-search__field {
-    border-radius: 2px;
-}
-.select2-container .select2-selection--single .select2-selection__rendered:focus,
-.select2-container--default .select2-search--dropdown .select2-search__field,
-.select2-container--default .select2-selection--single:focus,
-.select2-container--default .select2-selection--single:active {
-    outline:none;
-}
 .select2-container--default .select2-search--dropdown .select2-search__field:focus {
     border-color: #999;
 }
-.select2-container--default .select2-results__option[aria-disabled=true] {
-    font-size: 14px;
-}
 .select2-results__option.select2-results__message {
     color: #999;
-    font-size: 14px;
+}
+
+.select2-results .site-id-sep {
+    background-color: #6c757d;
+    color: #eee;
+}
+
+.select2-selection__rendered .site-id-sep {
+    background-color: #007bff;
+    color: #fff;
+}
+.select2-container--default .select2-results__option--highlighted .site-id-sep {
+    background-color: #343a40;
+}
+
+.select2-results .site-name-name {
+
 }
 
 /*! CLOCK

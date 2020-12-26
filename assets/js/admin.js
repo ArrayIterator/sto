@@ -102,8 +102,109 @@
         });
 
         if ($.fn.select2) {
-            $('select[data-change=true]').on('change', function () {
+
+            function parse_element_data(attributes)
+            {
+                var data = {
+                    data: {}
+                };
+                try {
+                    for (var i =0; attributes.length > i;i++) {
+                        var name = attributes[i].nodeName,
+                            val = attributes[i].nodeValue;
+                        if (name.toString().toLowerCase() === 'data') {
+                            continue;
+                        }
+                        if (typeof val === 'string') {
+                            if (val === 'true') {
+                                val = true;
+                            } else if (val === 'false') {
+                                val = false;
+                            } else if (/^[0-9]+$/.test(val)) {
+                                val = parseInt(val);
+                            } else if (/^[0-9]+\.[0-9]+$/.test(val)) {
+                                val = parseFloat(val);
+                            }
+                        }
+
+                        if (/^data\-/.test(name)) {
+                            name = name.replace(/^data\-/, '');
+                            data.data[name] = val;
+                        }
+                        data[name] = val;
+                    }
+                } catch (e) {
+                    // console.log(e);
+                    // pass
+                }
+                return data;
+            }
+
+            var callback_template = function (e) {
+                if (!e.element) {
+                    return e.text;
+                }
+
+                var element = $(e.element);
+                var $template = element.attr('data-template');
+                var data = parse_element_data(e.element.attributes);
+                if ($template) {
+                    try {
+                        data = $.extend(true, {}, data, {data:element.data()});
+                        $template = _.template(
+                            $template
+                        )(data);
+                        return $template;
+                    } catch (e) {
+                        // console.log(e);
+                    }
+                }
+                return e.text;
+            };
+
+            $('select[data-change-submit=true]').on('change', function () {
                 $(this).closest('form').submit();
+            });
+
+            $('select[data-change=true][data-target]').on('change', function () {
+                var $this = $(this),
+                    data_target = $this.attr('data-target'),
+                    data_template = $this.attr('data-template'),
+                    $selected = $this.find('option:selected');
+                if (!data_target || ! $selected.length) {
+                    return;
+                }
+
+                var $data_target;
+                try {
+                    $data_target = $this.closest(data_target);
+                    if (!$data_target.length) {
+                        $data_target = $this.parents().find(data_target);
+                    }
+                } catch (e) {
+                    $data_target = $this.closest($.escapeSelector(data_target));
+                }
+                if (!$data_target.length) {
+                    return;
+                }
+
+                var data   = parse_element_data(this.attributes);
+                    data   = $.extend(true, {}, data, {data:$this.data()});
+                var data_option = parse_element_data($selected[0].attributes);
+                    data = $.extend(true,  {}, data, data_option);
+                    data  = $.extend(true, {}, data, {data: $selected.data()});
+                var _html = $selected.html();
+                if (data_template && typeof data_template === 'string') {
+                    try {
+                        _html = _.template(
+                            data_template
+                        )(data);
+                    } catch (e) {
+                        // console.log(e);
+                        _html = $selected.html();
+                    }
+                }
+                $data_target.html(_html);
             });
 
             $('select[data-select=select2]').each(function () {
@@ -111,11 +212,64 @@
                 var config = {};
                 var placeholder = $this.data('placeholder');
                 var allowClear = $this.data('clear');
+                var allowHtml = $this.data('tag');
+                var data_options = $this.attr('data-options');
+                if (!data_options) {
+                    data_options = $this.attr('data-option');
+                }
+                if (data_options) {
+                    try {
+                        if (typeof data_options === 'string') {
+                            try {
+                                if (/\{([^":]+\s*:[^,]+[,]?)*\}$/g.test(data_options)
+                                    && !/\([^\)]*\)/g.test(data_options)
+                                ) {
+                                    var obj = (function (e) {
+                                        try {
+                                            eval('var data_options =' + e);
+                                            if (typeof data_options === 'object') {
+                                                return data_options;
+                                            }
+                                        } catch (e) {
+                                            console.log(e);
+                                        }
+                                    })(data_options);
+                                    if (obj && typeof obj === 'object') {
+                                        data_options = obj;
+                                    }
+                                }
+                            } catch (E) {
+                                // pass
+                            }
+                        }
+
+                        data_options = typeof data_options === 'object' ? data_options : JSON.parse(data_options);
+                        if (data_options && typeof data_options === 'object') {
+                            for (var i in data_options) {
+                                if (!data_options.hasOwnProperty(i)
+                                    || typeof i === "number"
+                                ) {
+                                    continue;
+                                }
+                                config[i] = data_options[i];
+                            }
+                        }
+                    } catch (e) {
+
+                    }
+                }
                 if (placeholder) {
                     config['placeholder'] = placeholder;
                 }
-                if (allowClear === '1' || allowClear === 'yes' || allowClear === 'true') {
+                if (allowClear === true || allowClear === '1' || allowClear === 'yes' || allowClear === 'true') {
                     config['allowClear'] = true;
+                }
+                if (allowHtml === true || allowHtml === 'true' || allowHtml === '1' || allowHtml === 'yes') {
+                    config['escapeMarkup'] = function (e) {
+                        return e;
+                    };
+                    config['templateResult'] = callback_template;
+                    config['templateSelection'] = callback_template;
                 }
                 $this.select2(config);
             })

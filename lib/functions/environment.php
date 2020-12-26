@@ -1,5 +1,6 @@
 <?php
 
+use ArrayIterator\Helper\NormalizerData;
 use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\UploadedFile;
 
@@ -756,4 +757,13 @@ function calculate_clock_delay($date = null, int $addSecond = 0) : array
     $hours   = (43200 * fmod($diff / 43200, 1)) * -1;
 
     return [$hours, $minutes, $seconds];
+}
+
+function get_max_upload_file_size() : int
+{
+    static $limit = null;
+    if ($limit === null) {
+        $limit = NormalizerData::getMaxUploadSize();
+    }
+    return $limit;
 }

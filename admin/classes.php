@@ -80,8 +80,8 @@ get_admin_header_template();
                             <div class="row-action">
                                 <?php if ($can_edit_class) {?>
                                 <a data-link-id="<?= $row['id'];?>" href="<?= esc_attr(add_query_args(['action' => 'edit', 'id' => $row['id']], get_admin_url('class-new.php'))) ?>"><?php trans_e('Edit');?></a>
-                                <?php } ?>
                                 <span class="row-sep">|</span>
+                                <?php } ?>
                                 <a data-action="preview" data-link-id="<?= $row['id'];?>" href="#<?= $identifier;?>"><?= esc_html_trans('Preview'); ?></a>
                             </div>
                             <div class="row-content"></div>
@@ -109,7 +109,7 @@ get_admin_header_template();
                         <div class="">
                             <div class="form-group">
                                 <label for="result-per-page" class="col-form-label sr-only"><?php esc_html_trans_e('Result per page'); ?></label>
-                                <select id="result-per-page" class="custom-select custom-select-sm" name="limit" data-change="true" data-select="select2" data-placeholder="<?php esc_attr_trans_e('Result per page'); ?>">
+                                <select id="result-per-page" class="custom-select custom-select-sm" name="limit" data-change-submit="true" data-select="select2" data-placeholder="<?php esc_attr_trans_e('Result per page'); ?>">
                                     <option disabled selected><?php esc_html_trans_e('Result per page'); ?></option>
 <?php
     $range = range(1, MYSQL_MAX_RESULT_LIMIT / 10);
@@ -133,7 +133,7 @@ get_admin_header_template();
                         <div class="" aria-label="<?php esc_attr_trans_e('Classes pagination'); ?>">
                             <div class="form-group">
                                 <label for="result-class-page" class="sr-only col-form-label"><small><?php esc_html_trans_e('Current Page'); ?></small></label>
-                                <select name="page" id="result-class-page" class="form-control custom-select-sm" data-change="true" data-select="select2">
+                                <select name="page" id="result-class-page" class="form-control custom-select-sm" data-change-submit="true" data-select="select2">
                                     <option disabled selected><?php esc_html_trans_e('Select Page'); ?></option>
                                     <?php
                                     foreach (range(1, $total_page) as $item) {
@@ -187,8 +187,8 @@ get_admin_header_template();
                             )
                         ). '&id=<%= item.id %>'
                         ;?>"><?php trans_e('Edit');?></a>
+                        <span class="row-sep">|</span>
                     <?php } ?>
-                    <span class="row-sep">|</span>
                     <a data-action="preview" data-link-id="<%= item.id %>" href="#class-id-<%= item.id %>">
                         <?= esc_html_trans('Preview'); ?>
                     </a>

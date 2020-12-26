@@ -192,10 +192,12 @@ function return_array(): array
  * @param string $data
  * @param bool|null $exit
  */
-function render(string $data, bool $exit = false)
+function render(string $data = null, bool $exit = false)
 {
     hook_run('before_render', $data, $exit);
-    echo $data;
+    if ($data !== null) {
+        echo $data;
+    }
     hook_run('after_render', $data, $exit);
     unset($data);
     if ($exit) {

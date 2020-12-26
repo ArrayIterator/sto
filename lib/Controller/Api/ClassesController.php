@@ -59,6 +59,7 @@ class ClassesController extends BaseController
             json(401, trans('Access Denied'));
             return;
         }
+
         $limit  = query_param_int('limit');
         $offset = query_param_int('offset');
         $siteIds = get_super_admin_site_ids_params();

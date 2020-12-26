@@ -421,11 +421,11 @@ function is_allow_access_dashboard(): bool
  */
 function is_login(): bool
 {
-    if (is_admin_page()) {
-        return is_supervisor();
+    if (is_route_api()) {
+        return is_supervisor() || is_student();
     }
 
-    return is_student();
+    return is_admin_page() ? is_supervisor() : is_student();
 }
 
 /**

@@ -174,12 +174,19 @@ function translator(): Translator
 }
 
 /**
- * @param string $code
+ * @param string|null $message
+ * @param string|null $fallback
+ * @param null $found
  * @return string
  */
-function translate(string $code): string
+function translate(string $message = null, string $fallback = null, &$found = null): string
 {
-    return translator()->trans($code);
+    if ($message === null) {
+        $found = false;
+        return '';
+    }
+
+    return translator()->trans($message, $fallback, $found);
 }
 
 /**
@@ -187,16 +194,16 @@ function translate(string $code): string
  * @param $found
  * @return string
  */
-function trans(string $message, &$found = null): string
+function trans(string $message = null, &$found = null): string
 {
-    return \translator()->trans($message, null, $found);
+    return translate($message, null, $found);
 }
 
 /**
  * @param string $message
  * @param $found
  */
-function trans_e(string $message, &$found = null)
+function trans_e(string $message = null, &$found = null)
 {
     render(trans($message, $found));
 }
@@ -206,18 +213,26 @@ function trans_e(string $message, &$found = null)
  * @param mixed ...$args
  * @return string
  */
-function trans_sprintf(string $message, ...$args): string
+function trans_sprintf(string $message = null, ...$args): string
 {
+    if ($message === null) {
+        return '';
+    }
+
     return sprintf(trans($message), ...$args);
 }
 
 /**
- * @param string $code
+ * @param string $message
  * @param mixed ...$args
  */
-function trans_printf(string $code, ...$args)
+function trans_printf(string $message = null, ...$args)
 {
-    printf(trans($code), ...$args);
+    if ($message === null) {
+        return;
+    }
+
+    printf(trans($message), ...$args);
 }
 
 /**
@@ -226,7 +241,7 @@ function trans_printf(string $code, ...$args)
  * @param $found
  * @return string
  */
-function esc_html_trans(string $message, &$found = null): string
+function esc_html_trans(string $message = null, &$found = null): string
 {
     return esc_html(trans($message, $found));
 }
@@ -236,7 +251,7 @@ function esc_html_trans(string $message, &$found = null): string
  * @param $args
  * @return string
  */
-function esc_html_trans_sprintf(string $message, ...$args): string
+function esc_html_trans_sprintf(string $message = null, ...$args): string
 {
     return esc_html(trans_sprintf($message, ...$args));
 }
@@ -245,57 +260,56 @@ function esc_html_trans_sprintf(string $message, ...$args): string
  * @param string $message
  * @param $args
  */
-function esc_html_trans_printf(string $message, ...$args)
+function esc_html_trans_printf(string $message = null, ...$args)
 {
     render(esc_html_trans_sprintf($message, ...$args));
 }
 
-function esc_html_trans_e(string $code, &$found = null)
+function esc_html_trans_e(string $message = null, &$found = null)
 {
-    render(esc_html_trans($code, $found));
+    render(esc_html_trans($message, $found));
 }
 
 /**
  * @param string $message
  * @param $args
  */
-function esc_html_trans_sprintf_e(string $message, ...$args)
+function esc_html_trans_sprintf_e(string $message = null, ...$args)
 {
     esc_html_trans_printf($message, ...$args);
 }
 
 
 /**
- * @param string $code
+ * @param string $message
  * @param $found
  * @return string
  */
-function esc_attr_trans(string $code, &$found = null): string
+function esc_attr_trans(string $message = null, &$found = null): string
 {
-    return esc_attr(trans($code, $found));
+    return esc_attr(trans($message, $found));
 }
 
-function esc_attr_trans_sprintf(string $code, ...$args): string
+function esc_attr_trans_sprintf(string $message = null, ...$args): string
 {
-    return esc_attr(trans_sprintf($code, ...$args));
+    return esc_attr(trans_sprintf($message, ...$args));
 }
 
-
-function esc_attr_trans_printf(string $code, ...$args)
+function esc_attr_trans_printf(string $message = null, ...$args)
 {
-    render(esc_attr(trans_sprintf($code, ...$args)));
+    render(esc_attr(trans_sprintf($message, ...$args)));
 }
 
-function esc_attr_trans_sprintf_e(string $code, ...$args)
+function esc_attr_trans_sprintf_e(string $message = null, ...$args)
 {
-    esc_attr_trans_printf($code, ...$args);
+    esc_attr_trans_printf($message, ...$args);
 }
 
 /**
- * @param string $code
+ * @param string $message
  * @param $found
  */
-function esc_attr_trans_e(string $code, &$found = null)
+function esc_attr_trans_e(string $message = null, &$found = null)
 {
-    render(esc_attr_trans($code, $found));
+    render(esc_attr_trans($message, $found));
 }

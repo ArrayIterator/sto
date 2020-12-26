@@ -53,6 +53,23 @@ class Site extends Model
     }
 
     /**
+     * @return PrepareStatement|bool
+     */
+    public function getAllStmt()
+    {
+        $stmt = $this->unbufferedPrepare(
+            sprintf(
+                "SELECT * FROM %s",
+                $this->getTableName()
+            )
+        );
+        if (!$stmt->execute()) {
+            return false;
+        }
+        return $stmt;
+    }
+
+    /**
      * @param string $host host could not be empty
      * @return false|PrepareStatement
      */
@@ -65,10 +82,21 @@ class Site extends Model
         $stmt = $this->prepare(
             sprintf('SELECT * FROM %s WHERE LOWER(TRIM(host))=?', $this->getTableName())
         );
+
         if ($stmt->execute([$host])) {
             return $stmt;
         }
         return false;
+    }
+
+    /**
+     * @return int|null
+     * @noinspection PhpMissingReturnTypeInspection
+     */
+    public function getSiteId()
+    {
+        $id = $this->data['id'] ?? null;
+        return is_numeric($id) ? abs(intval($id)) : null;
     }
 
     /**
@@ -196,5 +224,18 @@ class Site extends Model
         }
 
         return parent::delete();
+    }
+
+    public function __set($name, $value)
+    {
+        parent::__set($name, $value);
+        if ($name === 'id' && $this->isFromStatement()
+            && isset($this->data['id'])
+        ) {
+            $site_id = $this->data['id'];
+            if (is_int($site_id)) {
+                $this->setModelSiteId($site_id);
+            }
+        }
     }
 }

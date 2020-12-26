@@ -8,8 +8,13 @@ if (!defined('ADMIN_AREA')) {
 <?php if (!is_admin_login_page()) : ?>
     <footer id="footer-bottom">
         <div class="copy">
-            <div class="float-left clock-time">
-                <span data-clock="standard" data-format="D MMMM YYYY [-] H:mm:ss [(%location%)]"></span>
+            <div class="float-left">
+                <div class="clock-time">
+                    <span data-clock="standard" data-format="D MMMM YYYY [-] H:mm:ss [(%location%)]"></span>
+                </div>
+                <small class="d-block text-muted">
+                    Rendered in : <?= microtime(true) - MICRO_TIME_FLOAT;?> second | Memory <?= (memory_get_peak_usage(false)/(1024*1024));?>MB
+                </small>
             </div>
             <p class="text-muted">
                 <small><strong><?= APP_NAME;?></strong> - <?= trans('Version');?> : <?= VERSION;?></small>

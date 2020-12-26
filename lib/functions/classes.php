@@ -12,7 +12,66 @@ function get_classes_teacher_table_name() : string
     return 'sto_classes_teacher';
 }
 
+/**
+ * @return string
+ */
+function get_default_class_status() : string
+{
+    $status = hook_apply('get_default_class_status', STATUS_ACTIVE);
+    $status = !is_string($status) || trim($status) === ''
+        ? STATUS_ACTIVE
+        : trim(strtolower($status));
+    if (!in_array($status, get_classes_status_lists())) {
+        $status = STATUS_ACTIVE;
+    }
 
+    return $status;
+}
+
+/**
+ * @return array
+ */
+function get_classes_status_lists() : array
+{
+    $default_status = [
+        STATUS_ACTIVE,
+        STATUS_TRASH,
+        STATUS_DELETED,
+        STATUS_DRAFT
+    ];
+
+    $status = hook_apply('classes_status_lists', $default_status);
+    foreach ($status as $k => $item) {
+        if (!is_string($item)) {
+            unset($status[$k]);
+        }
+        $status[$k] = strtolower(trim($item));
+    }
+    if (!in_array(STATUS_ACTIVE, $status)) {
+        array_unshift($status, STATUS_ACTIVE);
+    }
+
+    $status = array_filter(array_unique($status));
+    return array_values($status);
+}
+
+/**
+ * @param string|mixed|null|false $classesStatus
+ * @return string
+ */
+function filter_classes_status($classesStatus) : string
+{
+    $defaultStatus = get_default_class_status();
+    $statuses = get_classes_status_lists();
+    $classesStatus = !is_string($classesStatus) || trim($classesStatus) === ''
+        ? $defaultStatus
+        : $classesStatus;
+    $classesStatus = strtolower($classesStatus);
+    if (!in_array($classesStatus, $statuses)) {
+        $classesStatus = $defaultStatus;
+    }
+    return $classesStatus;
+}
 /**
  * @param array $data
  * @return array
@@ -217,6 +276,10 @@ function get_classes_by_id(int $id) : array
             $row['teachers'] = [];
             $id = (int) $row['id'];
             $row['id'] = (int) $row['id'];
+            if (isset($row['created_by'])) {
+                $row['created_by'] = (int)$row['created_by'];
+            }
+
             $data[$id] = $row;
         }
     }
@@ -273,6 +336,10 @@ function get_classes_by_name(string $name, array $siteId = null) : array
     if ($stmt) {
         while ($row = $stmt->fetchAssoc()) {
             $row['id'] = (int) $row['id'];
+            if (isset($row['created_by'])) {
+                $row['created_by'] = (int)$row['created_by'];
+            }
+
             $row['teachers'] = [];
             $data[$row['id']] = $row;
         }
@@ -334,6 +401,9 @@ function get_classes_by_code(string $code, array $siteIds = null) : array
     if ($stmt) {
         while ($row = $stmt->fetchAssoc()) {
             $row['id'] = (int) $row['id'];
+            if (isset($row['created_by'])) {
+                $row['created_by'] = (int)$row['created_by'];
+            }
             $row['teachers'] = [];
             $data[$row['id']] = $row;
         }
@@ -448,6 +518,10 @@ SELECT *
         $row['teachers'] = [];
         $id = (int) $row['id'];
         unset($row['total']);
+        if (isset($row['created_by'])) {
+            $row['created_by'] = (int)$row['created_by'];
+        }
+
         $row['id'] = (int) $row['id'];
         $result[$id] = $row;
     }
@@ -534,12 +608,54 @@ function update_class_data(int $classId, array $classes)
         return false;
     }
 
+    $user_id = null;
+    if (is_admin()
+        && isset($classes['user_id'])
+        && is_numeric($classes['user_id'])
+        && is_int(abs($classes['user_id']))
+    ) {
+        $uid = get_supervisor_by_id(abs($classes['user_id']));
+        $user_id = $uid ? $uid->getId() : $user_id;
+        if (!is_super_admin() && $uid) {
+            $site_id = $uid->getSiteId();
+            // do not allow user different with user site id
+            if ($site_id !== get_current_supervisor()->getSiteId()
+                // do not allow change to super admin
+                || get_current_supervisor()->get('role') === ROLE_SUPER_ADMIN
+            ) {
+                $user_id = null;
+            }
+        }
+    }
+
+    $classesStatus = null;
+    if (isset($classes['status']) && is_string($classes['status'])) {
+        $classesStatus = filter_classes_status($classes['status']);
+    }
+
+    $posts = $classes;
     $classes = [
         'name' => $classes['name']??null,
         'code' => $classes['code']??null,
         'note' => $classes['note']??null,
     ];
-
+    if ($classesStatus) {
+        $classes['status'] = $classesStatus;
+    }
+    if ($user_id && $user_id > 0) {
+        $classes['created_by'] = $user_id;
+    }
+    // ONLY ALLOWED SUPER ADMIN TO CHANGE SITE_ID
+    if (is_super_admin()
+        && isset($posts['site_id'])
+        && is_numeric($posts['site_id'])
+        && is_int(abs($posts['site_id']))
+    ) {
+        $classes['site_id'] = (int) $posts['site_id'];
+        if ($classes['site_id'] === $data['site_id']) {
+            unset($classes['site_id']);
+        }
+    }
 
     $classes['code'] = !is_string($classes['code']) ? null : trim($classes['code']);
     $classes['code'] = $classes['code'] ? trim($classes['code']) : null;
@@ -562,7 +678,6 @@ function update_class_data(int $classId, array $classes)
             return -1;
         }
     }
-
 
     $classes['note'] = !is_string($classes['note']) ? null : trim($classes['note']);
     $classes['note'] = $classes['note'] !== null ? trim($classes['note']) : null;
@@ -587,11 +702,21 @@ function update_class_data(int $classId, array $classes)
     $table = get_classes_table_name();
     $newClass = [];
     $args = [];
+
+    if (isset($classes['site_id']) && !is_super_admin()) {
+        unset($classes['site_id']);
+    }
+
+    unset($classes['created_by']);
     foreach ($classes as $key => $item) {
         $keyName = ":_{$key}";
         $newClass[$key] = " {$key}={$keyName}";
         $args[$keyName] = $item;
         $data[$key] = $item;
+    }
+
+    if (!isset($data['created_by'])) {
+         $data['created_by'] = get_current_user_id();
     }
 
     $res = false;
@@ -644,11 +769,24 @@ function insert_class_data(array $classes)
         return -3;
     }
 
+    $user_id = get_current_user_id();
+    if (is_super_admin()
+        && isset($classes['user_id'])
+        && is_numeric($classes['user_id'])
+        && is_int(abs($classes['user_id']))
+    ) {
+        $uid = get_supervisor_by_id(abs($classes['user_id']));
+        $user_id = $uid ? $uid->getId() : $user_id;
+    }
+    $classesStatus = filter_classes_status($classes['status']??null);
+
     $classes = [
         'name' => $name,
         'code' => $code,
         'note' => $classes['note']??null,
         'site_id' => $site_id,
+        'status' => $classesStatus,
+        'created_by' => $user_id,
     ];
 
     $classes['note'] = !is_string($classes['note']) ? null : trim($classes['note']);
@@ -680,7 +818,7 @@ function insert_class_data(array $classes)
             $stmt->closeCursor();
             cache_delete_current($code, 'classes_code', $site_id);
             cache_delete_current($name, 'classes_name', $site_id);
-            return get_class_by_code($code, [$site_id]);
+            return get_class_by_code($code, $site_id);
         }
 
     } catch (Exception $e) {

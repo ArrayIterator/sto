@@ -42,10 +42,14 @@ function is_admin_page(): bool
  */
 function is_install_page(): bool
 {
-    return defined('INSTALLATION_FILE')
-        && INSTALLATION_FILE
-        && basename(server_environment()['SCRIPT_FILENAME']) === 'install.php'
-        && is_admin_page();
+    static $result = null;
+    if ($result === null) {
+        $result = defined('INSTALLATION_FILE')
+            && INSTALLATION_FILE
+            && basename(server_environment()['SCRIPT_FILENAME']) === 'install.php'
+            && is_admin_page();
+    }
+    return $result;
 }
 
 /**
@@ -55,10 +59,15 @@ function is_install_page(): bool
  */
 function is_admin_login_page(): bool
 {
-    return defined('ADMIN_LOGIN_PAGE')
-        && ADMIN_LOGIN_PAGE
-        && basename(server_environment()['SCRIPT_FILENAME']) === 'login.php'
-        && is_admin_page();
+    static $result = null;
+    if ($result === null) {
+        $result = defined('ADMIN_LOGIN_PAGE')
+            && ADMIN_LOGIN_PAGE
+            && basename(server_environment()['SCRIPT_FILENAME']) === 'login.php'
+            && is_admin_page();
+    }
+
+    return $result;
 }
 
 /**
@@ -66,7 +75,10 @@ function is_admin_login_page(): bool
  */
 function is_admin_profile_page() : bool
 {
-    return is_admin_page() && basename(server_environment()['SCRIPT_FILENAME']) === 'profile.php';
+    static $res = null;
+    $res === null
+        && $res = is_admin_page() && basename(server_environment()['SCRIPT_FILENAME']) === 'profile.php';
+    return $res;
 }
 
 /**
@@ -74,7 +86,10 @@ function is_admin_profile_page() : bool
  */
 function is_admin_dashboard_page() : bool
 {
-    return is_admin_page() && basename(server_environment()['SCRIPT_FILENAME']) === 'index.php';
+    static $res = null;
+    $res === null
+        && $res = is_admin_page() && basename(server_environment()['SCRIPT_FILENAME']) === 'index.php';
+    return $res;
 }
 
 /**
@@ -84,10 +99,12 @@ function is_admin_dashboard_page() : bool
  */
 function is_admin_quarantine_page(): bool
 {
-    return defined('QUARANTINED_FILE')
+    static $res = null;
+    $res === null && $res = defined('QUARANTINED_FILE')
         && QUARANTINED_FILE
         && basename(server_environment()['SCRIPT_FILENAME']) === 'quarantined.php'
         && is_admin_page();
+    return $res;
 }
 
 /**
@@ -98,6 +115,7 @@ function get_admin_role()
     if (!is_supervisor() || !($role = get_current_supervisor_role())) {
         return false;
     }
+
     if (!is_string($role)) {
         return false;
     }
@@ -159,6 +177,14 @@ function is_super_admin(): bool
 function is_admin(): bool
 {
     return is_super_admin() || admin_role_is('admin');
+}
+
+/**
+ * @return bool
+ */
+function is_admin_and_active() : bool
+{
+    return is_admin_active() && is_admin();
 }
 
 function is_teacher() : bool
