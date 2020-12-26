@@ -47,7 +47,8 @@ CREATE TABLE `sto_classes`
     `code`    varchar(60)   NOT NULL,
     `name`    varchar(255)  NOT NULL,
     `note`    longtext      DEFAULT NULL,
-    `status`  varchar(60)   DEFAULT 'active' COMMENT 'active, trash, deleted, draft'
+    `status`  varchar(60)   DEFAULT 'active' COMMENT 'active, trash, deleted, draft',
+    `created_by` bigint(20) DEFAULT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -800,10 +801,14 @@ ALTER TABLE `sto_attachments`
 -- Indexes for table `sto_classes`
 --
 ALTER TABLE `sto_classes`
-    ADD PRIMARY KEY (`id`, `code`) USING BTREE,
-    ADD UNIQUE KEY `code_site_id_unique` (`code`, `site_id`),
+    ADD PRIMARY KEY (`id`,`code`) USING BTREE,
+    ADD UNIQUE KEY `code_site_id_unique` (`code`,`site_id`),
+    ADD UNIQUE KEY `name_site_id_unique` (`site_id`,`name`) USING BTREE,
     ADD KEY `name` (`name`),
-    ADD KEY `site_id` (`site_id`);
+    ADD KEY `site_id` (`site_id`),
+    ADD KEY `code` (`code`),
+    ADD KEY `status` (`status`),
+    ADD KEY `created_by` (`created_by`);
 
 --
 -- Indexes for table `sto_classes_teacher`
@@ -1182,6 +1187,7 @@ ALTER TABLE `sto_supervisor_meta`
 -- Constraints for table `sto_classes`
 --
 ALTER TABLE `sto_classes`
+    ADD CONSTRAINT `sto_classes_created_by` FOREIGN KEY (`created_by`) REFERENCES `sto_supervisor` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
     ADD CONSTRAINT `sto_classes_site_id` FOREIGN KEY (`site_id`) REFERENCES `sto_sites` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --

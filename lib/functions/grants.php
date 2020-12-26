@@ -38,11 +38,11 @@ function current_supervisor_can(
     $invigilator_can_see_supervisors = $invigilator && invigilator_can_see_supervisors();
     $teacher_admin_grant = $admin || $teacher;
     $current_can = 'current_user_can_' . $can;
-
+    $result = false;
     switch ($can) {
         case 'view_about':
-            return hook_apply($current_can, $is_active, ...$args);
-
+            $result = $is_active;
+            break;
         case 'manage_setting':
         case 'manage_settings':
         case 'manage_tool':
@@ -75,7 +75,8 @@ function current_supervisor_can(
         case 'edit_invigilator':
         case 'edit_invigilators':
 
-            return hook_apply($current_can, $admin, ...$args);
+            $result = $admin;
+            break;
 
         case 'edit_student':
         case 'edit_students':
@@ -91,7 +92,10 @@ function current_supervisor_can(
         case 'delete_exam':
 
         case 'view_tools':
-            return hook_apply($current_can, $teacher_admin_grant, ...$args);
+
+            $result = $teacher_admin_grant;
+
+            break;
 
         case 'add_exam':
         case 'add_class':
@@ -102,11 +106,13 @@ function current_supervisor_can(
         case 'add_student':
         case 'add_question':
         case 'add_task':
-            $can_single = substr_replace($can, 'edit_', 0, 4);
-            if (current_supervisor_can($can_single, ...$args)) {
-                return hook_apply($current_can, true, ...$args);
-            }
-            return hook_apply($current_can, $admin, ...$args);
+            $result = $admin
+                || current_supervisor_can(
+                    substr_replace($can, 'edit_', 0, 4),
+                    ...$args
+                );
+
+            break;
 
         // view
         case 'view_students':
@@ -123,58 +129,54 @@ function current_supervisor_can(
         case 'view_rooms':
         case 'view_room':
         case 'view_status':
-            $can_single = substr_replace($can, 'edit_', 0, 5);
-            if (current_supervisor_can($can_single, ...$args)) {
-                return hook_apply($current_can, true, ...$args);
-            }
-
-            return hook_apply(
-                $current_can,
-                $teacher_admin_grant || $invigilator,
-                ...$args
-            );
-
-        case 'view_teachers':
-        case 'view_teacher':
-            $can_single = substr_replace($can, 'edit_', 0, 5);
-            if (current_supervisor_can($can_single, ...$args)) {
-                return hook_apply(
-                    $current_can,
-                    true,
+            $result = $teacher_admin_grant
+                || $invigilator
+                || current_supervisor_can(
+                    substr_replace($can, 'edit_', 0, 5),
                     ...$args
                 );
-            }
-            return hook_apply(
-                $current_can,
-                $teacher_admin_grant || $invigilator_can_see_supervisor,
-                ...$args
-            );
+
+            break;
+        case 'view_teachers':
+        case 'view_teacher':
+
+            $result = $teacher_admin_grant
+                || $invigilator_can_see_supervisor
+                || current_supervisor_can(
+                    substr_replace($can, 'edit_', 0, 5),
+                    ...$args
+                );
+
+            break;
 
         case 'view_supervisor':
         case 'view_invigilator':
-            $can_single = substr_replace($can, 'edit_', 0, 5);
-            if (current_supervisor_can($can_single, ...$args)) {
-                return hook_apply($current_can, true, ...$args);
-            }
+            $result = $admin
+                || $teacher_can_see_supervisor
+                || $invigilator_can_see_supervisor
+                || current_supervisor_can(
+                    substr_replace($can, 'edit_', 0, 5),
+                    ...$args
+                );
 
-            return hook_apply(
-                $current_can,
-                $admin || $teacher_can_see_supervisor || $invigilator_can_see_supervisor,
-                ...$args
-            );
+            break;
         case 'view_supervisors':
         case 'view_invigilators':
-            $can_single = substr_replace($can, 'edit_', 0, 5);
-            if (current_supervisor_can($can_single, ...$args)) {
-                return hook_apply($current_can, true, ...$args);
-            }
+            $result = $admin
+                || $teacher_can_see_supervisors
+                || $invigilator_can_see_supervisors
+                || current_supervisor_can(
+                    substr_replace($can, 'edit_', 0, 5),
+                    ...$args
+                );
 
-            return hook_apply(
-                $current_can,
-                $admin || $teacher_can_see_supervisors || $invigilator_can_see_supervisors,
-                ...$args
-            );
+            break;
     }
 
-    return hook_apply($current_can, false, ...$args);
+    // check if is not in stack
+    if (!hook_is_in_stack($current_can)) {
+        return hook_apply($current_can, $result, ...$args);
+    }
+
+    return $result;
 }

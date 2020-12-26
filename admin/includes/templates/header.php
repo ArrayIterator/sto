@@ -9,7 +9,7 @@ if (!defined('ADMIN_AREA')) {
     <?php admin_html_head(); ?>
 </head>
 <body<?= get_admin_body_attributes(); ?>>
-<div id="page"<?= (cookie('sidebar_closed') === 'true') ? ' class="sidebar-closed"': '';?>>
+<div id="page"<?= (cookie('sidebar-closed') === 'true') ? ' class="sidebar-closed"': '';?>>
     <?php admin_body_open(); ?>
     <?php if (!is_admin_login_page()) : ?>
     <div id="left-area">
@@ -37,7 +37,7 @@ if (!defined('ADMIN_AREA')) {
     </div>
     <div id="right-area">
         <div class="admin-top-bar">
-            <div id="sidebar-switch">
+            <div id="sidebar-switch" data-switch="sidebar-switch" data-class="sidebar-closed" data-cookie="sidebar-closed">
                 <div class="switcher" title="<?php esc_attr_trans_e('Toggle Sidebar');?>">
                     <span></span>
                     <span></span>
@@ -49,7 +49,7 @@ if (!defined('ADMIN_AREA')) {
                 // admin top menu
                 admin_top_bar_menu_navigation();
                 ?>
-                <ul class="navbar-nav navbar-account">
+                <ul class="navbar-nav navbar-account" data-navigation="navigation-account">
                     <li class="notification-menu">
                         <label for="account-notification-bar" title="<?php esc_attr_trans_e('Notifications');?>"><i class="icofont-alarm"></i></label>
                         <input type="checkbox" id="account-notification-bar">

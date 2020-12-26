@@ -467,7 +467,8 @@ function admin_sidebar_menu_navigation(callable $callback = null): string
         'ul',
         [
             'id' => 'navigation-sidebar',
-            'class' => 'sidebar-menu nav-menu admin-sidebar-menu'
+            'class' => 'sidebar-menu nav-menu admin-sidebar-menu',
+            'data-navigation' => 'navigation-sidebar',
         ],
         1,
         true,
@@ -494,7 +495,8 @@ function admin_top_bar_menu_navigation(callable $callback = null): string
         'ul',
         [
             'id' => 'navigation-top',
-            'class' => 'top-menu nav-menu admin-top-menu'
+            'class' => 'top-menu nav-menu admin-top-menu',
+            'data-navigation' => 'navigation-top',
         ],
         4,
         true,

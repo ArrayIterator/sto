@@ -9,11 +9,11 @@ if (!defined('ADMIN_AREA')) {
     <footer id="footer-bottom">
         <div class="copy">
             <div class="float-left">
-                <div class="clock-time">
-                    <span data-clock="standard" data-format="D MMMM YYYY [-] H:mm:ss [(%location%)]"></span>
+                <div class="clock-time text-muted small">
+                    <span data-clock="true" data-format="D MMMM YYYY [-] H:mm:ss [(%location%)]"></span>
                 </div>
                 <small class="d-block text-muted">
-                    Rendered in : <?= microtime(true) - MICRO_TIME_FLOAT;?> second | Memory <?= (memory_get_peak_usage(false)/(1024*1024));?>MB
+                    <?= esc_html_trans('Rendered in');?> : <?= round(microtime(true) - MICRO_TIME_FLOAT, 6);?> <?= esc_html_trans('second');?> | Memory <?= round(memory_get_peak_usage(false)/(1024*1024), 4);?> MB
                 </small>
             </div>
             <p class="text-muted">
@@ -28,9 +28,9 @@ if (!defined('ADMIN_AREA')) {
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <% if (typeof title !== "undefined" ) { %>
+                        <% if (typeof title === "string" ) { %>
                         <h5 class="modal-title"><%= title %></h5>
-                        <% %>
+                        <% } %>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -38,12 +38,12 @@ if (!defined('ADMIN_AREA')) {
                     <div class="modal-body">
                         <% if (typeof content !== "undefined" ) { %>
                             <%= content %>
-                        <% %>
+                        <% } %>
                     </div>
                     <div class="modal-footer">
                         <% if (typeof button !== "undefined" ) { %>
                             <%= button %>
-                        <% %>
+                        <% } %>
                     </div>
                 </div>
             </div>

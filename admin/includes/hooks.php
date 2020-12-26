@@ -30,7 +30,7 @@ function hook_admin_login_js()
     if (!is_string($js)) {
         return;
     }
-    render("<script type=\"text/javascript\">{$js}</script>");
+    render("<script type=\"text/javascript\">\n{$js}</script>\n");
     unset($js);
 }
 

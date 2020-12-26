@@ -10,7 +10,8 @@ return (function () {
             is_admin_page() ? get_admin_login_url() : get_login_url()
         )
     );
-
+    $checkSucceedSecond = 10000;
+    $checkFailSecond = 5000;
     $ping_url = json_ns(get_api_url('/ping'));
     $reconnect_text = json_ns(trans('Reconnecting...'));
     $offline_text = json_ns(trans('You seem to be offline'));
@@ -22,15 +23,15 @@ return (function () {
         var current_href = window.location.href.replace(/\#.*/g, ''),
             stop_first = false,
             api_ping = {$ping_url},
-            checkFail = 3000,
-            checkSucceed = 5000,
+            checkFail = {$checkFailSecond},
+            checkSucceed = {$checkSucceedSecond},
             interimIframe = null,
             interimLayout = null,
             loginUrl = {$login_url},
             offlineText = {$offline_text},
             connectingText = {$reconnect_text},
             _global_message = jq('#global-message'),
-            _page = jq('#page'),
+            _body = jq('body'),
             loop_back_succeed = function (e) {
                 var notLogged = e.data && (e.data['login'] === false || !e.data['as'] || typeof e.data['as']['supervisor'] === 'undefined');
                 if (!notLogged) {
@@ -67,7 +68,7 @@ return (function () {
 
                 interimIframe = jq('<iframe id="iframe-interim-login" class="iframe-interim" src="' + log + '?interim=1"></iframe>');
                 interimLayout.html(interimIframe);
-                _page.append(interimLayout);
+                _body.append(interimLayout);
                 var call_iframe_stat = function (href, close) {
                     if (!interimIframe) {
                         return;
