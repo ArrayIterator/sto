@@ -13,7 +13,7 @@ if (!defined('ADMIN_AREA')) {
                     <span data-clock="true" data-format="D MMMM YYYY [-] H:mm:ss [(%location%)]"></span>
                 </div>
                 <small class="d-block text-muted">
-                    <?= esc_html_trans('Rendered in');?> : <?= round(microtime(true) - MICRO_TIME_FLOAT, 6);?> <?= esc_html_trans('second');?> | Memory <?= round(memory_get_peak_usage(false)/(1024*1024), 4);?> MB
+                    <?= esc_html_trans('Rendered in');?> : <?= round(microtime(true) - MICRO_TIME_FLOAT, 6);?> <?= esc_html_trans('second');?> | Memory : <?= round(memory_get_peak_usage(false)/(1024*1024), 4);?> MB
                 </small>
             </div>
             <p class="text-muted">
