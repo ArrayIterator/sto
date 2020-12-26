@@ -4,6 +4,11 @@ namespace ArrayIterator\Database;
 
 use ArrayIterator\Database;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class Table
  * @package ArrayIterator\Database

@@ -2,7 +2,8 @@
 
 use ArrayIterator\Controller\Api\StatusController;
 
-if (!defined('ADMIN_AREA')) {
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR') || !defined('ADMIN_AREA')) {
     return;
 }
 

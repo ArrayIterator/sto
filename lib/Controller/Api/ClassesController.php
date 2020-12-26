@@ -7,6 +7,11 @@ use ArrayIterator\Route;
 use ArrayIterator\RouteStorage;
 use Exception;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /*
 SELECT
     class.*,

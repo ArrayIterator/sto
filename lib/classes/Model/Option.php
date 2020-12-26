@@ -6,6 +6,11 @@ use ArrayIterator\ArrayGetter;
 use ArrayIterator\Helper\StringFilter;
 use Exception;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class Option
  * @package ArrayIterator\Model

@@ -2,9 +2,13 @@
 
 namespace ArrayIterator\Model;
 
-
 use ArrayIterator\Database\PrepareStatement;
 use PDOStatement;
+
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
 
 /**
  * Class AbstractUserModel

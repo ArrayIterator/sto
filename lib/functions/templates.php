@@ -1,7 +1,5 @@
 <?php
 
-use ArrayIterator\Helper\NormalizerData;
-
 /* -------------------------------------------------
  *                     ADMIN
  * ------------------------------------------------*/
@@ -201,6 +199,7 @@ function &global_admin_title() : string
 function &global_title() : string
 {
     static $title;
+
     if (!is_string($title)) {
         $title = get_option('site_title', null, get_current_site_id(), $found);
         if (!$found || !is_string($title)) {
@@ -259,14 +258,12 @@ function get_admin_login_title(): string
  */
 function get_admin_button_submit_login(string $float = null): string
 {
-    $newFloat = $float === 'right'
-        ? 'float-right'
-        : ($float === 'left' ? 'float-left' : '');
+    $newFloat = $float === 'right' ? 'float-right' : ($float === 'left' ? 'float-left' : '');
     return hook_apply(
         'admin_button_submit_login',
         sprintf(
             '<button type="submit" class="btn-primary btn btn-block admin-submit-button%s">%s</button>',
-            $newFloat ? " {$newFloat}" : '',
+            $newFloat !== '' ? " {$newFloat}" : '',
             trans('Sign In')
         ),
         $float
@@ -279,14 +276,12 @@ function get_admin_button_submit_login(string $float = null): string
  */
 function get_button_submit(string $float = null): string
 {
-    $newFloat = $float === 'right'
-        ? 'float-right'
-        : ($float === 'left' ? 'float-left' : '');
+    $newFloat = $float === 'right' ? 'float-right' : ($float === 'left' ? 'float-left' : '');
     return hook_apply(
         'button_submit',
         sprintf(
             '<button type="submit" class="btn-primary btn admin-submit-button%s">%s</button>',
-            $newFloat ? " {$newFloat}" : '',
+            $newFloat !== '' ? " {$newFloat}" : '',
             trans('Submit')
         ),
         $float
@@ -299,14 +294,12 @@ function get_button_submit(string $float = null): string
  */
 function get_button_submit_small(string $float = null): string
 {
-    $newFloat = $float === 'right'
-        ? 'float-right'
-        : ($float === 'left' ? 'float-left' : '');
+    $newFloat = $float === 'right' ? 'float-right' : ($float === 'left' ? 'float-left' : '');
     return hook_apply(
         'button_submit_small',
         sprintf(
             '<button type="submit" class="btn-primary btn btn-sm admin-submit-button%s">%s</button>',
-            $newFloat ? " {$newFloat}" : '',
+            $newFloat !== '' ? " {$newFloat}" : '',
             trans('Submit')
         ),
         $float
@@ -319,14 +312,12 @@ function get_button_submit_small(string $float = null): string
  */
 function get_button_reset(string $float = null): string
 {
-    $newFloat = $float === 'right'
-        ? 'float-right'
-        : ($float === 'left' ? 'float-left' : '');
+    $newFloat = $float === 'right' ? 'float-right' : ($float === 'left' ? 'float-left' : '');
     return hook_apply(
         'button_reset',
         sprintf(
             '<button type="reset" class="btn-secondary btn btn-block admin-submit-button%s">%s</button>',
-            $newFloat ? " {$newFloat}" : '',
+            $newFloat !== '' ? " {$newFloat}" : '',
             trans('Reset')
         ),
         $float
@@ -350,7 +341,7 @@ function get_button_submit_login(): string
 /**
  *
  */
-function admin_login_form()
+function the_admin_login_form()
 {
     $interim_login = isset($_REQUEST['interim']);
     ?>
@@ -401,16 +392,14 @@ function admin_login_form()
             <?= get_admin_button_submit_login(); ?>
         </div>
     </form>
-    <script type="text/javascript">
-<?= get_js_core_by_name('input-switch'); ?>
-    </script>
+    <script type="text/javascript"><?php echo get_js_core_by_name('input-switch'); ?></script>
     <?php
 }
 
 /**
  * Login Form
  */
-function login_form()
+function the_login_form()
 {
     $interim_login = isset($_REQUEST['interim']);
     ?>
@@ -873,6 +862,11 @@ function create_indicator_clock(int $size = null, $date = null) : string
     return $html;
 }
 
+/**
+ * @param int|null $size
+ * @param null $date
+ * @return string
+ */
 function create_no_indicator_clock(int $size = null, $date = null) : string
 {
     list($hours, $minutes, $seconds) = calculate_clock_delay($date);

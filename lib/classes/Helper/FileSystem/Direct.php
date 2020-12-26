@@ -7,6 +7,11 @@ use ArrayIterator\Helper\AbstractFileSystem;
 use ArrayIterator\Helper\Path;
 use ArrayIterator\Helper\StringFilter;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class Direct
  * @package ArrayIterator\Helper\FileSystem

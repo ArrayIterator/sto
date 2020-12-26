@@ -6,6 +6,10 @@ use ArrayIterator\Helper\Path;
 use ArrayIterator\Info\Theme;
 use ArrayIterator\Traits\DataReaderTrait;
 
+/**
+ * Class Themes
+ * @package ArrayIterator
+ */
 final class Themes
 {
     use DataReaderTrait;

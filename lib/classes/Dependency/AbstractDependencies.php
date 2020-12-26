@@ -3,10 +3,10 @@
 namespace ArrayIterator\Dependency;
 
 /**
- * Class AbtsractDependencies
+ * Class AbstractDependencies
  * @package ArrayIterator\Dependency
  */
-class AbtsractDependencies
+class AbstractDependencies
 {
     /**
      * An array of registered handle objects.

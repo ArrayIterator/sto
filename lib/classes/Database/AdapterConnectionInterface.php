@@ -5,6 +5,11 @@ namespace ArrayIterator\Database;
 use Exception;
 use PDO;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Interface AdapterConnectionInterface
  * @package ArrayIterator\Database

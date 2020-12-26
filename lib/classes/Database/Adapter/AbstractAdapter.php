@@ -11,6 +11,11 @@ use Exception;
 use PDOException;
 use PDOStatement;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class AbstractAdapter
  * @package ArrayIterator\Database\Adapter

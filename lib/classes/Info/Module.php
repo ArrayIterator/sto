@@ -4,6 +4,11 @@ namespace ArrayIterator\Info;
 
 use ArrayIterator\Helper\Path;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class Module
  * @package ArrayIterator\Info

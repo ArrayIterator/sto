@@ -1,7 +1,9 @@
 <?php
+// end here cause I don't want throw error
 if (!defined('ROOT_DIR')) {
     return;
 }
+
 $is_interim = isset($_REQUEST['interim']);
 ?>
 <?php get_header_template(); ?>
@@ -17,7 +19,7 @@ $is_interim = isset($_REQUEST['interim']);
                             </h2>
                         </div>
                         <?php hook_run('admin_login_after_login_text'); ?>
-                        <?php login_form(); ?>
+                        <?php the_login_form(); ?>
                         <?php if (allow_student_reset_password()) { ?>
                             <div class="forgot-password">
                                 <a href="<?= get_reset_password_url();?>" class="forgot-password-link"><?php esc_attr_trans_e('Reset Your Password');?></a>

@@ -1,6 +1,6 @@
 <?php
 
-if (!defined('ADMIN_AREA')) {
+if (!defined('ROOT_DIR') || !defined('ADMIN_AREA')) {
     return;
 }
 

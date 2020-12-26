@@ -6,6 +6,11 @@ use ArrayIterator\Model\Model;
 use PDO;
 use PDOStatement;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class PrepareStatement
  * @package ArrayIterator\Database

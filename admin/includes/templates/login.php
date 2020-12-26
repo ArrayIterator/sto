@@ -171,7 +171,7 @@ get_admin_header_template();
                         );
                     }
                     ?>
-                    <?php admin_login_form(); ?>
+                    <?php the_admin_login_form(); ?>
                 </div>
             </div>
         </div>

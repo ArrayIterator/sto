@@ -123,9 +123,8 @@ function get_admin_current_file_url() : string
 function get_admin_logout_redirect_url(array $query = []) : string
 {
     $referer = get_referer();
-    $loginUrl = get_admin_login_url();
     if (!$referer) {
-        return $loginUrl;
+        return get_admin_login_url();
     }
 
     static $uri;
@@ -149,7 +148,7 @@ function get_admin_logout_redirect_url(array $query = []) : string
         if (!empty($exp)) {
             $baseName .= '?'.implode('?', $exp);
         }
-        $uri = add_query_args(['redirect' => $baseName], $loginUrl);
+        $uri = add_query_args(['redirect' => $baseName], get_admin_login_url());
     }
 
     return add_query_args($query, $uri);
@@ -165,16 +164,18 @@ function get_admin_login_redirect_url(array $query = []) : string
 
     $redirectUri = get_admin_base_name_file();
     $loginUrl    = get_admin_login_url();
-    switch (get_admin_base_name_file()) {
+
+    // disallow file
+    switch ($redirectUri) {
         case 'logout.php':
         case 'init.php':
         case 'login.php':
             $redirectUri = null;
             break;
-    }
-
-    if (!$redirectUri || ! file_exists(get_admin_directory() .'/' . $redirectUri)) {
-        $redirectUri = null;
+        default:
+            if (!file_exists(get_admin_directory() .'/' . $redirectUri)) {
+                $redirectUri = null;
+            }
     }
 
     $params = get_admin_param_redirect();
@@ -207,6 +208,7 @@ function get_admin_login_redirect_url(array $query = []) : string
 function get_admin_param_redirect() : array
 {
     static $params;
+
     if (is_array($params)) {
         return $params;
     }
@@ -261,7 +263,7 @@ function get_current_admin_login_url(array $query = []) : string
 {
     static $uri;
     if ($uri) {
-        $uri = hook_apply('current_admin_login_redirect_uri', $uri);
+        $uri = hook_apply('current_admin_login_redirect_url', $uri);
         return $uri;
     }
 
@@ -270,7 +272,7 @@ function get_current_admin_login_url(array $query = []) : string
     unset($params['error'], $params['logout']);
 
     $uri = add_query_args($params, $login_uri);
-    $uri = hook_apply('current_admin_login_redirect_uri', $uri);
+    $uri = hook_apply('current_admin_login_redirect_url', $uri);
     return add_query_args($query, $uri);
 }
 
@@ -280,9 +282,11 @@ function get_current_admin_login_url(array $query = []) : string
  */
 function get_admin_redirect_url(array $query = []) : string
 {
-    $params = get_admin_param_redirect();
-    $redirect = $params['redirect']??'';
-    $redirect = urlencode($redirect);
+    static $redirect = null, $params = null;
+    if ($redirect === null || $params === null) {
+        $params = get_admin_param_redirect();
+        $redirect = urlencode((string)($params['redirect'] ?? ''));
+    }
     $params   = array_merge($params, $query);
     unset($params['redirect'], $params['logout']);
 
@@ -295,9 +299,9 @@ function get_admin_redirect_url(array $query = []) : string
 function get_admin_uri(): UriInterface
 {
     static $uri;
-    if (!$uri) {
-        $uri = create_uri_for(get_admin_url());
-    }
+
+    $uri = $uri?:create_uri_for(get_admin_url());
+
     return $uri;
 }
 
@@ -417,11 +421,9 @@ function get_reset_password_url(): string
 /**
  * @return string
  */
-function current_login_url(): string
+function get_current_login_url(): string
 {
-    return is_admin_page()
-        ? get_admin_login_url()
-        : get_login_url();
+    return is_admin_page() ? get_admin_login_url() : get_login_url();
 }
 
 /**
@@ -434,6 +436,7 @@ function get_assets_url(string $uri = ''): string
     if ($uri && $uri[0] == '/') {
         $uri = substr($uri, 1);
     }
+
     return get_site_url($assets . $uri);
 }
 
@@ -447,6 +450,7 @@ function get_assets_vendor_url(string $uri = ''): string
     if ($uri && $uri[0] == '/') {
         $uri = substr($uri, 1);
     }
+
     return get_site_url($assets . $uri);
 }
 
@@ -463,15 +467,22 @@ function redirect(
 ): bool {
     global $is_IIS;
 
+    if (!isset($is_IIS)) {
+        $is_IIS = get_web_server() === WEBSERVER_IIS;
+    }
+
     $location = hook_apply('redirect', $location, $status);
-    $status = hook_apply('redirect_status', $status, $location);
+    $status   = hook_apply('redirect_status', $status, $location);
 
     if (!is_string($location)) {
         return false;
     }
 
     if ($status < 300 || 399 < $status) {
-        do_exit('HTTP redirect status code must be a redirection code, 3xx.', 255);
+        do_exit(
+            'HTTP redirect status code must be a redirection code, 3xx.',
+            255
+        );
     }
 
     $location = sanitize_redirect($location);
@@ -499,16 +510,12 @@ function redirect(
  * @param string|null $moduleFile
  * @return string
  */
-function get_modules_uri($moduleFile = null): string
+function get_modules_url($moduleFile = null): string
 {
-    static $moduleUri;
-    static $moduleDir;
-    if (!$moduleDir) {
-        $moduleDir = un_slash_it(normalize_path(get_modules_dir()));
-    }
-    if (!$moduleUri) {
-        $moduleUri = slash_it(get_site_url(get_modules_path()));
-    }
+    static $moduleUri, $moduleDir;
+
+    $moduleDir = $moduleDir?:un_slash_it(normalize_path(get_modules_dir()));
+    $moduleUri = $moduleUri?:slash_it(get_site_url(get_modules_path()));
 
     if (!is_string($moduleFile)) {
         if ($moduleFile instanceof Module) {
@@ -554,16 +561,12 @@ function get_modules_uri($moduleFile = null): string
  * @param string|null $themeFile
  * @return string
  */
-function get_themes_uri($themeFile = null): string
+function get_themes_url(string $themeFile = null): string
 {
-    static $themeUri;
-    static $themeDir;
-    if (!$themeDir) {
-        $themeDir = un_slash_it(normalize_path(get_themes_dir()));
-    }
-    if (!$themeUri) {
-        $themeUri = slash_it(get_site_url(get_themes_path()));
-    }
+    static $themeUri, $themeDir;
+
+    $themeDir = $themeDir?: un_slash_it(normalize_path(get_themes_dir()));
+    $themeUri = $themeUri?:slash_it(get_site_url(get_themes_path()));
 
     if (!is_string($themeFile)) {
         if ($themeFile instanceof Theme) {
@@ -576,7 +579,7 @@ function get_themes_uri($themeFile = null): string
         return $themeUri;
     }
 
-    $mod = normalize_path($themeFile);
+    $mod  = normalize_path($themeFile);
     $root = normalize_path(get_root_dir());
     if (strpos($mod, $themeDir) === 0) {
         if (substr($mod, -4) === '.php') {
@@ -605,9 +608,9 @@ function get_themes_uri($themeFile = null): string
  * @param string $path
  * @return string
  */
-function get_theme_uri(string $path = ''): string
+function get_theme_url(string $path = ''): string
 {
-    $uri = un_slash_it(get_themes_uri(get_active_theme()));
+    $uri = un_slash_it(get_themes_url(get_active_theme()));
     if ($path !== '') {
         $path = $path[0] === '/' ? substr($path, 1) : $path;
     }
@@ -618,9 +621,9 @@ function get_theme_uri(string $path = ''): string
 /**
  * @return string
  */
-function get_css_uri(): string
+function get_css_url(): string
 {
-    return get_theme_uri('theme.css');
+    return hook_apply('css_url', get_theme_url('theme.css'));
 }
 
 /* -------------------------------------------------
@@ -639,6 +642,7 @@ function get_api_url(string $pathUri = ''): string
         ? ltrim($pathUri, '/')
         : $pathUri;
     $apiUri = get_site_url($path);
+
     return hook_apply(
         'api_url',
         sprintf('%s%s', $apiUri, $pathUri),

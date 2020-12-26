@@ -14,6 +14,11 @@ use BadMethodCallException;
 use Exception;
 use RuntimeException;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class Model
  * @package ArrayIterator\Model

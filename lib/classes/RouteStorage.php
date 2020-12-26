@@ -6,6 +6,11 @@ use Exception;
 use FastRoute\BadRouteException;
 use FastRoute\RouteCollector;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class RouteStorage
  * @package ArrayIterator

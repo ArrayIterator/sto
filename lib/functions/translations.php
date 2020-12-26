@@ -65,11 +65,14 @@ function get_available_languages()
  */
 function get_language_files(): array
 {
-    static $files;
-    if (is_array($files)) {
+    $files  = cache_get('language_files', 'globals', $found);
+    if ($found && is_array($files)) {
         return $files;
     }
+
     $files = [];
+
+    cache_set('language_files', $files, 'globals');
     $languageDir = get_language_dir();
     if (!is_dir($languageDir)) {
         return $files;
@@ -96,6 +99,8 @@ function get_language_files(): array
         $lang['path'] = null;
         $files[Translation::ISO_2_NO_TRANSLATE] = $lang;
     }
+
+    cache_set('language_files', $files, 'globals');
     return $files;
 }
 
@@ -109,8 +114,9 @@ function get_selected_site_language(): string
     $update = false;
     if (!$found || !is_string($lang)) {
         $update = true;
-        $lang = \translation()->getSelectedLanguage();
+        $lang = translation()->getSelectedLanguage();
     }
+
     $lang = is_string($lang) ? trim($lang) : $lang;
     if ($update) {
         update_option('selected_language', $lang);
@@ -118,7 +124,7 @@ function get_selected_site_language(): string
 
     $language = hook_apply('selected_language', $lang);
     if (!is_string($language)) {
-        $language = \translation()->getSelectedLanguage();
+        $language = translation()->getSelectedLanguage();
     }
 
     if (!isset(get_language_files()[$language])
@@ -130,7 +136,7 @@ function get_selected_site_language(): string
     }
 
     if ($selectedLanguage !== $language) {
-        \translation()->setSelectedLanguage($language);
+        translation()->setSelectedLanguage($language);
     }
 
     return $language;

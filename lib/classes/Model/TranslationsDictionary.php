@@ -6,6 +6,11 @@ namespace ArrayIterator\Model;
 use ArrayIterator\Database;
 use PDO;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class Languages
  * @package ArrayIterator\Model

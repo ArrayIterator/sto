@@ -7,11 +7,16 @@ use ArrayIterator\Helper\Path;
 use ArrayIterator\Helper\StringFilter;
 use ArrayIterator\Hooks;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class Scripts
  * @package ArrayIterator\Dependency
  */
-class Scripts extends AbtsractDependencies
+class Scripts extends AbstractDependencies
 {
     /**
      * Base URL for scripts.

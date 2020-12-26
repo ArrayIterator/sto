@@ -5,6 +5,11 @@ namespace ArrayIterator\Model;
 use ArrayIterator\Database\PrepareStatement;
 use Throwable;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class AbstractOnlineModel
  * @package ArrayIterator\Model

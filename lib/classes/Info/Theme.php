@@ -2,6 +2,11 @@
 
 namespace ArrayIterator\Info;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class Theme
  * @package ArrayIterator\Info

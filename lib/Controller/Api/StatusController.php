@@ -4,6 +4,11 @@ namespace ArrayIterator\Controller\Api;
 use ArrayIterator\Controller\BaseController;
 use ArrayIterator\RouteStorage;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class Status
  * @package ArrayIterator\Controller\Api

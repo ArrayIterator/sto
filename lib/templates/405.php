@@ -1,4 +1,10 @@
-<!DOCTYPE html>
+<?php
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
+?><!DOCTYPE html>
 <html<?= get_html_attributes(); ?>>
 <head>
     <meta charset="utf-8">

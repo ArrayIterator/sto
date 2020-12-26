@@ -132,7 +132,10 @@ cache_add_global_groups([
     'supervisors',
     'site_options',
     'sites',
-    'languages'
+    'sites_all', // use for site_ids
+    'languages',
+    'permissions',
+    'globals', // use for global cache
 ]);
 
 // REQUIRE FILTERS BEFORE MODULE LOAD

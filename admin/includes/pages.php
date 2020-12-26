@@ -11,7 +11,7 @@ function admin_is_allowed(string $file = null, bool $default = false): bool
         return true;
     }
 
-    $grants = admin_page_grants();
+    $grants = admin_page_permissions();
     $base = $file ? basename($file) : get_admin_base_name_file();
     $result = $grants[$base] ?? $default;
     return is_bool($result) ? $result : $default;
@@ -20,11 +20,15 @@ function admin_is_allowed(string $file = null, bool $default = false): bool
 /**
  * @return mixed
  */
-function admin_page_grants()
+function admin_page_permissions()
 {
-    static $page;
-    if (!$page) {
-        $page = [
+    $permissions = cache_get(
+        'admin_page_permissions',
+        'globals',
+        $found
+    );
+    if (!$found || !is_array($permissions)) {
+        $permissions = [
             'admin.php' => is_super_admin(),
             'about.php' => true,
             'index.php' => true,
@@ -53,9 +57,11 @@ function admin_page_grants()
             'question-new.php' => current_supervisor_can('add_question') || current_supervisor_can('edit_question'),
             'status.php' => current_supervisor_can('view_status'),
         ];
+
+        cache_set('admin_page_permissions', $permissions, 'globals');
     }
 
-    return hook_apply('admin_page_grants', $page);
+    return hook_apply('admin_page_grants', $permissions);
 }
 
 /**

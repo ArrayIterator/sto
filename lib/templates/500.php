@@ -1,4 +1,9 @@
 <?php
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 $error = $error ?? error_get_last();
 $realMessage = strtok($error['message'], "\n");
 ?>

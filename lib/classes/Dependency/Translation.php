@@ -8,6 +8,11 @@ use ArrayIterator\Database\PrepareStatement;
 use ArrayIterator\Database\QueryPrepareInterface;
 use ArrayIterator\Model\TranslationsDictionary;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class Translation
  * @package ArrayIterator\Dependency

@@ -1,8 +1,8 @@
 <?php
+// end here cause I don't want throw error
 if (!defined('ROOT_DIR')) {
     return;
 }
-?>
-<?php get_header_template(); ?>
-<?php
+get_header_template();
+
 get_footer_template();

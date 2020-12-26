@@ -935,52 +935,114 @@
             }
         }
     };
-    Clock.calculate_delay = function (hours, minutes, seconds)
-    {
+    // reverse param
+    Clock.calculate_delay = function (
+        currentSecond,
+        currentMinute,
+        currentHour,
+        currentDate,
+        currentMonth,
+        currentYear
+    ) {
 
-        var date_1 = new Date();
-        if (arguments.length < 3) {
-            seconds = date_1.getSeconds();
-        }
-        if (arguments.length < 2) {
-            minutes = date_1.getMinutes();
-        }
-        if (arguments.length < 1) {
-            hours = date_1.getHours();
+        var defaultDate = new Date(),
+            currentYearString = defaultDate.getFullYear().toString();
+        if (arguments.length < 6
+            || typeof currentYear !== "number" && (
+                typeof currentYear !== 'string' || ! /^[0-9]{1,4}$/.test(currentYear)
+            )
+        ) {
+            currentYear = defaultDate.getFullYear();
         }
 
-        date_1 = new Date(date_1.getFullYear(), date_1.getMonth(), date_1.getDay());
+        if (currentYear.toString().length < 3) {
+            currentYear = ''
+                + currentYearString.substr(0, 4 - currentYear.toString().length)
+                + currentYear;
+        }
+
+        if (arguments.length < 5
+            || typeof currentMonth !== "number" && (
+                typeof currentMonth !== 'string'
+                || /^[0-9]{1,2}$/.test(currentMonth)
+                || (currentMonth < 1 || currentMonth > 12)
+            ) || (currentMonth < 1 || currentMonth > 12)
+        ) {
+            currentMonth = defaultDate.getMonth();
+        }
+
+        if (arguments.length < 4
+            || typeof currentDate !== "number" && (
+                typeof currentDate !== 'string'
+                || /^[0-9]{1,2}$/.test(currentDate)
+                || (currentDate < 1 || currentDate > 31)
+            ) || (currentDate < 1 || currentDate > 31)
+        ) {
+            currentDate = defaultDate.getDate();
+        }
+
+        if (arguments.length < 3
+            || typeof currentHour !== "number" && (
+                typeof currentHour !== 'string'
+                || /^[0-9]{1,2}$/.test(currentHour)
+                || (currentHour < 0 || currentHour > 24)
+            ) || (currentHour < 0 || currentHour > 24)
+        ) {
+            currentHour = defaultDate.getHours();
+        }
+
+        if (arguments.length < 2
+            || typeof currentMinute !== "number" && (
+                typeof currentMinute !== 'string'
+                || /^[0-9]{1,2}$/.test(currentMinute)
+                || (currentMinute < 0 || currentMinute > 60)
+            ) || (currentMinute < 0 || currentMinute > 60)
+        ) {
+            currentMinute = defaultDate.getMinutes();
+        }
+
+        if (arguments.length < 1
+            || typeof currentSecond !== "number" && (
+                typeof currentSecond !== 'string'
+                || /^[0-9]{1,2}$/.test(currentSecond)
+                || (currentSecond < 0 || currentSecond > 60)
+            ) || (currentSecond < 0 || currentSecond > 60)
+        ) {
+            currentSecond = defaultDate.getSeconds();
+        }
+
+        defaultDate = new Date(currentYear, currentMonth, currentDate);
         var date = new Date(
-                date_1.getFullYear(),
-                date_1.getMonth(),
-                date_1.getDay(),
-                hours,
-                minutes,
-                seconds
+                currentYear,
+                currentMonth,
+                currentDate,
+                currentHour,
+                currentMinute,
+                currentSecond
             ),
-            diff = (date.getTime() - date_1.getTime())/1000;
-            seconds = (60 * ((diff / 60) % 1)) * -1;
-            minutes = (3600 * ((diff / 3600) % 1)) * -1;
-            hours   = (43200 * ((diff / 43200) % 1)) * -1;
+            diff = (date.getTime() - defaultDate.getTime())/1000;
+            currentSecond = (60 * ((diff / 60) % 1)) * -1;
+            currentMinute = (3600 * ((diff / 3600) % 1)) * -1;
+            currentHour   = (43200 * ((diff / 43200) % 1)) * -1;
         return {
             date,
             seconds: {
-                '-webkit-animation-delay' : seconds + 's',
-                '-moz-animation-delay' : seconds + 's',
-                '-ms-animation-delay' : seconds + 's',
-                'animation-delay' : seconds + 's',
+                '-webkit-animation-delay' : currentSecond + 's',
+                '-moz-animation-delay' : currentSecond + 's',
+                '-ms-animation-delay' : currentSecond + 's',
+                'animation-delay' : currentSecond + 's',
             },
             minutes: {
-                '-webkit-animation-delay' : minutes + 's',
-                '-moz-animation-delay' : minutes + 's',
-                '-ms-animation-delay' : minutes + 's',
-                'animation-delay' : minutes + 's',
+                '-webkit-animation-delay' : currentMinute + 's',
+                '-moz-animation-delay' : currentMinute + 's',
+                '-ms-animation-delay' : currentMinute + 's',
+                'animation-delay' : currentMinute + 's',
             },
             hours: {
-                '-webkit-animation-delay' : hours + 's',
-                '-moz-animation-delay' : hours + 's',
-                '-ms-animation-delay' : hours + 's',
-                'animation-delay' : hours + 's',
+                '-webkit-animation-delay' : currentHour + 's',
+                '-moz-animation-delay' : currentHour + 's',
+                '-ms-animation-delay' : currentHour + 's',
+                'animation-delay' : currentHour + 's',
             }
         }
     }

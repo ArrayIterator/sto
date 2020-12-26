@@ -2,7 +2,6 @@
 namespace ArrayIterator\Controller;
 
 use ArrayIterator\RouteStorage;
-use FastRoute\RouteCollector;
 
 /**
  * Class BaseController

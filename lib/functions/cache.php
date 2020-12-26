@@ -85,6 +85,7 @@ function cache_get($key, string $group = ObjectCache::DEFAULT_GROUP, &$found = n
  * @param string $group
  * @param null $found
  * @param int|null $siteId
+ * @return mixed
  */
 function cache_get_current($key, string $group = ObjectCache::DEFAULT_GROUP, &$found = null, int $siteId = null)
 {

@@ -5,6 +5,11 @@ namespace ArrayIterator;
 use Exception;
 use FastRoute\BadRouteException;
 
+// end here cause I don't want throw error
+if (!defined('ROOT_DIR')) {
+    return;
+}
+
 /**
  * Class RouteApi
  * @package ArrayIterator

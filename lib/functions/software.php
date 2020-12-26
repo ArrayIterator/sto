@@ -95,6 +95,7 @@ function get_device_browser()
 function get_web_server(): string
 {
     static $software = null;
+
     if (is_string($software)) {
         return $software;
     }
