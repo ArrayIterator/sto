@@ -17,17 +17,19 @@
   ],
   "require": {
     "php": ">= 7.0",
+    "ext-calendar": "*",
     "ext-curl": "*",
     "ext-json": "*",
     "ext-pdo": "*",
     "ext-date": "*",
-    "ext-redis": "*",
     "ext-mbstring": "*",
-    "ext-calendar": "*",
+    "ext-openssl": "*",
     "nikic/fast-route": "v1.3.0",
     "guzzlehttp/guzzle": "^6",
-    "ext-openssl": "*",
     "ua-parser/uap-php": "^3.9"
+  },
+  "suggest": {
+    "ext-redis": "*"
   },
   "config": {
     "vendor-dir": "lib/vendor",
