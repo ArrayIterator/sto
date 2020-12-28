@@ -26,7 +26,9 @@
     "ext-openssl": "*",
     "nikic/fast-route": "v1.3.0",
     "guzzlehttp/guzzle": "^6",
-    "ua-parser/uap-php": "^3.9"
+    "ua-parser/uap-php": "^3.9",
+    "phpoffice/phpspreadsheet": "^1.15",
+    "phpoffice/phpword": "^0.17.0"
   },
   "suggest": {
     "ext-redis": "*"
