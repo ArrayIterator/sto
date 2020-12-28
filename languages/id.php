@@ -119,11 +119,13 @@ return [
     'Search query could not be empty' => 'Kueri pencarian tidak boleh kosong',
     'Search type is invalid!' => 'Jenis pencarian salah!',
     'Data could not be empty' => 'Data tidak boleh kosong',
-    'Invalid format' => 'Format salah',
-    'Data is duplicate' => 'Data duplikat',
+    'Invalid Format' => 'Format Salah',
+    'Duplicate Data' => 'Data Duplikat',
     'Edit Class: %s' => 'Ubah Kelas: %s',
     'Class Name' => 'Nama Kelas',
     'Note' => 'Keterangan',
     'Notes' => 'Keterangan',
     'User Does Not Exists' => 'Pengguna Tidak Ada',
+    // CLASS
+    'Class code must be contains only alpha numeric, underscore and dashes. Must be started and ending with alphabet or numeric with format: <code>%s</code>' => 'Kode kelas hanya boleh berisi alfa numerik, garis bawah, dan tanda hubung. Harus dimulai dan diakhiri dengan alfabet atau numerik dengan format: <code>%s</code>'
 ];

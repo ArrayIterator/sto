@@ -159,7 +159,8 @@
                 }
 
                 return e.text;
-            };
+            },
+            $modal_template = $('script#underscore_template_modal');
 
         $('select[data-change-submit=true]').on('change', function () {
             $(this).closest('form').submit();
@@ -205,6 +206,37 @@
             }
 
             $data_target.html(html);
+        });
+        $(document)
+            .on('click', '[data-modal=true][data-api][data-template-id]', function (e) {
+            e.preventDefault();
+            var $this = $(this),
+                template_id = $this.attr('data-template-id'),
+                apis_path = $this.data('api'),
+                $template = $('script#'+$.escapeSelector(template_id)),
+                title = $this.data('title')
+            if (!$template.length || typeof apis_path !== 'string') {
+                return;
+            }
+            if (!apis_path.match(/^(https?:)\/\//)) {
+                apis_path = apis_path.replace(/^[\/]+/gi, '');
+                var apis_url = window.api_url || '/api/';
+                    apis_url = apis_url.replace(/[\/]+$/g, '');
+                apis_path = apis_url + '/' + apis_path;
+            }
+            var $modal = $modal_template.html();
+            var data = {
+                content: '<div class="loading loading-dark"><div class="lds-dual-ring"></div></div>'
+            };
+            if (title) {
+                data.title = title;
+            }
+            var template = _.template($modal)(data);
+            var $mod = $(template);
+            $mod.modal('show');
+            $mod.on('bs.hidden', function () {
+                $(this).remove();
+            });
         });
 
         if ($.fn.select2) {

@@ -74,7 +74,7 @@ get_admin_header_template();
                                         ? add_query_args(['action' => 'edit', 'id' => $row['id']], get_admin_url('class-new.php'))
                                         : "#{$identifier}"
                                 );?>">
-                                    <?= esc_html_trans($row['code']); ?>
+                                    <?= esc_html($row['code']); ?>
                                 </a>
                             </div>
                             <div class="row-action">
@@ -82,7 +82,7 @@ get_admin_header_template();
                                 <a data-link-id="<?= $row['id'];?>" href="<?= esc_attr(add_query_args(['action' => 'edit', 'id' => $row['id']], get_admin_url('class-new.php'))) ?>"><?php trans_e('Edit');?></a>
                                 <span class="row-sep">|</span>
                                 <?php } ?>
-                                <a data-action="preview" data-link-id="<?= $row['id'];?>" href="#<?= $identifier;?>"><?= esc_html_trans('Preview'); ?></a>
+                                <a data-action="preview" data-link-id="<?= $row['id'];?>" href="#<?= $identifier;?>"  data-title="<?php trans_e('Code');?> <?php esc_attr_e($row['code']);?>" data-modal="true" data-api="/classes/id/<?= $row['id'];?>" data-template-id="underscore_template_class_preview"><?= esc_html_trans('Preview'); ?></a>
                             </div>
                             <div class="row-content"></div>
                         </td>
@@ -189,7 +189,7 @@ get_admin_header_template();
                         ;?>"><?php trans_e('Edit');?></a>
                         <span class="row-sep">|</span>
                     <?php } ?>
-                    <a data-action="preview" data-link-id="<%= item.id %>" href="#class-id-<%= item.id %>">
+                    <a data-action="preview" data-link-id="<%= item.id %>" href="#class-id-<%= item.id %>" data-title="<?php trans_e('Code');?> <%= item.code %>" data-modal="true" data-api="/classes/id/<%= item.id %>" data-template-id="underscore_template_class_preview">
                         <?= esc_html_trans('Preview'); ?>
                     </a>
                 </div>
@@ -204,6 +204,9 @@ get_admin_header_template();
         <% _.range(1, items).map(function (item) {%>
             <option value="<%= item %>"<%= selected(item) %>><%= item %></option>
         <% }); %>
+    </script>
+    <script type="text/template" id="underscore_template_class_preview">
+
     </script>
     <script type="text/javascript">
 ;(function ($) {

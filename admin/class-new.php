@@ -69,7 +69,7 @@ if (is_method_post()) {
                 );
             }
 
-            $dataResult = get_classes_by_id($id);
+            $dataResult = get_class_by_id($id);
             if (!$dataResult) {
                 return redirect(
                     add_query_args(
@@ -208,9 +208,15 @@ if (is_method_post()) {
             } elseif ($response === RESULT_ERROR_EMPTY_NAME) {
                 $messageStatus = trans_sprintf('Class %s could not be empty!', trans('Name'));
             } elseif ($response === RESULT_ERROR_EXIST_CODE) {
-                $messageStatus = trans_sprintf('Class code %s is duplicate!', post('code'));
+                $messageStatus = trans_sprintf(
+                    'Class %s is duplicate!',
+                    sprintf('%s %s', trans('Code'), post('code'))
+                );
             } elseif ($response === RESULT_ERROR_EXIST_NAME) {
-                $messageStatus = trans_sprintf('Class name %s is duplicate!', post('name'));
+                $messageStatus = trans_sprintf(
+                    'Class %s is duplicate!',
+                    sprintf('%s %s', trans('Name'), post('name'))
+                );
             } elseif ($response === RESULT_ERROR_FAIL) {
                 $messageStatus = trans('Error save data!');
             }
@@ -362,8 +368,8 @@ get_admin_header_template();
             var $form = $('form#form-edit-class'),
                 search_url = <?= json_ns(get_api_url('/classes/search/'));?>,
                 data_empty_text = <?= json_ns(trans('Data could not be empty'));?>,
-                data_invalid_text = <?= json_ns(trans('Invalid format'));?>,
-                data_duplicate_text = <?= json_ns(trans('Data is duplicate'));?>,
+                data_invalid_text = <?= json_ns(trans('Invalid Format'));?>,
+                data_duplicate_text = <?= json_ns(trans('Duplicate Data'));?>,
                 submitBtn = $('form [type=submit]'),
                 regexVal = {
                     'code' : /^[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9]+)?$/g,
@@ -383,6 +389,12 @@ get_admin_header_template();
                 inType = false,
                 set_alert = function (_, alert) {
                     _ = $(_[0] || _);
+                    var alert_m = _.parent().find('.message-alert');
+                    if (!alert_m.length) {
+                        alert_m = $('<span class="message-alert text-danger small"></span>');
+                        _.before(alert_m);
+                    }
+                    alert_m.html(alert);
                     _[0].setCustomValidity(alert);
                     _.addClass(bDanger);
                     _.removeClass(bSuccess);
@@ -396,9 +408,18 @@ get_admin_header_template();
                 },
                 set_succeed = function (_) {
                     _ = $(_[0] || _);
+                    _.closest('.message-alert').remove();
                     _[0].setCustomValidity('');
                     _.removeClass('border-danger');
                     _.addClass('border-success');
+                },
+                disable_button = function () {
+                    submitBtn.attr('disabled', true);
+                    submitBtn.addClass('disabled');
+                },
+                enable_button = function () {
+                    submitBtn.removeClass('disabled');
+                    submitBtn.attr('disabled', false);
                 },
                 check_validity = function () {
                     if (formHasChange) {
@@ -407,8 +428,29 @@ get_admin_header_template();
                             if (!dataStorage.hasOwnProperty(name)) {
                                 continue;
                             }
-                            var val = $('[name='+ $.escapeSelector(name)+']');
-                            if (val.val() !== dataStorage[name]) {
+                            var $val = $('[name='+ $.escapeSelector(name)+']'),
+                                newData;
+                            if ($val.is('select')) {
+                                newData = $val.find('option:selected').val();
+                            } else if ($val.prop('type') === 'checkbox') {
+                                newData = $val.prop('checked');
+                            } else {
+                                newData = $val.val();
+                            }
+                            if (typeof newData === 'string') {
+                                newData = newData.replace(/\s+/g, ' ').trim();
+                            }
+                            if (name === 'site_id') {
+                                if (typeof newData === 'string' && /^[0-9]+$/.test(newData)) {
+                                    newData = parseInt(newData);
+                                }
+
+                                if (typeof newData === "number") {
+                                    site_id = newData;
+                                }
+                            }
+
+                            if (newData !== dataStorage[name]) {
                                 formHasChange = true;
                                 break;
                             }
@@ -417,13 +459,12 @@ get_admin_header_template();
 
                     for (var i in validity) {
                         if (validity[i] === false || ! formHasChange) {
-                            submitBtn.attr('disabled', true);
-                            submitBtn.addClass('disabled');
+                            disable_button();
                             return false;
                         }
                     }
-                    submitBtn.removeClass('disabled');
-                    submitBtn.attr('disabled', false);
+
+                    enable_button();
                     return true;
                 },
                 search_by = function (type, q, succeed, fail, site_id) {
@@ -435,234 +476,285 @@ get_admin_header_template();
                 },
                 current_ajax = {},
                 validity = {},
+                codeHasChange = false,
+                nameHasChange = false,
                 dataStorage = {};
-            $(window).on('beforeunload', function () {
-                if (formHasChange) {
-                    var formChange = false;
-                    for (var name in dataStorage) {
-                        if (!dataStorage.hasOwnProperty(name)) {
-                            continue;
-                        }
-                        var val = $('[name='+ $.escapeSelector(name)+']');
-                        if (val.val() !== dataStorage[name]) {
-                            formChange = true;
-                            break;
-                        }
+            // if on submit - do reverse
+            $form.on('submit', function () {
+                formHasChange = false;
+            });
+            var hasOut = false,
+                inp = $form
+                .find('input[name],textarea[name],select[name]')
+                .not('button,[type=submit],[type=reset]');
+            var detect_change = function (e) {
+                var $this = $(this),
+                    name = $this.attr('name'),
+                    isTextarea = $this.is('textarea'),
+                    isRequired = $this.is('required')
+                        || name === 'code'
+                        || name === 'name';
+
+                if (!top_cleared) {
+                    top_cleared = true;
+                    top_message.find('.alert .close').click();
+                }
+
+                $this.parent().find('.message-alert').remove();
+                if (!isRequired && dataStorage[name] === undefined) {
+                    check_validity();
+                    return;
+                }
+
+                var newData;
+                if ($this.is('select')) {
+                    newData = $this.find('option:selected').val();
+                } else if ($this.prop('type') === 'checkbox') {
+                    newData = $this.prop('checked');
+                } else {
+                    newData = $this.val();
+                }
+
+                if (name === 'site_id' && e.type === 'change') {
+                    if (typeof newData === 'string' && /^[0-9]+$/.test(newData)) {
+                        newData = parseInt(newData);
                     }
-                    if (formChange) {
-                        return <?= json_ns(trans('Do you really want to leave this page?'));?>
+
+                    if (typeof newData === "number") {
+                        site_id = newData;
                     }
                 }
-                dataStorage = {};
-            });
 
-            $form.on('submit', function () {
-               formHasChange = false;
-            });
+                if (newData !== dataStorage[name]) {
+                    formHasChange = true;
+                }
 
-            var selectorNotType = 'input[name]:not([type=button]):not([type=submit]), textarea[name]';
-            var hasOut = false;
-            $form
-                .find(selectorNotType)
-                .each(function () {
-                    var $this = $(this),
-                        name = $this.attr('name'),
-                        originalValues = ($this.val() || '').toString(),
-                        values = originalValues.replace(/\s+/g, ' ').trim();
-                    dataStorage[name] = values;
-                    validity[name] = $this.attr('required') === undefined || values.length > 0;
-                    check_validity();
-                })
-                .on('keyup', function () {
-                    var name = $(this).attr('name');
-                    if (dataStorage[name] !== undefined && dataStorage[name] !== $(this).val()) {
-                        formHasChange = true;
+                if ($this.is('input')
+                    && $this.prop('type') === 'checkbox'
+                    && ! $this.is('textarea')
+                    || $this.is('select')
+                ) {
+                    if (name === 'site_id' && $this.is('select')) {
+                        $('[name=code], [name=name]').trigger('focusout');
+                        hasOut = false;
+                        return;
                     }
                     if (!hasOut) {
                         check_validity();
                     }
+
                     hasOut = false;
-                }).on('change', function () {
-                    hasOut = true;
-                });
-
-            $('select:not([name=site_id])').on('change', function () {
-                formHasChange = true;
-                $('input[required]:first').trigger('focusout');
-            });
-
-            $('select[name=site_id]').on('change', function () {
-                formHasChange = true;
-                $('input[required]:first').trigger('focusout');
-                var val = $(this).find('option:selected').val();
-                if (typeof val === "number") {
-                    site_id = val;
                     return;
                 }
-            });
 
-            $form
-                .find('textarea[name]:not([required]),input[name]:not([required])')
-                .on('focusout', function () {
-                    var $this = $(this),
-                        name = $this.attr('name'),
-                        originalValues = ($this.val() || '').toString(),
-                        values = originalValues.replace(/\s+/g, ' ').trim();
-                    $this.addClass(bSuccess);
-                    validity[name] = true;
-                    var isTextarea = $this.prop('tagName') === 'TEXTAREA';
-                    if (isTextarea) {
-                        values = originalValues
-                            .replace(/([\n]+)\s*/g, "\n")
-                            .replace(/[\r ]+/g, ' ')
-                            .replace(/(^[\n]+|[\n]+$)/g, "");
-                        if (values === originalValues) {
-                            $this.val(values);
-                            formHasChange = true;
-                        }
-                    }
-                    if (isTextarea && values !== originalValues) {
+                var values = newData.replace(/\s+/g, ' ').trim(),
+                    lowerValue = values.toLowerCase().trim(),
+                    re = name ? regexVal[name] : null,
+                    valid  = (!isRequired
+                            || values !== '' && (re !== null ? values.match(re) !== null : true)
+                        ) && (
+                            lastRes[name] === undefined
+                            || lastRes[name][site_id] === undefined
+                            || lastRes[name][site_id][lowerValue] === undefined
+                            || lastRes[name][site_id][lowerValue] === true
+                        );
+                validity[name] = valid;
+                $this.addClass(valid ? bSuccess : bDanger);
+                $this.removeClass(!valid ? bSuccess : bDanger);
+                if (inType === false) {
+                    inType = true;
+                }
+
+                formHasChange = dataStorage[name] !== values;
+                if (e.type !== 'focusout') {
+                    check_validity();
+                    return;
+                }
+
+                inType = false;
+                if (isTextarea) {
+                    values = values
+                        .replace(/[ ]*([\n])+[ ]*/g, '$1')
+                        .replace(/[\r ]+/g, ' ')
+                        .replace(/(^[\n]+|[\n]+$)/g, "");
+                    if (values === newData) {
                         $this.val(values);
                         formHasChange = true;
                     }
-                    if (!top_cleared) {
-                        top_cleared = true;
-                        top_message.find('.alert .close').click();
-                    }
-                });
-            $('textarea[name][required],input[name][required]')
-                .on('keyup focusout', function (e) {
-                    if (!top_cleared) {
-                        top_cleared = true;
-                        top_message.find('.alert .close').click();
-                    }
-                    var $this = $(this),
-                        originalValues = ($this.val() || '').toString(),
-                        values = originalValues.replace(/\s+/g, ' ').trim(),
-                        lowerValue = values.toString().toLowerCase().trim(),
-                        name = $this.attr('name');
-                    var re = name ? regexVal[name] : null,
-                        valid  = (values !== '' && (re === null || !!(values.match(re))));
-                        valid  = valid && (
-                            lastRes[name] === undefined
-                            || lastRes[name][lowerValue] === undefined
-                            || lastRes[name][lowerValue] === true
-                        );
+                }
 
-                    validity[name] = valid;
-                    $this.addClass(valid ? bSuccess : bDanger);
-                    $this.removeClass(!valid ? bSuccess : bDanger);
-                    if (inType === false) {
-                        inType = true;
-                    }
+                if (!isRequired) {
+                    check_validity();
+                    return;
+                }
 
-                    if (dataStorage[name] !== undefined && dataStorage[name] !== values) {
-                        formHasChange = true;
-                    }
+                if (values === '') {
+                    set_alert($this, data_empty_text);
+                    disable_button();
+                    return;
+                }
 
-                    if (e.type === 'focusout') {
-                        inType = false;
-                        var isTextarea = $this.prop('tagName') === 'TEXTAREA';
-                        if (isTextarea) {
-                            values = originalValues
-                                .replace(/([\n])+\s*/g, '$1')
-                                .replace(/[\r ]+/g, ' ')
-                                .replace(/(^[\n]+|[\n]+$)/g, "");
-                            if (values === originalValues) {
-                                $this.val(values);
-                                formHasChange = true;
-                            }
-                        }
-                        if (isTextarea && values !== originalValues) {
-                            $this.val(values);
-                            formHasChange = true;
-                        }
+                if (!valid) {
+                    set_alert(
+                        $this,
+                        lastRes[name] === undefined
+                            || lastRes[name][site_id] === undefined
+                            || typeof lastRes[name][site_id][lowerValue] !== "boolean"
+                            ? data_invalid_text
+                            : data_duplicate_text
+                    );
+                    disable_button();
+                    return;
+                }
 
-                        if (values === '') {
-                            set_alert($this, data_empty_text);
-                        } else if (!valid) {
-                            if (lastRes[name][lowerValue] === false) {
-                                set_alert($this, data_duplicate_text);
-                                return;
-                            }
-                            set_alert($this, data_invalid_text);
-                        } else if (valid && lastRes[name][lowerValue] === true) {
-                            set_succeed($this);
-                        } else {
-                            if (name === 'code' || name === 'name') {
-                                if (typeof lastRes[name][lowerValue] === 'boolean') {
-                                    if (lastRes[name][lowerValue]) {
-                                        set_succeed($this);
-                                        return;
-                                    }
-                                    set_alert($this, data_duplicate_text)
-                                    return;
-                                }
-                                if (name && current_ajax[name]) {
-                                    current_ajax[name].abort()
-                                }
-                                current_ajax[name] = search_by(
-                                    name,
-                                    values,
-                                    function(e) {
-                                        delete current_ajax[name];
-                                        if (!e.data || !e.data.results) {
-                                            return;
-                                        }
+                if (valid && name !== 'code' && name !== 'name') {
+                    set_succeed($this);
+                    check_validity();
+                    return;
+                }
 
-                                        var valuesLow = values.toString().toLowerCase().trim()
-                                        if (get_size(lastRes[name]) > 1000) {
-                                            var count_ = 0;
-                                            for (var k in lastRes[name]) {
-                                                if (!lastRes[name].hasOwnProperty(k)) {
-                                                    continue;
-                                                }
+                if (!lastRes[name]) {
+                    lastRes[name] = {};
+                }
+                if (lastRes[name][site_id] === undefined) {
+                    lastRes[name][site_id] = {};
+                }
 
-                                                delete lastRes[name][k];
-                                                if (count_++ > 20) {
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        if (e.data.results.length === 0) {
-                                            lastRes[name][valuesLow] = true;
-                                            set_succeed($this);
-                                            return;
-                                        }
-
-                                        for (var i in e.data.results) {
-                                            if (!e.data.results.hasOwnProperty(i)) {
-                                                continue;
-                                            }
-                                            var ie = e.data.results[i],
-                                                iN = ie[name].toString().toLowerCase().trim();
-                                            lastRes[name][iN] = ie.id === id;
-                                        }
-
-                                        validity[name] = lastRes[name][valuesLow] === true;
-                                        if (lastRes[name][valuesLow] !== true) {
-                                            set_alert($this, data_duplicate_text);
-                                        } else {
-                                            set_succeed($this);
-                                        }
-                                        check_validity();
-                                    },
-                                    function (e) {
-                                        validity[name] = true;
-                                        delete current_ajax[name];
-                                        check_validity();
-                                    },
-                                    site_id
-                                );
-
-                                check_validity();
-                                return;
-                            }
-                            set_succeed(this);
-                        }
+                if (typeof lastRes[name][site_id][lowerValue] === 'boolean') {
+                    if (lastRes[name][site_id][lowerValue]) {
+                        set_succeed($this);
+                    } else {
+                        set_alert($this, data_duplicate_text)
                     }
                     check_validity();
-                });
+                    return;
+                }
+                if (current_ajax[name]) {
+                    current_ajax[name].abort()
+                }
+                if (name === 'name') {
+                    nameHasChange = true;
+                } else if (name === 'code') {
+                    codeHasChange = true;
+                }
+
+                current_ajax[name] = search_by(
+                    name,
+                    values,
+                    function(e) {
+                        delete current_ajax[name];
+                        if (!e.data || !e.data.results) {
+                            return;
+                        }
+                        var valuesLow = values.toString().toLowerCase().trim()
+                        if (get_size(lastRes[name]) > 1000) {
+                            var count_ = 0;
+                            for (var k in lastRes[name]) {
+                                if (!lastRes[name].hasOwnProperty(k)) {
+                                    continue;
+                                }
+
+                                delete lastRes[name][k];
+                                if (count_++ > 20) {
+                                    break;
+                                }
+                            }
+                        }
+                        if (e.data.results.length === 0) {
+                            lastRes[name][site_id][valuesLow] = true;
+                            set_succeed($this);
+                            check_validity();
+                            return;
+                        }
+
+                        for (var i in e.data.results) {
+                            if (!e.data.results.hasOwnProperty(i)) {
+                                continue;
+                            }
+                            var ie = e.data.results[i],
+                                iN = ie[name].toString().toLowerCase().trim(),
+                                sid = ie['site_id'];
+                            if (lastRes[name][sid] === undefined) {
+                                lastRes[name][sid] = {};
+                            }
+                            lastRes[name][sid][iN] = ie.id === id;
+                        }
+
+                        validity[name] = lastRes[name][site_id][valuesLow] === true
+                            || lastRes[name][site_id][valuesLow] === undefined;
+                        if (!validity[name]) {
+                            set_alert($this, data_duplicate_text);
+                        } else {
+                            set_succeed($this);
+                        }
+                        check_validity();
+                    },
+                    function (e) {
+                        validity[name] = true;
+                        delete current_ajax[name];
+                        check_validity();
+                    },
+                    site_id
+                );
+            };
+
+            inp.each(function () {
+                    var $this = $(this),
+                        name = $this.attr('name');
+                    if ($this.is('select')) {
+                        dataStorage[name] = $this.find('option:selected').val().replace(/\s+/g, ' ').trim();
+                    } else if ($this.prop('type') === 'checkbox') {
+                        dataStorage[name] = $this.prop('checked');
+                    } else {
+                        dataStorage[name] = $this.val().replace(/\s+/g, ' ').trim();
+                    }
+
+                    if (name === 'site_id') {
+                        if (typeof dataStorage[name] === 'string' && /^[0-9]+$/.test(dataStorage[name])) {
+                            dataStorage[name] = parseInt(dataStorage[name]);
+                        }
+                        if (typeof dataStorage[name] === "number") {
+                            site_id = dataStorage[name];
+                        }
+                    }
+
+                    validity[name] = $this.is('required')
+                        || dataStorage[name] !== undefined && dataStorage[name] !== '';
+                })
+                .on('change', detect_change)
+                .on('focusout',detect_change)
+                .on('keyup', detect_change);
+            $(window).on('beforeunload', function () {
+                if (!formHasChange) {
+                    dataStorage = {};
+                    return;
+                }
+                var formChange = false,
+                    name;
+                for (name in dataStorage) {
+                    if (!dataStorage.hasOwnProperty(name)) {
+                        continue;
+                    }
+                    var $val = $('[name='+ $.escapeSelector(name)+']'),
+                        newData;
+                    if ($val.is('select')) {
+                        newData = $val.find('option:selected').val();
+                    } else if ($val.prop('type') === 'checkbox') {
+                        newData = $val.prop('checked');
+                    } else {
+                        newData = $val.val();
+                    }
+                    if (newData !== dataStorage[name]) {
+                        formChange = true;
+                        break;
+                    }
+                }
+                if (formChange) {
+                    return <?= json_ns(trans('Do you really want to leave this page?'));?>
+                }
+                dataStorage = {};
+            });
+            check_validity();
         })(window.jquery);
     </script>
 <?php

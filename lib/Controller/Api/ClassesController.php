@@ -322,24 +322,36 @@ class ClassesController extends BaseController
         }
 
         if ($response === -4) {
-            $data = trans_sprintf('Class %s could not be empty!', trans('Code'));
+            $data = trans_sprintf(
+                'Class %s could not be empty!',
+                trans('Code')
+            );
             json(412, $data);
             return;
         }
         if ($response === -3) {
-            $data = trans_sprintf('Class %s could not be empty!', trans('Name'));
+            $data = trans_sprintf(
+                'Class %s could not be empty!',
+                trans('Name')
+            );
             json(412, $data);
             return;
         }
 
         if ($response === -2) {
-            $data = trans_sprintf('Class code %s is duplicate!', post('code'));
+            $data = trans_sprintf(
+                'Class %s is duplicate!',
+                sprintf('%s %s', trans('Code'), post('code'))
+            );
             json(412, $data);
             return;
         }
 
         if ($response === -1) {
-            $data = trans_sprintf('Class name %s is duplicate!', post('name'));
+            $data = trans_sprintf(
+                'Class %s is duplicate!',
+                sprintf('%s %s', trans('Name'), post('name'))
+            );
             json(412, $data);
             return;
         }

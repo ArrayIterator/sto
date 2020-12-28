@@ -424,7 +424,7 @@ function get_class_by_code(string $code, int $siteIds = null)
 {
     $siteIds = $siteIds??get_current_site_id();
     $result = get_classes_by_code($code, [$siteIds]);
-    return $result[0]?:false;
+    return $result[0]??false;
 }
 
 /**
@@ -687,6 +687,9 @@ function update_class_data(int $classId, array $classes)
     $classes['note'] = $classes['note'] !== null ? trim($classes['note']) : null;
     if ($classes['note'] === null) {
         unset($classes['note']);
+    } else {
+        $classes['note'] = preg_replace('#[ ]*[\n]+[ ]*#', "\n", $classes['note']);
+        $classes['note'] = preg_replace('#(^[\n]+|[\n]+$)#', "", $classes['note']);
     }
 
     if (empty($classes)) {
@@ -797,6 +800,11 @@ function insert_class_data(array $classes)
 
     $classes['note'] = !is_string($classes['note']) ? null : trim($classes['note']);
     $classes['note'] = $classes['note'] ? trim($classes['note']) : '';
+
+    if ($classes['note'] !== '') {
+        $classes['note'] = preg_replace('#[ ]*[\n]+[ ]*#', "\n", $classes['note']);
+        $classes['note'] = preg_replace('#(^[\n]+|[\n]+$)#', "", $classes['note']);
+    }
 
     $before = get_class_by_code($classes['code'], $site_id);
     if (!empty($before)) {

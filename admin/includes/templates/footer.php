@@ -24,7 +24,7 @@ if (!defined('ADMIN_AREA')) {
     </div>
     <!-- #right-area -->
     <script type="text/template" id="underscore_template_modal">
-        <div class="modal" tabindex="-1" role="dialog">
+        <div class="modal fade" tabindex="-1" role="dialog" data-template="underscore_template_modal">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">

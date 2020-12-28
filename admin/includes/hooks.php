@@ -53,6 +53,7 @@ function hook_admin_js_header()
     $tz   = timezone()->getDateTime('UTC');
     $time = (int) ceil(abs($tz->getTimestamp().$tz->format('.u'))*1000);
     $ping_url = json_ns(get_api_url(StatusController::PING_PATH));
+    $api_url = json_ns(get_api_url());
     $login_url = json_ns(get_admin_login_url());
     $user_id = get_current_user_id();
     $cookie_domain = json_ns(COOKIE_DOMAIN);
@@ -65,6 +66,7 @@ function hook_admin_js_header()
         $rendered = <<<JS
 
             w.ping_url  = {$ping_url};
+            w.api_url  = {$api_url};
             w.login_url = {$login_url};
             w.user_id   = $user_id;
             w.max_upload_size = {$upload_file_size_limit};
