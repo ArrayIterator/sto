@@ -79,10 +79,10 @@ function filter_classes_status($classesStatus) : string
 function get_classes_data_filters(array $data) : array
 {
     $ids = [];
-    foreach ($data as &$item) {
+    foreach ($data as $key => $item) {
         $ids[$item['id']] = true;
         if (isset($item['site_id']) && is_numeric($item['site_id'])) {
-            $item['site_id'] = (int) $item['site_id'];
+            $data[$key]['site_id'] = (int) $item['site_id'];
         }
     }
 
@@ -90,7 +90,8 @@ function get_classes_data_filters(array $data) : array
         return $data;
     }
 
-    $implodedIds = implode(',', $ids);
+    $implodedIds = implode(',', array_keys($ids));
+
     $where = count($ids) === 1
         ? " class_id={$implodedIds} "
         : "class_id IN ({$implodedIds})";
@@ -128,6 +129,7 @@ WHERE {$where}
         $data[$id]['teachers'][] = $row;
     }
 
+    $stmt->closeCursor();
     foreach ($data as $classId => $item) {
         cache_set_current(
             trim($item['code']),
@@ -148,7 +150,6 @@ WHERE {$where}
         );
     }
 
-    $stmt->closeCursor();
     return $data;
 }
 
@@ -502,7 +503,6 @@ function search_classes_by(
     $res = $stmt ? $stmt->fetchClose(PDO::FETCH_ASSOC) : false;
     $total = $res ? abs($res['total']??0) : 0;
     unset($res);
-
     $stmt = database_unbuffered_query_execute(
         "
 SELECT *
@@ -653,8 +653,10 @@ function update_class_data(int $classId, array $classes)
     if (isset($posts['site_id'])
         && is_numeric($posts['site_id'])
         && is_int(abs($posts['site_id']))
+        && is_super_admin()
     ) {
         $classes['site_id'] = (int) $posts['site_id'];
+        $siteId = $classes['site_id'];
     }
 
     $classes['code'] = !is_string($classes['code'])
@@ -704,13 +706,6 @@ function update_class_data(int $classId, array $classes)
     $table = get_classes_table_name();
     $newClass = [];
     $args = [];
-
-    if (!is_super_admin()
-        || !is_int($classes['site_id'])
-        || !get_site_by_id($classes['site_id'])
-    ) {
-        unset($classes['site_id']);
-    }
 
     unset($classes['created_by']);
     foreach ($classes as $key => $item) {

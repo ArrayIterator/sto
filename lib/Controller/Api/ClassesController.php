@@ -107,7 +107,7 @@ class ClassesController extends BaseController
         ];
 
         try {
-            $data = get_classes_data($limit, $offset);
+            $data = get_classes_data($limit, $offset, $siteIds);
             $offset = $data['meta']['query']['offset'];
             if (!empty($filter)) {
                 foreach ($data['results'] as $key => &$item) {
@@ -184,7 +184,7 @@ class ClassesController extends BaseController
         } catch (Exception $e) {
             json(500, $e);
         }
-        json(200, $data, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        json(200, $data);
     }
 
     /**
@@ -465,7 +465,7 @@ class ClassesController extends BaseController
             );
         }
 
-        json(200, $data, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+        json(200, $data);
     }
 
     protected function registerController(RouteStorage $route)

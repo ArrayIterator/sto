@@ -435,14 +435,14 @@ function render_admin_message()
 {
     hook_remove('admin_top_message', 'render_admin_message');
     $messages =& get_admin_messages();
-    foreach ($messages as $key => &$item) {
+    foreach ($messages as $key => $item) {
         if (!is_array($item)) {
-            $item = [];
+            $messages[$key] = [];
             continue;
         }
         foreach ($item as $l => $message) {
             if (!is_string($message)) {
-                unset($item[$l]);
+                unset($messages[$key][$l]);
                 continue;
             }
             echo $message;

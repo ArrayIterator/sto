@@ -13,6 +13,7 @@ set_admin_title('Add New Class');
 
 $posts = array_map_string_empty(posts());
 $current_site_id = get_current_site_id();
+$class_site_id = $current_site_id;
 $is_super_admin = is_super_admin();
 $is_edit = false;
 $referer = get_referer();
@@ -21,6 +22,7 @@ $id = query_param_int('id');
 $result = null;
 if ($id > 0) {
     $result = get_class_by_id($id);
+    $class_site_id = $result ? $result['site_id'] : $class_site_id;
 }
 
 $matchReferer = $referer
@@ -97,6 +99,7 @@ if (is_method_post()) {
                 );
             }
 
+            $class_site_id = $dataResult['site_id'];
             $response = update_class_data($id, $posts);
             if ($response === true || $response === 1) {
                 create_cookie_succeed();
@@ -293,8 +296,8 @@ get_admin_header_template();
                             <?php
                                 $selectedHost = '';
                                 foreach (get_all_sites() as $siteId => $site) {
-                                    $selected = $current_site_id  === $siteId ? ' selected' : '';
-                                    if ($current_site_id === $siteId) {
+                                    $selected = $class_site_id  === $siteId ? ' selected' : '';
+                                    if ($class_site_id === $siteId) {
                                         $selectedHost = $site->get('host');
                                     }
                             ?>
@@ -367,7 +370,7 @@ get_admin_header_template();
                     'name' : /^(.+)$/g,
                 },
                 top_message = $('#top-message'),
-                site_id = <?= get_current_site_id();?>,
+                site_id = <?= $class_site_id;?>,
                 id = <?= $posts['id']??'null';?>,
                 bSuccess = 'border-success',
                 bDanger = 'border-danger',
@@ -423,8 +426,12 @@ get_admin_header_template();
                     submitBtn.attr('disabled', false);
                     return true;
                 },
-                search_by = function (type, q, succeed, fail) {
-                    return $.get(search_url + '?type='+type+'&q='+q+'&limit=10', {}, succeed).fail(fail);
+                search_by = function (type, q, succeed, fail, site_id) {
+                    var url = search_url + '?type='+type+'&q='+q+'&limit=10';
+                    if (typeof site_id === "number") {
+                        url += "&site_id="+site_id;
+                    }
+                    return $.get(url, {}, succeed).fail(fail);
                 },
                 current_ajax = {},
                 validity = {},
@@ -478,6 +485,22 @@ get_admin_header_template();
                 }).on('change', function () {
                     hasOut = true;
                 });
+
+            $('select:not([name=site_id])').on('change', function () {
+                formHasChange = true;
+                $('input[required]:first').trigger('focusout');
+            });
+
+            $('select[name=site_id]').on('change', function () {
+                formHasChange = true;
+                $('input[required]:first').trigger('focusout');
+                var val = $(this).find('option:selected').val();
+                if (typeof val === "number") {
+                    site_id = val;
+                    return;
+                }
+            });
+
             $form
                 .find('textarea[name]:not([required]),input[name]:not([required])')
                 .on('focusout', function () {
@@ -606,18 +629,16 @@ get_admin_header_template();
                                             set_succeed($this);
                                             return;
                                         }
+
                                         for (var i in e.data.results) {
                                             if (!e.data.results.hasOwnProperty(i)) {
                                                 continue;
                                             }
                                             var ie = e.data.results[i],
                                                 iN = ie[name].toString().toLowerCase().trim();
-                                            lastRes[name][iN] = iN !== values;
-                                            if (id !== null) {
-                                                lastRes[name][iN] = lastRes[name][iN] && ie[id] === id;
-                                            }
+                                            lastRes[name][iN] = ie.id === id;
                                         }
-                                        lastRes[name][valuesLow] = !(lastRes[name][valuesLow]);
+
                                         validity[name] = lastRes[name][valuesLow] === true;
                                         if (lastRes[name][valuesLow] !== true) {
                                             set_alert($this, data_duplicate_text);
@@ -631,6 +652,7 @@ get_admin_header_template();
                                         delete current_ajax[name];
                                         check_validity();
                                     },
+                                    site_id
                                 );
 
                                 check_validity();
