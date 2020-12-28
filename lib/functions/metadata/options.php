@@ -4,6 +4,14 @@ use ArrayIterator\ArrayGetter;
 use ArrayIterator\Info\Theme;
 
 /**
+ * @return string
+ */
+function get_option_table_name() : string
+{
+    return option()->getTableName();
+}
+
+/**
  * @param string $name
  * @param null $default
  * @param int|null $siteId

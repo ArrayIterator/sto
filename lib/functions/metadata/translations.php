@@ -4,6 +4,19 @@ use ArrayIterator\Dependency\Translation;
 use ArrayIterator\Dependency\Translator;
 
 /**
+ * @return string
+ */
+function  get_translations_table_name() : string
+{
+    return translation()->getTableName();
+}
+
+function get_translator_table_name() : string
+{
+    return translation()->getTranslator()->getTableName();
+}
+
+/**
  * Get available translated Languages
  *
  * @return array
@@ -21,8 +34,8 @@ function get_available_translated_language(): array
             FROM `%s` as k
             INNER JOIN `%s` as l ON l.iso_3 = k.iso_3
             GROUP BY l.iso_3',
-            \translation()->getTableName(),
-            \translation()->getTranslator()->getTableName()
+            get_translations_table_name,
+            get_translator_table_name()
         )
     );
 
@@ -77,6 +90,7 @@ function get_language_files(): array
     if (!is_dir($languageDir)) {
         return $files;
     }
+
     $lang = get_available_languages();
     foreach ($lang as $key => $l) {
         $file = sprintf('%s/%s.php', get_language_dir(), $l['iso_2']);
@@ -90,6 +104,7 @@ function get_language_files(): array
         $l['path'] = normalize_directory($file);
         $files[$key] = $l;
     }
+
     if (!isset($files[Translation::ISO_2_NO_TRANSLATE])) {
         $lang = $lang ?? [
                 'iso_3' => 'eng',
@@ -150,6 +165,7 @@ function translator(): Translator
     static $required = [];
 
     $selectedLanguage = get_selected_site_language();
+
     $translator = translation()->getTranslator($selectedLanguage);
     if (!isset($required[$selectedLanguage])) {
         $required[$selectedLanguage] = true;

@@ -11,12 +11,14 @@ function get_current_site_id(): int
         return application()->getDefaultSiteId();
     }
 
-    $data = hook_apply('current_site_id', application()->getSite()->getModelSiteId());
-    if (!is_numeric($data) || !is_int(abs($data))) {
+    $current_site = get_current_site_meta();
+    $id = $current_site ? $current_site['id'] : 0;
+    // $data = hook_apply('current_site_id', $id);
+    if (!is_numeric($id) || !is_int(abs($id))) {
         return 0;
     }
 
-    return abs($data);
+    return $id;
 }
 
 /**
@@ -36,6 +38,7 @@ function get_all_sites() : array
     if ($found && is_array($sites)) {
         return $sites;
     }
+
     cache_set('site_ids', [], 'sites_all');
     $stmt = site()->getAllStmt();
     if (!$stmt) {
@@ -62,27 +65,40 @@ function enable_multisite(): bool
 }
 
 /**
+ * @return Site
+ */
+function get_global_site_meta() : Site
+{
+    static $site;
+    if ($site) {
+        return $site;
+    }
+    $site = site()->findById(1)->fetchClose();
+    return $site;
+}
+
+/**
  * @return array|false
  */
 function get_current_site_meta()
 {
     static $meta = [];
+
     $host = get_host();
-    if (!isset($meta[$host])) {
-        /**
-         * @var Site $site
-         */
-        $site = site()->getHostOrAdditionalMatch($host);
-        cache_set($site->getId(), $site, 'sites');
-        $meta[$host] = $site
-            ? $site->toArray()
-            : false;
+    $enableMultisite = enable_multisite();
+    if (isset($meta[$host])) {
+        $data = $meta[$host];
+        if ($data) {
+            $site = get_site_by_id($data['id']);
+            $data = $site ? $site->toArray() : $data;
+        }
+
+        return hook_apply('current_site_meta', $data, $host, $enableMultisite);
     }
 
-    $data = $meta[$host];
-    $enableMultisite = enable_multisite();
     if (!$enableMultisite) {
-        $data = $meta[$host] ?: [
+        $site = get_site_by_id(1);
+        $site  = $site ? $site->toArray() : [
             'id' => 1,
             'name' => 'Default System',
             'host' => $host,
@@ -91,7 +107,26 @@ function get_current_site_meta()
             'type' => 'host',
             'metadata' => null
         ];
+
+        $meta[$site['host']] = $site;
+        $meta[$host] = $site;
+    } elseif (!isset($meta[$host])) {
+        $global = get_global_site_meta();
+        /**
+         * @var Site $site
+         */
+        $site = site()->getHostOrAdditionalMatch($host);
+        if (!$site && $global->get('host') === $host) {
+            $site = $global;
+        }
+
+        // no save cached
+        $meta[$host] = $site
+            ? $site->toArray()
+            : false;
     }
+
+    $data = $meta[$host];
 
     return hook_apply('current_site_meta', $data, $host, $enableMultisite);
 }
@@ -106,10 +141,12 @@ function get_site_by_id(int $siteId)
     if (!$found && ($data instanceof Site || $data === false)) {
         return $data;
     }
+
     $site = site()->findById($siteId);
     cache_set($siteId, false, 'sites');
     if ($site) {
         $data = $site->fetch();
+        $site->closeCursor();
         cache_set($siteId, $data, 'sites');
         return $data;
     }

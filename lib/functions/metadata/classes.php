@@ -85,6 +85,7 @@ function get_classes_data_filters(array $data) : array
             $item['site_id'] = (int) $item['site_id'];
         }
     }
+
     if (empty($data)) {
         return $data;
     }
@@ -639,32 +640,33 @@ function update_class_data(int $classId, array $classes)
         'code' => $classes['code']??null,
         'note' => $classes['note']??null,
     ];
+
     if ($classesStatus) {
         $classes['status'] = $classesStatus;
     }
+
     if ($user_id && $user_id > 0) {
         $classes['created_by'] = $user_id;
     }
+
     // ONLY ALLOWED SUPER ADMIN TO CHANGE SITE_ID
-    if (is_super_admin()
-        && isset($posts['site_id'])
+    if (isset($posts['site_id'])
         && is_numeric($posts['site_id'])
         && is_int(abs($posts['site_id']))
     ) {
         $classes['site_id'] = (int) $posts['site_id'];
-        if ($classes['site_id'] === $data['site_id']) {
-            unset($classes['site_id']);
-        }
     }
 
-    $classes['code'] = !is_string($classes['code']) ? null : trim($classes['code']);
+    $classes['code'] = !is_string($classes['code'])
+        ? null
+        : trim($classes['code']);
     $classes['code'] = $classes['code'] ? trim($classes['code']) : null;
     if ($classes['code'] === null) {
         unset($classes['code']);
     } else {
         $before = get_class_by_code($classes['code'], $siteId);
         if ($before && ((int) $before['id']) <> $classId) {
-            return -2;
+            return RESULT_ERROR_EXIST_CODE;
         }
     }
 
@@ -675,7 +677,7 @@ function update_class_data(int $classId, array $classes)
     } else {
         $before = get_class_by_name($classes['name'], $siteId);
         if ($before && (int) $before['id'] <> $classId) {
-            return -1;
+            return RESULT_ERROR_EXIST_NAME;
         }
     }
 
@@ -686,7 +688,7 @@ function update_class_data(int $classId, array $classes)
     }
 
     if (empty($classes)) {
-        return 1;
+        return RESULT_ERROR_OK;
     }
 
     foreach ($classes as $item => $v) {
@@ -696,14 +698,17 @@ function update_class_data(int $classId, array $classes)
     }
 
     if (empty($classes)) {
-        return 1;
+        return RESULT_ERROR_OK;
     }
 
     $table = get_classes_table_name();
     $newClass = [];
     $args = [];
 
-    if (isset($classes['site_id']) && !is_super_admin()) {
+    if (!is_super_admin()
+        || !is_int($classes['site_id'])
+        || !get_site_by_id($classes['site_id'])
+    ) {
         unset($classes['site_id']);
     }
 
@@ -718,6 +723,9 @@ function update_class_data(int $classId, array $classes)
     if (!isset($data['created_by'])) {
          $data['created_by'] = get_current_user_id();
     }
+    if (is_int($user_id)) {
+        $data['created_by'] = $user_id;
+    }
 
     $res = false;
     $set = implode(', ', $newClass);
@@ -731,7 +739,7 @@ function update_class_data(int $classId, array $classes)
         }
         $stmt && $stmt->closeCursor();
     } catch (Exception $e) {
-        return false;
+        return RESULT_ERROR_FAIL;
     }
 
     return (bool) $res;
@@ -740,19 +748,22 @@ function update_class_data(int $classId, array $classes)
 /**
  * @param array $classes
  * @return array|false|int
+ * -4 is empty code
+ * -3 is empty name
+ * -2 code exist
+ * -1 name exist
  */
 function insert_class_data(array $classes)
 {
     $site_id = get_current_site_id();
-    if (is_super_admin()) {
-        if (isset($classes['site_id']) && is_numeric($classes['site_id'])) {
-            $classes['site_id'] = abs($classes['site_id']);
-            if (is_int($classes['site_id'])) {
-                $exists = get_site_by_id($classes['site_id']);
-                if ($exists) {
-                    $site_id = $exists->getId();
-                }
-            }
+    if (is_super_admin()
+        && isset($classes['site_id'])
+        && is_numeric($classes['site_id'])
+        && is_int(abs($classes['site_id']))
+    ) {
+        $classes['site_id'] = abs($classes['site_id']);
+        if (($exists = get_site_by_id($classes['site_id']))) {
+            $site_id = $exists->getId();
         }
     }
 
@@ -760,13 +771,13 @@ function insert_class_data(array $classes)
     $code = !is_string($code) ? null : trim($code);
     $code = $code ?: null;
     if (!$code) {
-        return -4;
+        return RESULT_ERROR_EMPTY_CODE;
     }
     $name = $classes['name']??null;
     $name = !is_string($name) ? null : trim($name);
     $name = $name ?: null;
     if (!$name) {
-        return -3;
+        return RESULT_ERROR_EMPTY_NAME;
     }
 
     $user_id = get_current_user_id();
@@ -794,12 +805,12 @@ function insert_class_data(array $classes)
 
     $before = get_class_by_code($classes['code'], $site_id);
     if (!empty($before)) {
-        return -2;
+        return RESULT_ERROR_EXIST_CODE;
     }
 
     $before = get_class_by_name($classes['name'], $site_id);
     if (!empty($before)) {
-        return -1;
+        return RESULT_ERROR_EXIST_NAME;
     }
 
     $table = get_classes_table_name();
