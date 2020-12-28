@@ -98,7 +98,7 @@
          * ---------------------- */
         var parse_element_attributes = function (attributes) {
                 var data = {data: {}};
-                if (typeof attributes !== 'object' || attributes.length) {
+                if (typeof attributes !== 'object' || ! attributes.length) {
                     return data;
                 }
                 try {
@@ -148,6 +148,7 @@
                 if ($template) {
                     try {
                         data = $.extend(true, {}, data, {data:element.data()});
+
                         $template = _.template(
                             $template
                         )(data);
@@ -202,6 +203,7 @@
                     html = $selected.html();
                 }
             }
+
             $data_target.html(html);
         });
 

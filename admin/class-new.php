@@ -124,19 +124,19 @@ if (is_method_post()) {
                 );
             }
             $messageStatus = null;
-            if ($response === -4) {
-                $posts['name'] = $result['name']??'';
+            if ($response === RESULT_ERROR_EMPTY_CODE) {
+                $posts['code'] = $result['code']??'';
                 $messageStatus = trans_sprintf('Class %s could not be empty!', trans('Code'));
-            } elseif ($response === -3) {
+            } elseif ($response === RESULT_ERROR_EMPTY_CODE) {
                 $posts['name'] = $result['name']??'';
                 $messageStatus = trans_sprintf('Class %s could not be empty!', trans('Name'));
-            } elseif ($response === -2) {
+            } elseif ($response === RESULT_ERROR_EXIST_CODE) {
                 $posts['code'] = $result['code']??$posts['code'];
                 $messageStatus = trans_sprintf('Class code %s is duplicate!', post('code'));
-            } elseif ($response === -1) {
+            } elseif ($response === RESULT_ERROR_EXIST_NAME) {
                 $posts['name'] = $result['name']??$posts['name'];
                 $messageStatus = trans_sprintf('Class name %s is duplicate!', post('name'));
-            } elseif ($response === false) {
+            } elseif ($response === RESULT_ERROR_FAIL) {
                 $messageStatus = trans('Error save data!');
             }
 
@@ -200,15 +200,15 @@ if (is_method_post()) {
                         get_admin_current_file_url()
                     )
                 );
-            } elseif ($response === -4) {
+            } elseif ($response === RESULT_ERROR_EMPTY_CODE) {
                 $messageStatus = trans_sprintf('Class %s could not be empty!', trans('Code'));
-            } elseif ($response === -3) {
+            } elseif ($response === RESULT_ERROR_EMPTY_NAME) {
                 $messageStatus = trans_sprintf('Class %s could not be empty!', trans('Name'));
-            } elseif ($response === -2) {
+            } elseif ($response === RESULT_ERROR_EXIST_CODE) {
                 $messageStatus = trans_sprintf('Class code %s is duplicate!', post('code'));
-            } elseif ($response === -1) {
+            } elseif ($response === RESULT_ERROR_EXIST_NAME) {
                 $messageStatus = trans_sprintf('Class name %s is duplicate!', post('name'));
-            } elseif ($response === false) {
+            } elseif ($response === RESULT_ERROR_FAIL) {
                 $messageStatus = trans('Error save data!');
             }
 
@@ -282,7 +282,7 @@ get_admin_header_template();
                     <div class="text-muted small"><?php trans_e(get_admin_title());?></div>
                 </div>
                 <div class="card-body">
-                    <?php if (is_super_admin()) { ?>
+                    <?php if (is_super_admin() && enable_multisite()) { ?>
                     <div class="form-group row">
                         <div class="col-sm-3">
                             <label for="class-site-id"><?php esc_html_trans_e('Site Id');?></label>

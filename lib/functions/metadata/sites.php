@@ -3,6 +3,22 @@
 use ArrayIterator\Model\Site;
 
 /**
+ * @return string
+ */
+function get_sites_table_name() : string
+{
+    return site()->getTableName();
+}
+
+/**
+ * @return bool
+ */
+function site_has_found() : bool
+{
+    return get_current_site_id() > 0;
+}
+
+/**
  * @return int
  */
 function get_current_site_id(): int
@@ -13,7 +29,6 @@ function get_current_site_id(): int
 
     $current_site = get_current_site_meta();
     $id = $current_site ? $current_site['id'] : 0;
-    // $data = hook_apply('current_site_id', $id);
     if (!is_numeric($id) || !is_int(abs($id))) {
         return 0;
     }
@@ -73,6 +88,7 @@ function get_global_site_meta() : Site
     if ($site) {
         return $site;
     }
+
     $site = site()->findById(1)->fetchClose();
     return $site;
 }
@@ -82,18 +98,41 @@ function get_global_site_meta() : Site
  */
 function get_current_site_meta()
 {
-    static $meta = [];
+    static $meta = [], $force_host = null;
+    if ($force_host === null) {
+        $force_host = false;
+        if (defined('FORCE_SITE_HOST') && is_string(FORCE_SITE_HOST)) {
+            $forced = trim(FORCE_SITE_HOST);
+            $force_host_array = [];
+            if ($forced !== '') {
+                $force_host_array = explode(',', $forced);
+                $force_host_array = array_unique(array_map('trim', $force_host_array));
+                $force_host_array = array_values(array_filter($force_host_array));
+                foreach ($force_host_array as $item => $h) {
+                    $force_host_array[$item] = preg_replace(
+                        '#^(?:(?:https?:)?//)?([^/]+)(?:/.*)?$#',
+                        '$1',
+                        $h
+                    );
+                }
+            }
+            $force_host = !empty($force_host_array) ? $force_host_array : false;
+        }
+    }
 
     $host = get_host();
+    $host = strtolower($host);
     $enableMultisite = enable_multisite();
+
     if (isset($meta[$host])) {
         $data = $meta[$host];
-        if ($data) {
-            $site = get_site_by_id($data['id']);
-            $data = $site ? $site->toArray() : $data;
-        }
-
         return hook_apply('current_site_meta', $data, $host, $enableMultisite);
+    }
+
+    if (is_array($force_host) && in_array($host, $force_host)) {
+        $meta[$host] = get_global_site_meta()->toArray();
+        $meta[$host]['force_host'] = $force_host;
+        return hook_apply('current_site_meta', $meta[$host], $host, $enableMultisite);
     }
 
     if (!$enableMultisite) {
@@ -105,13 +144,15 @@ function get_current_site_meta()
             'token' => null,
             'status' => 'active',
             'type' => 'host',
-            'metadata' => null
+            'metadata' => null,
+            'force_host' => $force_host
         ];
 
         $meta[$site['host']] = $site;
         $meta[$host] = $site;
     } elseif (!isset($meta[$host])) {
         $global = get_global_site_meta();
+
         /**
          * @var Site $site
          */
@@ -120,10 +161,21 @@ function get_current_site_meta()
             $site = $global;
         }
 
+        if ($site && $site->getId() === 1
+            && is_array($force_host)
+            && ! in_array($host, $force_host)
+        ) {
+            $meta[$host] = false;
+            return false;
+        }
+
         // no save cached
         $meta[$host] = $site
             ? $site->toArray()
             : false;
+        if ($meta[$host] !== false) {
+            $meta[$host]['force_host'] = $force_host;
+        }
     }
 
     $data = $meta[$host];
@@ -233,4 +285,3 @@ function site_status_is_pending() : bool
 {
     return site_status_is('pending');
 }
-

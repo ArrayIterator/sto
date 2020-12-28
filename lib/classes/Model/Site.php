@@ -27,6 +27,9 @@ class Site extends Model
         'token',
     ];
 
+    private static $static_host = null;
+    private static $static_additional_host = null;
+
     /**
      * @return null
      */
@@ -176,17 +179,29 @@ class Site extends Model
         if (!$stmt->execute([':h' => $host])) {
             return false;
         }
-
+        $lastRowFound = false;
+        $foundRow = false;
         while ($row = $stmt->fetch()) {
             if ($row['type'] === 'host') {
+                $lastRowFound = $row;
+                $foundRow = $row;
                 break;
             }
+
+            if ($row['type'] === 'additional_host') {
+                $lastRowFound = $row;
+            }
         }
-        if ($row && isset($row['id'])) {
-            $row['id'] = abs(intval($row));
+
+        if ($foundRow) {
+            $lastRowFound = $foundRow;
         }
+        if ($lastRowFound && isset($lastRowFound['id'])) {
+            $lastRowFound['id'] = abs(intval($lastRowFound['id']));
+        }
+
         $stmt->closeCursor();
-        return $row;
+        return $lastRowFound;
     }
 
     /**
@@ -234,12 +249,57 @@ class Site extends Model
     public function __set($name, $value)
     {
         parent::__set($name, $value);
-        if ($name === 'id' && $this->isFromStatement()
+        if ($this->isFromStatement()
             && isset($this->data['id'])
         ) {
             $site_id = $this->data['id'];
-            if (is_int($site_id)) {
+            if (!is_int($site_id)) {
+                return;
+            }
+
+            if ($name === 'id') {
                 $this->setModelSiteId($site_id);
+                return;
+            }
+
+            if ($site_id === 1) {
+                $this->data['status'] = 'active';
+                if (self::$static_host === null) {
+                    self::$static_host = defined('DEFAULT_SITE_HOST')
+                        && is_string(DEFAULT_SITE_HOST)
+                        && trim(DEFAULT_SITE_HOST) !== ''
+                        ? DEFAULT_SITE_HOST
+                        : false;
+                }
+
+                if (self::$static_additional_host === null) {
+                    self::$static_additional_host = defined('DEFAULT_ADDITIONAL_HOST')
+                    && is_string(DEFAULT_ADDITIONAL_HOST)
+                    && trim(DEFAULT_ADDITIONAL_HOST) !== ''
+                        ? DEFAULT_ADDITIONAL_HOST
+                        : false;
+                }
+
+                if (self::$static_host
+                    && array_key_exists('host', $this->data)
+                    && (!$this->data['host']
+                        || !is_string($this->data['host'])
+                        || trim($this->data['host']) === ''
+                    )
+                ) {
+                    $this->data['host'] = self::$static_host;
+                }
+
+                if (self::$static_additional_host
+                    && array_key_exists('additional_host', $this->data)
+                    && (
+                        ! $this->data['additional_host']
+                        || !is_string($this->data['additional_host'])
+                        || trim($this->data['additional_host']) === ''
+                    )
+                ) {
+                    $this->data['additional_host'] = self::$static_additional_host;
+                }
             }
         }
     }

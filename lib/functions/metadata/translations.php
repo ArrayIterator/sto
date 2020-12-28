@@ -6,11 +6,14 @@ use ArrayIterator\Dependency\Translator;
 /**
  * @return string
  */
-function  get_translations_table_name() : string
+function get_translations_table_name() : string
 {
     return translation()->getTableName();
 }
 
+/**
+ * @return string
+ */
 function get_translator_table_name() : string
 {
     return translation()->getTranslator()->getTableName();
@@ -34,7 +37,7 @@ function get_available_translated_language(): array
             FROM `%s` as k
             INNER JOIN `%s` as l ON l.iso_3 = k.iso_3
             GROUP BY l.iso_3',
-            get_translations_table_name,
+            get_translations_table_name(),
             get_translator_table_name()
         )
     );

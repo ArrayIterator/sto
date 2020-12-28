@@ -54,7 +54,12 @@ define('COOKIE_STUDENT_NAME', 'sto_student');
  *  fill without slashed cause slashed will be trimmed
  *  and add single slash on first path
  *
- * @const THEME_PATH theme
+ * @const THEMES_PATH Themes path
+ * @const LOGIN_PATH login uri suffix URL
+ * @const UPLOADS_PATH Upload Path
+ * @const MODULES_PATH The Modules Path
+ * @const CACHE_DIR The cache directory
+ * @const LANGUAGE_DIR The language directory
  * -------------------------------
  */
 define('ADMIN_PATH', '/admin');
@@ -72,3 +77,9 @@ define('DEFAULT_LANGUAGE', 'en');
 define('ENABLE_MULTISITE', false);
 // DEBUG MODE
 define('DEBUG', false);
+
+// DEFAULT GLOBAL SITE HOST IF SITE DATABASE EMPTY
+define('DEFAULT_SITE_HOST', 'sto.dot');
+define('DEFAULT_ADDITIONAL_HOST', 'sto.dot');
+// FORCE MATCHES SITE HOST, SEPARATED BY COMMA
+define('FORCE_SITE_HOST', 'example.com, www.example.com');

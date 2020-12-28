@@ -16,13 +16,11 @@ require_once __DIR__ . '/functions/software.php';
 require_once __DIR__ . '/functions/filters.php';
 require_once __DIR__ . '/functions/handler.php';
 require_once __DIR__ . '/functions/headers.php';
-require_once __DIR__ . '/functions/settings.php';
 require_once __DIR__ . '/functions/attachments.php';
 require_once __DIR__ . '/functions/api.php';
 require_once __DIR__ . '/functions/database.php';
 require_once __DIR__ . '/functions/auth.php';
 require_once __DIR__ . '/functions/filters.php';
-require_once __DIR__ . '/functions/translations.php';
 require_once __DIR__ . '/functions/route.php';
 require_once __DIR__ . '/functions/calendar.php';
 require_once __DIR__ . '/functions/assets.php';
@@ -31,10 +29,12 @@ require_once __DIR__ . '/functions/admin.environment.php';
 
 // database tables
 require_once __DIR__ . '/functions/meta.php';
-require_once __DIR__ . '/functions/grants.php';
-require_once __DIR__ . '/functions/classes.php';
-require_once __DIR__ . '/functions/user.php';
-require_once __DIR__ . '/functions/options.php';
+require_once __DIR__ . '/functions/permissions.php';
+require_once __DIR__ . '/functions/metadata/classes.php';
+require_once __DIR__ . '/functions/metadata/options.php';
+require_once __DIR__ . '/functions/metadata/sites.php';
+require_once __DIR__ . '/functions/metadata/translations.php';
+require_once __DIR__ . '/functions/metadata/user.php';
 
 // use buffer
 if (ob_get_level() < 1 || ob_get_level() === 1 && ob_get_length() === 0) {
@@ -115,6 +115,11 @@ defined('COOKIE_STUDENT_NAME') || define('COOKIE_STUDENT_NAME', 'sto_student');
 defined('COOKIE_SUPERVISOR_NAME') || define('COOKIE_SUPERVISOR_NAME', 'sto_supervisor');
 defined('COOKIE_TOKEN_NAME') || define('COOKIE_TOKEN_NAME', 'sto_token');
 
+// pass
+if (!defined('DEFAULT_SITE_HOST') && get_remote_address() === '127.0.0.1') {
+    define('DEFAULT_SITE_HOST', 'localhost');
+}
+
 if (defined('COOKIE_MULTI_DOMAIN') && COOKIE_MULTI_DOMAIN) {
     session_set_cookie_params(['domain' => cookie_multi_domain(), 'path' => '/']);
     if (!defined('COOKIE_DOMAIN')) {
@@ -137,6 +142,7 @@ cache_add_global_groups([
     'permissions',
     'globals', // use for global cache
 ]);
+$site = get_current_site_meta();
 
 // REQUIRE FILTERS BEFORE MODULE LOAD
 require_once __DIR__ . '/filters.php';
@@ -209,7 +215,9 @@ if (!is_admin_page()) {
     init();
 }
 
-if (get_current_site_id() === 0) {
+// if site has not found or site is not active
+if (! site_status_is_active()) {
     route_not_found();
     do_exit(0);
 }
+

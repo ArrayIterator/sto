@@ -277,6 +277,27 @@ function admin_sidebar_menu_array(): array
                 ]
             ]
         ],
+        'sites' => [
+            'name' => trans('Sites'),
+            'link' => get_admin_url('sites.php'),
+            'hide' => !admin_is_allowed('sites.php'),
+            'icon' => 'web',
+            'position' => 1000,
+            'menus' => [
+                'sites' => [
+                    'name' => trans('Site Management'),
+                    'link' => get_admin_url('sites.php'),
+                    'hide' => !admin_is_allowed('sites.php'),
+                    'position' => 1000,
+                ],
+                'site_new' => [
+                    'name' => trans('Add New Site'),
+                    'link' => get_admin_url('site-new.php'),
+                    'hide' => !admin_is_allowed('site-new.php'),
+                    'position' => 1050,
+                ]
+            ]
+        ],
         'profile' => [
             'name' => trans('Accounts'),
             'link' => get_admin_url('profile.php'),

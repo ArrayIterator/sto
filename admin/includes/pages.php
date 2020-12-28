@@ -30,6 +30,7 @@ function admin_page_permissions()
     if (!$found || !is_array($permissions)) {
         $permissions = [
             'admin.php' => is_super_admin(),
+            'sites.php' => is_super_admin() && site_is_global(),
             'about.php' => true,
             'index.php' => true,
             'profile.php' => true,

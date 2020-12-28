@@ -48,13 +48,12 @@ function cache_add($key, $data, string $group = ObjectCache::DEFAULT_GROUP, int 
  */
 function cache_set($key, $data, string $group = ObjectCache::DEFAULT_GROUP, int $exp = 0): bool
 {
-    return object_cache()->add($key, $data, $group, $exp);
+    return object_cache()->set($key, $data, $group, $exp);
 }
 
-function cache_set_current($key, $data, string $group = ObjectCache::DEFAULT_GROUP, int $exp = 0, int $siteId = null): bool
+function cache_set_current($key, $data, string $group = ObjectCache::DEFAULT_GROUP, int $siteId = null, int $exp = 0): bool
 {
-    $site_id = get_current_site_id();
-    $siteId = $siteId === null ? $site_id : $siteId;
+    $siteId = $siteId === null ? get_current_site_id() : $siteId;
     $cache_set_id = cache_get_site_id();
 
     $is_switched = $siteId !== $cache_set_id;

@@ -87,6 +87,16 @@ define('ROLE_INVIGILATOR', 'invigilator');
 define('ROLE_CONTRIBUTOR', 'contributor');
 define('ROLE_EDITOR', 'editor');
 
+// ERR STATUS
+define('RESULT_ERROR_EMPTY_CODE', -4);
+define('RESULT_ERROR_EMPTY_NAME', -3);
+define('RESULT_ERROR_EXIST_CODE', -2);
+define('RESULT_ERROR_EXIST_NAME', -1);
+define('RESULT_ERROR_EMPTY', 0);
+define('RESULT_ERROR_OK', 1);
+define('RESULT_ERROR_SUCCEED', true);
+define('RESULT_ERROR_FAIL', false);
+
 // STATUS
 define('STATUS_ACTIVE', 'active');
 define('STATUS_BANNED', 'banned');

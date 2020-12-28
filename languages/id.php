@@ -93,6 +93,9 @@ return [
     'Profile' => 'Profil',
     'My Profile' => 'Profil Saya',
     'Logout' => 'Log Keluar',
+    'Sites' => 'Situs',
+    'Site Management' => 'Manajemen Situs',
+    'Add New Site' => 'Tambahkan Situs Baru',
 
     // TEXT
     'You seem to be offline' => 'Anda sepertinya sedang offline',

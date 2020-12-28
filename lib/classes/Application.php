@@ -121,6 +121,7 @@ class Application
         if (!self::$instance) {
             self::$instance = new static();
         }
+
         return self::$instance;
     }
 

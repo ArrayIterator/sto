@@ -154,5 +154,5 @@ function is_windows(): bool
  */
 function is_unix(): bool
 {
-    return !is_windows();
+    return !is_windows() && DIRECTORY_SEPARATOR === '/';
 }
