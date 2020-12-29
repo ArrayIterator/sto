@@ -189,7 +189,7 @@ get_admin_header_template();
                         ;?>"><?php trans_e('Edit');?></a>
                         <span class="row-sep">|</span>
                     <?php } ?>
-                    <a data-action="preview" data-link-id="<%= item.id %>" href="#class-id-<%= item.id %>" data-title="<?php trans_e('Code');?> <%= item.code %>" data-modal="true" data-api="/classes/id/<%= item.id %>" data-template-id="underscore_template_class_preview">
+                    <a data-action="preview" data-link-id="<%= item.id %>" href="#class-id-<%= item.id %>" data-title="<?php trans_e('Code');?> <%= item.code %>" data-method="GET" data-params="{}" data-modal="true" data-api="/classes/id/<%= item.id %>" data-template-id="underscore_template_class_preview">
                         <?= esc_html_trans('Preview'); ?>
                     </a>
                 </div>
@@ -206,7 +206,9 @@ get_admin_header_template();
         <% }); %>
     </script>
     <script type="text/template" id="underscore_template_class_preview">
+        <% if (typeof data === "object") { %>
 
+        <% } %>
     </script>
     <script type="text/javascript">
 ;(function ($) {

@@ -10,7 +10,7 @@ if (!defined('ADMIN_AREA')) {
         <div class="copy">
             <div class="float-left">
                 <div class="clock-time text-muted small">
-                    <span data-clock="true" data-format="D MMMM YYYY [-] H:mm:ss [(%location%)]"></span>
+                    <span data-clock="text" data-format="D MMMM YYYY [-] H:mm:ss [(%location%)]"></span>
                 </div>
                 <small class="d-block text-muted">
                     <?= esc_html_trans('Rendered in');?> : <?= round(microtime(true) - MICRO_TIME_FLOAT, 6);?> <?= esc_html_trans('second');?> | Memory : <?= round(memory_get_peak_usage(false)/(1024*1024), 4);?> MB

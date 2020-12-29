@@ -3,18 +3,223 @@
         return;
     }
 
-    var currentLanguage = document.documentElement.lang;
+    var currentLanguage = document.documentElement.lang,
+        apiUri = window.api_url || '/api/',
+        Sto;
     if (!currentLanguage || typeof currentLanguage !== "string") {
         currentLanguage = 'en';
     }
+
+    (function ($) {
+        var Request = function Request() {
+            this.Request = this;
+            this.queue = {};
+            this.last_id = null;
+            this.last_processed_id = null;
+            this.process = {};
+            this.processed = {};
+            return this;
+        };
+        Request.prototype.constructor = Request;
+        Request.prototype.add = function (url, method, param, args, args2) {
+            var newParams = param;
+            if (!newParams || typeof newParams !== "object") {
+                newParams = {};
+            }
+
+            if (url && typeof url === "object") {
+                newParams = $.extend(url, newParams);
+                url = null;
+            } else {
+                newParams.url = url;
+            }
+            if (typeof method === "function") {
+                newParams.success = method;
+                newParams.method = 'GET';
+                method = null;
+            }
+            if (typeof param === "function") {
+                newParams.error = param;
+                param = null;
+            }
+            if (typeof args === "function") {
+                newParams.done = args;
+                args = null;
+            }
+            if (typeof args2 === "function") {
+                newParams.always = args2;
+                args2 = null;
+            }
+
+            if (method && typeof method === "object") {
+                newParams = $.extend(method, newParams);
+            }
+            if (args && typeof args === "object") {
+                newParams = $.extend(args, newParams);
+            }
+            if (args2 && typeof args2 === "object") {
+                newParams = $.extend(args2, newParams);
+            }
+
+            if (!Sto) {
+                Sto = window.Sto;
+            }
+            this.last_id = Sto.hash.sha1(JSON.stringify(newParams)).toString();
+            this.queue[this.last_id] = newParams;
+            return this;
+        };
+        Request.prototype.getQueueId = function () {
+            return Object.keys(this.queue);
+        };
+        Request.prototype.getQueue = function () {
+            return this.queue;
+        };
+        Request.prototype.getProcessedId = function () {
+            return Object.keys(this.processed);
+        };
+        Request.prototype.getProcessId = function () {
+            return Object.keys(this.process);
+        };
+        Request.prototype.getLasProcessedId = function () {
+            return this.last_processed_id;
+        };
+        Request.prototype.delete = function (...args) {
+            var deleted = 0,
+                i = 0;
+            for (; args.length > i;i++) {
+                if (!args[i]) {
+                    continue;
+                }
+                if (typeof args[i] === "string") {
+                    if (this.queue[args[i]] !== undefined) {
+                        deleted++;
+                        delete this.queue[args[i]];
+                    }
+                    continue;
+                }
+                if (typeof args[i] === "object") {
+                    deleted +=this.delete(...Object.values(args[i]));
+                }
+            }
+            return deleted;
+        };
+        Request.prototype.clear = function () {
+            this.queue = {};
+            this.last_id = null;
+            this.last_processed_id = null;
+            this.process = {};
+            this.processed = {};
+        };
+        Request.prototype.inQueue = function (id) {
+            if (typeof id !== "string") {
+                return;
+            }
+            return this.queue.hasOwnProperty(id);
+        };
+        Request.prototype.isProcessed = function (id) {
+            if (typeof id !== "string") {
+                return;
+            }
+            return this.processed.hasOwnProperty(id);
+        };
+        Request.prototype.inProcessed = function (id) {
+            if (typeof id !== "string") {
+                return;
+            }
+            return this.process.hasOwnProperty(id);
+        };
+        Request.prototype.getLastId = function () {
+            return this.last_id;
+        };
+
+        Request.prototype.run = function () {
+            var key;
+            for (key in this.queue) {
+                if (!this.queue.hasOwnProperty(key)) {
+                    continue;
+                }
+                var params = this.queue[key],
+                    always = null,
+                    t = this,
+                    time = new Date().getTime();
+                if (params.always !== undefined) {
+                    if (params.always && typeof params.always === "function") {
+                        always = params.always;
+                    }
+                    delete params.always;
+                }
+                if (this.process[key]) {
+                    delete t.processed[key];
+                    this.process[key].abort();
+                }
+                if (typeof params.success === 'function') {
+                    var ts = params.success;
+                    params.success = function () {
+                        var args = Object.values(arguments);
+                        args.push(this);
+                        ts.call(t, ...args);
+                    }
+                }
+                if (typeof params.error === 'function') {
+                    var tr = params.error;
+                    params.error = function () {
+                        var args = Object.values(arguments);
+                        args.push(this);
+                        re.call(t, ...args);
+                    }
+                }
+                if (typeof params.xhr === 'function') {
+                    var xr = params.xhr;
+                    params.xhr = function () {
+                        var args = Object.values(arguments);
+                        args.push(this);
+                        xr.call(t, ...args);
+                    }
+                }
+                if (typeof params.beforeSend === 'function') {
+                    var bf = params.beforeSend;
+                    params.beforeSend = function () {
+                        var args = Object.values(arguments);
+                        args.push(this);
+                        bf.call(t, ...args);
+                    }
+                }
+                this.process[key] = $.ajax(params).always(function () {
+                    delete t.process[key];
+                    t.last_processed_id = key;
+                    var args = Object.values(arguments);
+                    var end = new Date().getTime();
+                    t.processed[key] = end;
+                    if (typeof always === "function") {
+                        args.push({
+                            time: {
+                                start: time,
+                                end: end,
+                                time: (end / time) / 1000
+                            },
+                            result: arguments[0],
+                            status: arguments[1],
+                            xhr: arguments[2],
+                        }, this);
+                        always.call(this, ...args);
+                    }
+                });
+                this.process[key].id = key;
+                delete this.queue[key];
+            }
+            return this;
+        };
+        Request = new Request();
+        $.request = Request;
+    })($);
 
     $(document).ready(function () {
         if (typeof moment !== 'undefined' && typeof moment.locale === "function") {
             moment.locale(currentLanguage);
         }
 
-        var Sto = window.Sto,
-            nav_top = '.nav-menu[data-navigation=navigation-top]',
+        Sto = window.Sto;
+        var nav_top = '.nav-menu[data-navigation=navigation-top]',
             nav_sidebar = '.nav-menu[data-navigation=navigation-sidebar]',
             h_a_s = 'has-active-submenu',
             $n = $('.nav-menu[data-navigation=navigation-top]'),
@@ -211,28 +416,32 @@
             .on('click', '[data-modal=true][data-api][data-template-id]', function (e) {
             e.preventDefault();
             var $this = $(this),
-                template_id = $this.attr('data-template-id'),
-                apis_path = $this.data('api'),
-                $template = $('script#'+$.escapeSelector(template_id)),
-                title = $this.data('title')
-            if (!$template.length || typeof apis_path !== 'string') {
+                attr = $this.data(),
+                template_id = attr['templateId'],
+                apis_path = attr['api'] || null,
+                $template = template_id ? $('script#'+$.escapeSelector(template_id)) : null,
+                $modal,
+                $mod,
+                template,
+                data = {
+                    content: '<div class="loading loading-dark"><div class="lds-dual-ring"></div></div>'
+                }
+            ;
+            if (!$template || !$template.length || !apis_path || typeof apis_path !== 'string') {
                 return;
             }
+
             if (!apis_path.match(/^(https?:)\/\//)) {
                 apis_path = apis_path.replace(/^[\/]+/gi, '');
-                var apis_url = window.api_url || '/api/';
-                    apis_url = apis_url.replace(/[\/]+$/g, '');
-                apis_path = apis_url + '/' + apis_path;
+                apis_path = apiUri.replace(/[\/]+$/g, '') + '/' + apis_path;
             }
-            var $modal = $modal_template.html();
-            var data = {
-                content: '<div class="loading loading-dark"><div class="lds-dual-ring"></div></div>'
-            };
-            if (title) {
-                data.title = title;
+
+            $modal = $modal_template.html();
+            if (attr.title) {
+                data.title = attr.title;
             }
-            var template = _.template($modal)(data);
-            var $mod = $(template);
+            template = _.template($modal)(data);
+            $mod = $(template);
             $mod.modal('show');
             $mod.on('bs.hidden', function () {
                 $(this).remove();
@@ -311,7 +520,7 @@
 
         /*! CLOCKS
          * ---------------------- */
-        $('[data-clock=true]').each(function () {
+        $('[data-clock=text]').each(function () {
             // if no moment js
             if (!moment || typeof moment !== 'function') {
                 return;

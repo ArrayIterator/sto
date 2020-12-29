@@ -427,34 +427,6 @@ function get_current_login_url(): string
 }
 
 /**
- * @param string $uri
- * @return string
- */
-function get_assets_url(string $uri = ''): string
-{
-    $assets = '/assets/';
-    if ($uri && $uri[0] == '/') {
-        $uri = substr($uri, 1);
-    }
-
-    return get_site_url($assets . $uri);
-}
-
-/**
- * @param string $uri
- * @return string
- */
-function get_assets_vendor_url(string $uri = ''): string
-{
-    $assets = '/assets/vendor/';
-    if ($uri && $uri[0] == '/') {
-        $uri = substr($uri, 1);
-    }
-
-    return get_site_url($assets . $uri);
-}
-
-/**
  * @param string $location
  * @param int $status
  * @param string|null $x_redirect_by

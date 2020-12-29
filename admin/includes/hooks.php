@@ -18,8 +18,9 @@ function hook_admin_default_assets()
         assets_style_enqueue('select2');
         assets_script_enqueue('select2');
     }
-    assets_style_enqueue('admin');
+
     assets_script_enqueue($is_login_page ? 'admin-login' : 'admin');
+    assets_style_enqueue('admin');
     if (!$is_login_page) {
         assets_script_enqueue('moment');
     }

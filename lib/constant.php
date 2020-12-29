@@ -14,11 +14,18 @@ define('DS', DIRECTORY_SEPARATOR);
 define('LIB_DIR', __DIR__);
 define('LIB_PATH', basename(__DIR__));
 define('ROOT_DIR', dirname(__DIR__));
+define('INCLUDES_DIR', __DIR__ .'/includes');
 define('ROOT_TEMPLATES_DIR', __DIR__ . '/templates');
 define('DEFAULT_CACHE_DIR', ROOT_DIR . ' /cache');
 define('DEFAULT_LANGUAGE_DIR', ROOT_DIR . '/languages');
 
 define('DEFAULT_COOKIE_SUCCEED_NAME', '__saved_state_');
+
+define('ASSETS_PATH', '/assets');
+define('ASSETS_VENDOR_PATH', ASSETS_PATH.'/vendor');
+define('ASSETS_CSS_PATH', ASSETS_PATH.'/css');
+define('ASSETS_JS_PATH', ASSETS_PATH.'/js');
+define('ASSETS_IMAGE_PATH', ASSETS_PATH.'/images');
 
 define('DEFAULT_API_PATH', '/api');
 define('DEFAULT_LOGIN_PATH', '/login');
@@ -123,3 +130,4 @@ define('VERSION_ICOFONT_CSS', '1.0.1');
 define('VERSION_SELECT2', '4.0.13');
 define('VERSION_UNDERSCORE_JS', '1.12.0');
 define('VERSION_CRYPTO_JS', '4.0.0');
+define('VERSION_QUILL_JS', 'v1.3.6');

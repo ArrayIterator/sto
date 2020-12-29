@@ -347,7 +347,7 @@ function do_assets_print_styles(): array
  */
 function get_js_core_by_name(string $name)
 {
-    $js_dir = dirname(__DIR__).'/includes/js/';
+    $js_dir = INCLUDES_DIR . '/';
     if (substr($name, -4) !== '.php') {
         $name .= '.php';
     }
@@ -378,82 +378,8 @@ function assets_default_scripts(Scripts $scripts)
 {
     $scripts->assets_url = get_assets_url('/');
     $scripts->default_version = VERSION;
-    $scripts->default_dirs = ['/assets/js/', '/assets/vendor/'];
-    $dependencies = [
-        'jquery' => [
-            null,
-            ['jquery-core'],
-        ],
-        'jquery-core' => [
-            '/assets/js/jquery.js',
-            [],
-            VERSION_JQUERY
-        ],
-        'bootstrap' => [
-            '/assets/vendor/bootstrap/js/bootstrap.min.js',
-            ['jquery'],
-            VERSION_BOOTSTRAP
-        ],
-        'chart' => [
-            null,
-            ['chart-js']
-        ],
-        'chart-js' => [
-            '/assets/js/Chart.js',
-            ['moment'],
-            VERSION_CHART_JS
-        ],
-        'moment' => [
-            null,
-            ['moment-js']
-        ],
-        'moment-js' => [
-            '/assets/js/moment-locales-timezone.js',
-            [],
-            VERSION_MOMENT_JS
-        ],
-        'underscore' => [
-            null,
-            ['underscore-js']
-        ],
-        'underscore-js' => [
-            '/assets/js/underscore.js',
-            [],
-            VERSION_MOMENT_JS
-        ],
-        'crypto' => [
-            null,
-            ['crypto-js'],
-            VERSION_MOMENT_JS
-        ],
-        'crypto-js' => [
-            '/assets/js/crypto.js',
-            [],
-            VERSION_MOMENT_JS
-        ],
-        'select2' => [
-            '/assets/vendor/select2/select2.js',
-            ['jquery'],
-            VERSION_SELECT2
-        ],
-        'core' => [
-            '/assets/js/core.js',
-            [
-                'crypto'
-            ],
-            VERSION
-        ],
-        'admin' => [
-            '/assets/js/admin.js',
-            ['jquery', 'crypto', 'core', 'bootstrap', 'underscore'],
-            VERSION
-        ],
-        'admin-login' => [
-            '/assets/js/login.js',
-            ['jquery', 'core', 'bootstrap'],
-            VERSION
-        ]
-    ];
+    $scripts->default_dirs = [ASSETS_JS_PATH, ASSETS_VENDOR_PATH];
+    $dependencies = require INCLUDES_DIR .'/definitions/js.php';
     foreach ($dependencies as $key => $item) {
         $scripts->add($key, ...$item);
     }
@@ -465,30 +391,98 @@ function assets_default_scripts(Scripts $scripts)
 function assets_default_styles(Styles $styles)
 {
     $styles->default_version = VERSION;
-    $styles->default_dirs = ['/assets/css/', '/assets/vendor/'];
-    $dependencies = [
-        'admin' => [
-            '/assets/css/admin.css',
-            ['bootstrap', 'icofont'],
-            VERSION
-        ],
-        'bootstrap' => [
-            '/assets/vendor/bootstrap/css/bootstrap.min.css',
-            [],
-            VERSION_BOOTSTRAP
-        ],
-        'select2' => [
-            '/assets/vendor/select2/select2.css',
-            [],
-            VERSION_SELECT2
-        ],
-        'icofont' => [
-            '/assets/vendor/icofont/icofont.min.css',
-            [],
-            VERSION_ICOFONT_CSS
-        ],
-    ];
+    $styles->default_dirs = [ASSETS_CSS_PATH, ASSETS_VENDOR_PATH];
+    $dependencies = require INCLUDES_DIR .'/definitions/css.php';
     foreach ($dependencies as $key => $item) {
         $styles->add($key, ...$item);
     }
+}
+
+/* -------------------------------------------------
+ *                     ASSETS URL
+ * ------------------------------------------------*/
+
+
+/**
+ * @param string $uri
+ * @return string
+ */
+function get_assets_url(string $uri = ''): string
+{
+    $assets = '/assets/';
+    if ($uri && $uri[0] == '/') {
+        $uri = substr($uri, 1);
+    }
+
+    return get_site_url($assets . $uri);
+}
+
+/**
+ * @param string $uri
+ * @return string
+ */
+function get_asset_js_url(string $uri = ''): string
+{
+    $assets = '/assets/js/';
+    if ($uri && $uri[0] == '/') {
+        $uri = substr($uri, 1);
+    }
+
+    return get_site_url($assets . $uri);
+}
+
+/**
+ * @param string $uri
+ * @return string
+ */
+function get_asset_css_url(string $uri = ''): string
+{
+    $assets = '/assets/css/';
+    if ($uri && $uri[0] == '/') {
+        $uri = substr($uri, 1);
+    }
+
+    return get_site_url($assets . $uri);
+}
+
+/**
+ * @param string $uri
+ * @param string|null $vendorName
+ * @return string
+ */
+function get_assets_vendor_url(string $uri = '', string $vendorName = null): string
+{
+    $assets = '/assets/vendor/';
+    if ($uri && $uri[0] == '/') {
+        $uri = substr($uri, 1);
+    }
+    if ($vendorName) {
+        $uri = "{$vendorName}/{$uri}";
+    }
+
+    return get_site_url($assets . $uri);
+}
+
+/**
+ * @param string $name
+ * @return string
+ */
+function js_a(string $name) : string
+{
+    if (substr($name, -3) !== '.js') {
+        $name .= ".js";
+    }
+    return get_asset_js_url($name);
+}
+
+/**
+ * @param string $name
+ * @return string
+ */
+function css_a(string $name) : string
+{
+    if (substr($name, -4) !== '.css') {
+        $name .= ".css";
+    }
+    return get_asset_css_url($name);
 }
