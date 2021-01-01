@@ -10,6 +10,8 @@ if (($_SERVER['SCRIPT_FILENAME'] ?? null) === __FILE__) {
 
 // LOAD LOADER
 require_once dirname(__DIR__) . '/lib/load.php';
+
+require_once __DIR__ . '/includes/forms.php';
 require_once __DIR__ . '/includes/menus.php';
 require_once __DIR__ . '/includes/pages.php';
 require_once __DIR__ . '/includes/hooks.php';
@@ -42,7 +44,7 @@ hook_run('admin_init');
 
 if (!is_admin_login_page()) {
     $is_interim = isset($_REQUEST['interim']);
-    $is_success = query_param('login') === 'success';
+    $is_success = query_param(PARAM_LOGIN_QUERY) === 'success';
     $referer = get_referer() ?: '';
     $login_page = explode('?', get_admin_login_url())[0];
     if ($is_interim && $is_success && preg_match('#' . preg_quote($login_page) . '#', get_admin_login_url())) {

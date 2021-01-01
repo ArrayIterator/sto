@@ -18,7 +18,7 @@ $is_super_admin = is_super_admin();
 $is_edit = false;
 $referer = get_referer();
 $allowed_message = true;
-$id = query_param_int('id');
+$id = query_param_int(PARAM_ID_QUERY);
 $result = null;
 if ($id > 0) {
     $result = get_class_by_id($id);
@@ -27,7 +27,7 @@ if ($id > 0) {
 
 $matchReferer = $referer
     && (string) (new Uri($referer))->withQuery('')->withFragment('') === get_admin_current_file_url();
-if (is_method_get() && query_param('action') === 'edit' && has_query_param('id')) {
+if (is_method_get() && query_param(PARAM_ACTION_QUERY) === 'edit' && has_query_param(PARAM_ID_QUERY)) {
     if ($result && isset($result['id']) && ($is_super_admin || $result['site_id'] === $current_site_id)) {
         $is_edit = !empty($result);
         $posts = array_merge($posts, $result);
@@ -46,7 +46,7 @@ if (is_method_get() && query_param('action') === 'edit' && has_query_param('id')
 }
 
 // if cannot edit
-if ($is_edit && !current_supervisor_can('edit_class', query_param('id'))) {
+if ($is_edit && !current_supervisor_can('edit_class', query_param(PARAM_ID_QUERY))) {
     return load_admin_denied();
 }
 
@@ -233,9 +233,9 @@ if (is_method_post()) {
 }
 
 $is_from_referer_update = false;
-if (has_cookie_succeed() && $allowed_message && $referer && $is_edit && ($statusSuccess = query_param('success'))) {
+if (has_cookie_succeed() && $allowed_message && $referer && $is_edit && ($statusSuccess = query_param(PARAM_SUCCESS_QUERY))) {
     if ($matchReferer) {
-        $statusResponse = query_param('response');
+        $statusResponse = query_param(PARAM_RESPONSE_QUERY);
         $messageStatus = null;
         if ($statusResponse === 'true' || $statusResponse === '1') {
             add_admin_success_message(
@@ -285,7 +285,7 @@ if (has_cookie_succeed() && $allowed_message && $referer && $is_edit && ($status
 get_admin_header_template();
 ?>
     <div class="form-post panel-form">
-        <form method="post" id="form-edit-class" action="<?= esc_attr(NormalizerData::removeQueryArg(['success', 'response'],get_current_url()));?>">
+        <form method="post" id="form-edit-class" action="<?= esc_attr(remove_query_args(['success', 'response'],get_current_url()));?>">
             <div class="card">
                 <div class="card-header">
                     <div class="text-muted small"><?php trans_e(get_admin_title());?></div>

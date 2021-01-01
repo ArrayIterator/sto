@@ -19,6 +19,23 @@ define('ROOT_TEMPLATES_DIR', __DIR__ . '/templates');
 define('DEFAULT_CACHE_DIR', ROOT_DIR . ' /cache');
 define('DEFAULT_LANGUAGE_DIR', ROOT_DIR . '/languages');
 
+define('PARAM_SEARCH_QUERY', 'q');
+define('PARAM_TYPE_QUERY', 'type');
+define('PARAM_FILTER_QUERY', 'filter');
+define('PARAM_LIMIT_QUERY', 'limit');
+define('PARAM_OFFSET_QUERY', 'offset');
+define('PARAM_PAGE_QUERY', 'page');
+define('PARAM_ID_QUERY', 'id');
+define('PARAM_SITE_ID_QUERY', 'site_id');
+define('PARAM_SITE_IDS_QUERY', 'site_ids');
+define('PARAM_ACTION_QUERY', 'action');
+define('PARAM_STATUS_QUERY', 'status');
+define('PARAM_ERROR_QUERY', 'error');
+define('PARAM_SUCCESS_QUERY', 'success');
+define('PARAM_LOGIN_QUERY', 'login');
+define('PARAM_USER_ID_QUERY', 'user_id');
+define('PARAM_RESPONSE_QUERY', 'response');
+
 define('DEFAULT_COOKIE_SUCCEED_NAME', '__saved_state_');
 
 define('ASSETS_PATH', '/assets');
@@ -106,6 +123,7 @@ define('RESULT_ERROR_FAIL', false);
 
 // STATUS
 define('STATUS_ACTIVE', 'active');
+define('STATUS_INACTIVE', 'inactive');
 define('STATUS_BANNED', 'banned');
 define('STATUS_PENDING', 'pending');
 define('STATUS_DELETED', 'deleted');
@@ -124,10 +142,11 @@ define('TYPE_REVISION', 'revision');
 // ASSETS VERSION
 define('VERSION_JQUERY', 'v3.5.1');
 define('VERSION_BOOTSTRAP', 'v4.5.3');
+define('VERSION_POPPER_JS', 'v2.6.0');
 define('VERSION_CHART_JS', 'v2.9.4');
 define('VERSION_MOMENT_JS', '2.29.1');
 define('VERSION_ICOFONT_CSS', '1.0.1');
 define('VERSION_SELECT2', '4.0.13');
 define('VERSION_UNDERSCORE_JS', '1.12.0');
 define('VERSION_CRYPTO_JS', '4.0.0');
-define('VERSION_QUILL_JS', 'v1.3.6');
+define('VERSION_QUILL', 'v1.3.6');

@@ -1,6 +1,7 @@
 <?php
 
 use ArrayIterator\Helper\NormalizerData;
+use ArrayIterator\Helper\Random;
 use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\UploadedFile;
 
@@ -141,12 +142,35 @@ function has_query_param(string $key) : bool
 
 /**
  * @param string $key
+ * @param int $default
  * @return int
  */
-function query_param_int(string $key) : int
+function query_param_int(string $key, int $default = 0) : int
 {
-    $value = query_param($key);
-    return !is_numeric($value) ? 0 : abs(intval($value));
+    $value = query_param($key)??$default;
+    return !is_numeric($value) ? $default : (int)$value;
+}
+
+/**
+ * @param string $key
+ * @param string $default
+ * @param bool $trim
+ * @return string
+ */
+function query_param_string(
+    string $key,
+    string $default = '',
+    bool $trim = false
+) : string {
+    $value = query_param($key)??$default;
+    if (is_string($value)) {
+        return $trim ? trim($value) : $value;
+    }
+    if (is_numeric($value) || is_object($value) && method_exists($value, '__tostring')) {
+        $value = (string) $value;
+    }
+
+    return !is_string($value) ? $default : ($trim ? trim($value) : $value);
 }
 
 /**
@@ -675,7 +699,10 @@ function get_generate_site_ids(array $siteIds = null) : array
 {
     $currentSiteId = get_current_site_id();
     if ($siteIds === null) {
-        $siteIds = [$currentSiteId];
+        $siteIds = [];
+        if (!is_super_admin()) {
+            $siteIds = [$currentSiteId];
+        }
     }
 
     foreach ($siteIds as $key => $item) {
@@ -759,6 +786,9 @@ function calculate_clock_delay($date = null, int $addSecond = 0) : array
     return [$hours, $minutes, $seconds];
 }
 
+/**
+ * @return int
+ */
 function get_max_upload_file_size() : int
 {
     static $limit = null;
@@ -766,4 +796,27 @@ function get_max_upload_file_size() : int
         $limit = NormalizerData::getMaxUploadSize();
     }
     return $limit;
+}
+
+/**
+ * @param int $length
+ * @param string|null $char
+ * @return string
+ */
+function random_char(int $length = 64, string $char = null) : string
+{
+    return Random::char($length, $char);
+}
+
+/**
+ * @return string
+ */
+function get_current_random_string() : string
+{
+    static $random;
+    if (!$random) {
+        $random = random_char();
+    }
+
+    return $random;
 }

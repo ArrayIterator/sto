@@ -446,7 +446,7 @@ function admin_sidebar_menu_callback(
             array_shift($args);
             $args = implode('?', $args);
             parse_str($args, $q);
-            if (($q['status']??null) === query_param('status')) {
+            if (($q['status']??null) === query_param(PARAM_STATUS_QUERY)) {
                 $classes .= ' current-menu active';
                 $menu->setLinkAttribute('class', $classes);
                 $classes = $menu->getAttributes()['class'] ?? '';

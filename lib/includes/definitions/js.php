@@ -9,31 +9,29 @@ return [
     'jquery-core' => [js_a('jquery'), [], VERSION_JQUERY],
 
     // chart js
-    'chart' => [null, ['chart-js']],
-    'chart-js' => [js_a('Chart'), ['moment'], VERSION_CHART_JS],
+    'chart' => [js_a('Chart'), ['moment'], VERSION_CHART_JS],
 
     // moment js
-    'moment' => [null, ['moment-js']],
-    'moment-js' => [js_a('moment-locales-timezone.js'), [], VERSION_MOMENT_JS],
+    'moment' => [js_a('moment-locales-timezone.js'), [], VERSION_MOMENT_JS],
 
     // underscore js
-    'underscore' => [null, ['underscore-js']],
-    'underscore-js' => [js_a('underscore'), [], VERSION_MOMENT_JS],
+    'underscore' => [js_a('underscore'), [], VERSION_MOMENT_JS],
 
     // crypto js
-    'crypto' => [null, ['crypto-js']],
-    'crypto-js' => [js_a('crypto'), [], VERSION_MOMENT_JS],
+    'crypto' => [js_a('crypto'), [], VERSION_MOMENT_JS],
+    // popper
+    'popper' => [js_a('popper'), [], VERSION_POPPER_JS],
 
-    'quill' => [null, ['quill-js']],
-    'quill-js' => [
+    // quill
+    'quill' => [
         get_assets_vendor_url('quill.min.js', 'quill'),
         [],
-        VERSION_QUILL_JS
+        VERSION_QUILL
     ],
 
     'bootstrap' => [
-        get_assets_vendor_url('/js/bootstrap.min.js', 'bootstrap'),
-        ['jquery'],
+        get_assets_vendor_url('js/bootstrap.min.js', 'bootstrap'),
+        ['jquery', 'popper'],
         VERSION_BOOTSTRAP
     ],
 
@@ -44,18 +42,20 @@ return [
     ],
 
     'core' => [
-        js_a('core'),
+        js_a('core.min'),
         ['crypto'],
         VERSION
     ],
+
     'admin' => [
         js_a('admin'),
-        ['jquery', 'crypto', 'core', 'bootstrap', 'underscore'],
+        ['core', 'jquery', 'bootstrap', 'underscore', 'select2'],
         VERSION
     ],
+
     'admin-login' => [
         js_a('login.js'),
-        ['jquery', 'core', 'bootstrap'],
+        ['core', 'jquery', 'bootstrap'],
         VERSION
     ]
 ];

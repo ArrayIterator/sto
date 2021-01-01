@@ -30,6 +30,7 @@ hook_add('assets_admin_print_styles', 'do_assets_admin_print_styles', 9);
 
 
 hook_add('html_footer', 'assets_print_footer_scripts', 20);
-hook_add('admin_html_footer', 'assets_admin_print_footer_scripts', 20);
-hook_add('assets_print_footer_scripts', 'do_assets_footer_scripts');
-hook_add('assets_admin_print_footer_scripts', 'do_assets_footer_scripts');
+hook_add('admin_html_footer', 'assets_admin_footer_scripts');
+hook_add('admin_html_footer', 'assets_admin_print_footer_scripts', 50);
+hook_add('assets_print_footer_scripts', 'do_assets_footer_scripts', 50);
+hook_add('assets_admin_print_footer_scripts', 'do_assets_footer_scripts', 50);

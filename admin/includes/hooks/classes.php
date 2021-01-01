@@ -34,3 +34,5 @@ function hook_grant_current_user_can_edit_class(bool $result, $args = null) : bo
 
 hook_add('current_user_can_edit_class', 'hook_grant_current_user_can_edit_class', 1);
 hook_add('current_user_can_edit_classes', 'hook_grant_current_user_can_edit_class', 1);
+//hook_add('script_loader_ver', 'return_string');
+// hook_add('style_loader_ver', 'return_string');

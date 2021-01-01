@@ -131,11 +131,7 @@ function esc_attr(string $message = null) : string
  */
 function esc_attr_e(string $message = null)
 {
-    if ($message === null) {
-        return '';
-    }
-
-    render(htmlspecialchars($message, ENT_QUOTES|ENT_COMPAT));
+    render(esc_attr($message));
 }
 
 /**
@@ -154,9 +150,6 @@ function esc_html(string $message = null) : string
 
 function esc_html_e(string $message = null)
 {
-    if ($message === null) {
-        return '';
-    }
     render(esc_html($message));
 }
 
@@ -208,7 +201,7 @@ function build_query(
     string $key = '',
     bool $urlEncode = true
 ) : string {
-    return NormalizerData::buildQuery($prefix, $sep, $key, $urlEncode);
+    return NormalizerData::buildQuery($data, $prefix, $sep, $key, $urlEncode);
 }
 
 /**
@@ -265,4 +258,26 @@ function substr_tag_strip(string $data, int $start = 0, int $end = null, string 
     }
 
     return $newData;
+}
+
+/**
+ * @param mixed $data
+ * @return bool
+ */
+function is_true_value($data) : bool
+{
+    if (is_bool($data)) {
+        $returnValue = $data;
+    } elseif (!is_array($data)) {
+        $returnValue = !empty($data);
+    } elseif (is_numeric($data)) {
+        $returnValue = (float) $data === 1.0;
+    } else {
+        $returnValue = !is_string($data) ? false : in_array(
+            strtolower($data),
+            ['yes', 'true', '1']
+        );
+    }
+
+    return (bool) hook_apply('is_true_value', $returnValue, $data);
 }

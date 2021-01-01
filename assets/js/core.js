@@ -10,7 +10,6 @@
     if (!doc.cookie === undefined) {
         doc.cookie = '';
     }
-
     // add pi();
     Math.pi = function () {
         return Math.PI;
@@ -117,8 +116,9 @@
     Clock.prototype.Clock = Hash.prototype.clock = Clock;
 
     Url.parse = function (url) {
-        url = url.split('?')[1] || '';
-        var ret_val = {};
+        var ret_val = {},
+            split = url.split('?');
+        url = split[1] || (split.length === 1 ? split[0] : '');
         if (url === '') {
             return ret_val;
         }
@@ -884,26 +884,26 @@
     };
 
     Hash.sha1 = function (e) {
-        return CryptoJS.SHA1(convert_compat_string(e));
+        return CryptoJS.SHA1(convert_compat_string(e)).toString();
     }
-    Hash.md5 = function () {
-        return CryptoJS.MD5(convert_compat_string(e));
+    Hash.md5 = function (e) {
+        return CryptoJS.MD5(convert_compat_string(e)).toString();
     };
-    Hash.sha256 = function () {
-        return CryptoJS.SHA256(convert_compat_string(e));
+    Hash.sha256 = function (e) {
+        return CryptoJS.SHA256(convert_compat_string(e)).toString();
     };
-    Hash.sha224 = function () {
-        return CryptoJS.SHA224(convert_compat_string(e));
+    Hash.sha224 = function (e) {
+        return CryptoJS.SHA224(convert_compat_string(e)).toString();
     };
-    Hash.sha384 = function () {
-        return CryptoJS.SHA384(convert_compat_string(e));
+    Hash.sha384 = function (e) {
+        return CryptoJS.SHA384(convert_compat_string(e)).toString();
     };
-    Hash.sha512 = function () {
-        return CryptoJS.SHA512(convert_compat_string(e));
+    Hash.sha512 = function (e) {
+        return CryptoJS.SHA512(convert_compat_string(e)).toString();
     };
     Hash.hmac = function (algo, val)
     {
-        return CryptoJS.HMAC(algo, convert_compat_string(val));
+        return CryptoJS.HMAC(algo, convert_compat_string(val)).toString();
     }
 
     Clock.calculate_second = function (hours, minutes, seconds)
@@ -1056,6 +1056,6 @@
     Sto.uuid = Uuid;
     Sto.url = Url;
     Sto.clock = Clock;
-
     w.Sto = Sto;
+    w.location.query_string = Url.parse(location.search || location.href);
 });

@@ -237,7 +237,7 @@ function teacher_can_see_supervisors() : bool
     $data = is_string($data) ? trim(strtolower($data)) : $data;
     return hook_apply(
             'teacher_can_see_supervisors',
-            $data === 'true' || $data === 'yes' || $data === true
+            is_true_value($data)
         ) === true;
 }
 
@@ -250,7 +250,7 @@ function teacher_can_see_supervisor() : bool
     $data = is_string($data) ? trim(strtolower($data)) : $data;
     return hook_apply(
             'teacher_can_see_supervisor',
-            $data === 'true' || $data === 'yes' || $data === true
+            is_true_value($data)
         ) === true;
 }
 
@@ -263,7 +263,7 @@ function invigilator_can_see_supervisors() : bool
     $data = is_string($data) ? trim(strtolower($data)) : $data;
     return hook_apply(
             'invigilator_can_see_supervisors',
-            $data === 'true' || $data === 'yes' || $data === true
+            is_true_value($data)
         ) === true;
 }
 /**
@@ -275,7 +275,7 @@ function invigilator_can_see_supervisor() : bool
     $data = is_string($data) ? trim(strtolower($data)) : $data;
     return hook_apply(
             'invigilator_can_see_supervisor',
-            $data === 'true' || $data === 'yes' || $data === true
+            is_true_value($data)
         ) === true;
 }
 
@@ -284,10 +284,10 @@ function invigilator_can_see_supervisor() : bool
  */
 function get_super_admin_site_id_param()
 {
-    $siteId = query_param('site_id');
+    $siteId = query_param(PARAM_SITE_ID_QUERY);
     if (is_super_admin()) {
         $siteId = is_string($siteId) ? trim($siteId) : $siteId;
-        if (!has_query_param('site_id') || !is_numeric($siteId) || abs($siteId) < 1) {
+        if (!has_query_param(PARAM_SITE_ID_QUERY) || !is_numeric($siteId) || abs($siteId) < 1) {
             $siteId = false;
         } else {
             $siteId = (int) abs(intval($siteId));
@@ -305,7 +305,7 @@ function get_super_admin_site_id_param()
  */
 function get_super_admin_site_ids_param() : array
 {
-    $siteIds = query_param('site_ids');
+    $siteIds = query_param(PARAM_SITE_IDS_QUERY);
     if (!is_super_admin()) {
         return [get_current_site_id()];
     }
@@ -329,11 +329,11 @@ function get_super_admin_site_ids_param() : array
 function get_super_admin_site_ids_params() : array
 {
     $siteIds = [];
-    if (has_query_param('site_ids')) {
+    if (has_query_param(PARAM_SITE_IDS_QUERY)) {
         $siteIds = get_super_admin_site_ids_param();
     }
 
-    if (has_query_param('site_id')) {
+    if (has_query_param(PARAM_SITE_ID_QUERY)) {
         $siteId = get_super_admin_site_id_param();
         $siteId = $siteId === 0 ? false : $siteId;
         if ($siteId !== false && !in_array($siteId, $siteIds)) {

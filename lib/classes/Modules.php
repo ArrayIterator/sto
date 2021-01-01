@@ -219,7 +219,7 @@ final class Modules
     protected function readModuleInfo(string $fileName): array
     {
         $info = $this->readData($fileName, $this->headers);
-        if (in_array(strtolower($info['site_wide']), ['yes', 'true', '1'])) {
+        if (in_array(strtolower((string)$info['site_wide']), ['yes', 'true', '1'])) {
             $info['site_wide'] = true;
         } else {
             $info['site_wide'] = false;

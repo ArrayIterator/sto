@@ -347,6 +347,7 @@ function assets_scripts(): Scripts
         $scripts = new Scripts(get_site_url(), hooks());
         hook_run_ref_array('assets_default_scripts', [&$scripts]);
     }
+
     return $scripts;
 }
 

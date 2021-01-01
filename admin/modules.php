@@ -5,8 +5,8 @@ if (!admin_is_allowed(__FILE__)) {
     return load_admin_denied();
 }
 
-switch (query_param('status')) {
-    case 'active':
+switch (query_param(PARAM_STATUS_QUERY)) {
+    case STATUS_ACTIVE:
         set_admin_title('Active Modules');
         break;
     case 'inactive':
@@ -18,13 +18,12 @@ switch (query_param('status')) {
 
 get_admin_header_template();
 
-$moduleInputSearchName = 's';
 $moduleInputStatusName = 'module_status';
 $moduleStatusName = 'status';
 
 $moduleStatus = query_param($moduleStatusName);
 $moduleSearchStatus = query_param($moduleInputStatusName);
-$moduleSearch = query_param($moduleInputSearchName);
+$moduleSearch = query_param(PARAM_SEARCH_QUERY);
 
 $moduleStatus = !is_string($moduleStatus) ? '' : $moduleStatus;
 $moduleSearchStatus = !is_string($moduleSearchStatus) ? '' : $moduleSearchStatus;
@@ -118,7 +117,7 @@ foreach (modules()->getModules() as $name => $module) {
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="module-form-search-input" class="sr-only">Search Module</label>
-                        <input class="form-control" id="module-form-search-input" type="search" name="<?= esc_attr($moduleInputSearchName); ?>" value="<?= esc_attr($moduleSearch); ?>" placeholder="<?php esc_attr_trans_e('Type To Search ...'); ?>">
+                        <input class="form-control" id="module-form-search-input" type="search" name="<?= esc_attr(PARAM_SEARCH_QUERY); ?>" value="<?= esc_attr($moduleSearch); ?>" placeholder="<?php esc_attr_trans_e('Type To Search ...'); ?>">
                     </div>
                 </div>
             </div>

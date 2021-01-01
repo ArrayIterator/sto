@@ -15,9 +15,9 @@ return [
         VERSION_BOOTSTRAP
     ],
     'quill' => [
-        get_assets_vendor_url('quill.min.css', 'quill'),
+        get_assets_vendor_url('quill.snow.css', 'quill'),
         [],
-        VERSION_QUILL_JS
+        VERSION_QUILL
     ],
     'select2' => [
         get_assets_vendor_url('select2.css', 'select2'),

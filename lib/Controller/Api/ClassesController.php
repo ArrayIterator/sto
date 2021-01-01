@@ -53,8 +53,22 @@ LIMIT 10
  */
 class ClassesController extends BaseController
 {
-    public function getClasses()
+    public function getClasses(Route $r)
     {
+        $type = query_param_string(PARAM_TYPE_QUERY);
+        $search = query_param_string(PARAM_SEARCH_QUERY, true);
+        // fallback to query
+        if (in_array($type, ['name', 'code']) && $search !== '') {
+            $this->searchClasses(
+                $r,
+                [
+                    PARAM_TYPE_QUERY => $type,
+                    PARAM_SEARCH_QUERY => $search
+                ]
+            );
+            return;
+        }
+
         if (!is_user_logged() || is_supervisor() && !is_admin_active()) {
             route_not_found();
             return;
@@ -64,14 +78,13 @@ class ClassesController extends BaseController
             json(401, trans('Access Denied'));
             return;
         }
-
-        $limit  = query_param_int('limit');
-        $offset = query_param_int('offset');
+        $limit  = query_param_int(PARAM_LIMIT_QUERY);
+        $offset = query_param_int(PARAM_OFFSET_QUERY);
         $siteIds = get_super_admin_site_ids_params();
-        $hasSiteIds = is_super_admin() && has_query_param('site_ids');
+        $hasSiteIds = is_super_admin() && has_query_param(PARAM_SITE_IDS_QUERY);
         $originalLimit = $limit;
 
-        $filter = query_param('filter');
+        $filter = query_param(PARAM_FILTER_QUERY);
         $filter = !is_string($filter) ? null : trim($filter);
         $filter = $filter ? explode(',', $filter) : [];
         foreach ($filter as $key => $item) {
@@ -99,7 +112,7 @@ class ClassesController extends BaseController
                 'site_id' => $siteIds,
                 'limit' => $limit,
                 'offset' => $offset,
-                'query' => null,
+                PARAM_SEARCH_QUERY => null,
                 'type' => null,
                 'filters' => array_keys($filter)
             ],
@@ -139,7 +152,7 @@ class ClassesController extends BaseController
                     'site_id' => $siteIds,
                     'limit' => $meta['query']['limit'],
                     'offset' => $meta['query']['offset'],
-                    'query' => null,
+                    PARAM_SEARCH_QUERY => null,
                     'type' => null,
                     'filters' => array_keys($filter)
                 ],
@@ -371,12 +384,12 @@ class ClassesController extends BaseController
             return;
         }
 
-        $type = query_param('type');
+        $type = $params[PARAM_TYPE_QUERY]??query_param(PARAM_TYPE_QUERY);
         $type = is_string($type) ? trim(strtolower($type)) : '';
         if (!$type || !in_array($type, ['name', 'code'])) {
             json(412, trans('Search type is invalid!'));
         }
-        $search = query_param('q');
+        $search = $params[PARAM_SEARCH_QUERY]??query_param(PARAM_SEARCH_QUERY);
         if (!$search || !is_string($search) || trim($search) === '') {
             json(428, trans('Search query could not be empty!'));
             return;
@@ -385,12 +398,12 @@ class ClassesController extends BaseController
         $siteIds = [];
         $hasSiteIds = false;
 
-        if (has_query_param('site_ids')) {
+        if (has_query_param(PARAM_SITE_IDS_QUERY)) {
             $hasSiteIds = true;
             $siteIds = get_super_admin_site_ids_param();
         }
 
-        if (has_query_param('site_id')) {
+        if (has_query_param(PARAM_SITE_ID_QUERY)) {
             $siteId = get_super_admin_site_id_param();
             $siteId = $siteId === 0 ? false : $siteId;
             if ($siteId !== false && !in_array($siteId, $siteIds)) {
@@ -402,7 +415,7 @@ class ClassesController extends BaseController
             $siteIds = [get_current_site_id()];
         }
 
-        $filter = query_param('filter');
+        $filter = query_param(PARAM_FILTER_QUERY);
         $filter = !is_string($filter) ? null : trim($filter);
         $filter = $filter ? explode(',', $filter) : [];
         foreach ($filter as $key => $item) {
@@ -413,8 +426,8 @@ class ClassesController extends BaseController
 
         $filter = array_values($filter);
         $filter = array_flip($filter);
-        $offset = query_param_int('offset');
-        $limit = query_param('limit');
+        $offset = query_param_int(PARAM_OFFSET_QUERY);
+        $limit = query_param(PARAM_LIMIT_QUERY);
         $originalLimit = $limit;
         $limit = !is_numeric($limit) ? MYSQL_DEFAULT_SEARCH_LIMIT : abs(intval($limit));
         $limit = $limit <= 1 ? 1 : (
@@ -448,7 +461,7 @@ class ClassesController extends BaseController
                 'site_id' => $siteIds,
                 'limit' => $data['meta']['query']['limit'],
                 'offset' => $data['meta']['query']['offset'],
-                'query' => $search,
+                PARAM_SEARCH_QUERY => $search,
                 'type' => $type,
                 'filters' => array_keys($filter),
             ],
@@ -469,7 +482,7 @@ class ClassesController extends BaseController
                 $args[$key] = implode(',', $siteIds);
             }
             $args['type'] = $type;
-            $args['q'] = $search;
+            $args[PARAM_SEARCH_QUERY] = $search;
             $data['next']['url'] = sprintf(
                 '%s?%s',
                 get_current_uri()->getPath(),

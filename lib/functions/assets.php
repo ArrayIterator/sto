@@ -74,6 +74,11 @@ function assets_admin_print_footer_scripts()
     hook_run(__FUNCTION__);
 }
 
+function assets_admin_footer_scripts()
+{
+    hook_run(__FUNCTION__);
+}
+
 function do_assets_footer_scripts()
 {
     do_assets_print_late_styles();
@@ -100,9 +105,9 @@ function do_assets_print_head_scripts(): array
  */
 function do_assets_print_footer_scripts(): array
 {
-    $wp_scripts = assets_scripts();
-    $wp_scripts->doFooterItems();
-    return $wp_scripts->done;
+    $scripts = assets_scripts();
+    $scripts->doFooterItems();
+    return $scripts->done;
 }
 
 /**
@@ -195,7 +200,7 @@ function assets_style_add_data(string $handle, string $key, $value): bool
  */
 function assets_script_enqueue(
     string $handle,
-    string $src = '',
+    string $src = null,
     $deps = [],
     string $ver = null,
     bool $in_footer = false
@@ -206,17 +211,32 @@ function assets_script_enqueue(
         if ($src) {
             $scripts->add($_handle[0], $src, $deps, $ver);
         }
-
         if ($in_footer) {
             $scripts->addData($_handle[0], 'group', 1);
         }
     }
+
     $scripts->queue($handle);
+}
+
+/**
+ * @param string $handle
+ * @param string|null $src
+ * @param array $deps
+ * @param string|null $ver
+ */
+function assets_script_enqueue_footer(
+    string $handle,
+    string $src = null,
+    $deps = [],
+    string $ver = null
+) {
+    assets_script_enqueue($handle, $src, $deps, $ver, true);
 }
 
 function assets_style_enqueue(
     string $handle,
-    string $src = '',
+    string $src = null,
     $deps = [],
     string $ver = null,
     string $media = 'all'
@@ -347,7 +367,7 @@ function do_assets_print_styles(): array
  */
 function get_js_core_by_name(string $name)
 {
-    $js_dir = INCLUDES_DIR . '/';
+    $js_dir = INCLUDES_DIR . '/js/';
     if (substr($name, -4) !== '.php') {
         $name .= '.php';
     }

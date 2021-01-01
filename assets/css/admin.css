@@ -14,8 +14,26 @@ body {
     /*min-height: 100vh;*/
     /*font-family: -apple-system,BlinkMacSystemFont,Roboto,"Helvetica Neue",Helvetica,"Segoe UI",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";*/
 }
+.btn:focus {
+    box-shadow:none;
+}
 .form-control {
+    font-weight: 200;
     font-size: 14px;
+    padding: 1.14rem .75rem;
+}
+.custom-select,
+.custom-select-lg,
+.custom-select-sm {
+    font-size: 14px;
+    font-weight: 200;
+    height: calc(1.5em + .75rem + 5.5px);
+}
+.custom-select-lg {
+    height: calc(1.5em + 1rem + 5.5px);
+}
+.custom-select-sm {
+    height: calc(1.5em + .5rem + 5.5px)
 }
 .hidden {
     display:none;
@@ -322,9 +340,6 @@ body.login-page .login-wrap-row.interim {
     outline: none;
 }
 
-.form-control {
-    font-weight: 200;
-}
 .form-control:focus,
 .admin-login-form input[type=text]:focus,
 .admin-login-form input[type=password]:focus {

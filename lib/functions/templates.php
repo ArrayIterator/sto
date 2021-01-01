@@ -40,17 +40,17 @@ function get_admin_html_attributes(): string
 function get_admin_login_form_attributes(): string
 {
     $body_class = ['login-form', 'admin-login-form'];
-    $body_class = hook_apply('admin_login_form_class', $body_class);
     $attribute = [
-        'class' => implode(
-            ' ',
-            normalize_html_class($body_class)
-        ),
+        'class' => $body_class,
         'id' => 'login-form',
         'method' => 'post',
         'action' => get_current_admin_login_url(),
     ];
-
+    $body_class = hook_apply('admin_login_form_class', $body_class, $attribute);
+    $attribute['class'] = implode(
+        ' ',
+        normalize_html_class($body_class)
+    );
     $attribute = hook_apply('admin_login_form_attributes', $attribute);
     if (isset($attribute['id'])) {
         $attribute['id'] = normalize_html_class($attribute['id']);
@@ -95,16 +95,15 @@ function get_admin_body_attributes(): string
     }
 
     $siteId = get_current_site_id();
-    $body_class = hook_apply('admin_body_class', $body_class);
-    $body_class[] = sprintf('current-site-%d', $siteId);
-    $body_class = array_filter(array_unique($body_class));
     $attribute = [
-        'class' => implode(
-            ' ',
-            normalize_html_class($body_class)
-        ),
+        'class' => $body_class,
         'data-site-id' => $siteId,
     ];
+    $body_class = hook_apply('admin_body_class', $body_class, $attribute);
+    $body_class[] = sprintf('current-site-%d', $siteId);
+    $body_class = array_filter(array_unique($body_class));
+    $attribute['class'] = implode(' ', normalize_html_class($body_class));
+
     if ($isLogin) {
         $attribute['data-user-id'] = $userId;
     }
@@ -350,8 +349,7 @@ function the_admin_login_form()
         <div class="form-group">
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                    <label for="username" class="input-group-text col-form-label"
-                           title="<?php esc_attr_trans_e('Username'); ?>">
+                    <label for="username" class="input-group-text col-form-label" title="<?php esc_attr_trans_e('Username'); ?>">
                         <i class="icofont icofont-user-alt-3"></i>
                     </label>
                 </div>
@@ -554,16 +552,17 @@ function get_body_attributes(): string
     }
 
     $siteId = get_current_site_id();
+    $attribute = [
+        'class' => $body_class,
+        'data-site-id' => $siteId,
+    ];
     $body_class = hook_apply('body_class', $body_class);
     $body_class[] = sprintf('current-site-%d', $siteId);
     $body_class = array_filter(array_unique($body_class));
-    $attribute = [
-        'class' => implode(
-            ' ',
-            normalize_html_class($body_class)
-        ),
-        'data-site-id' => $siteId,
-    ];
+    $attribute['class'] = implode(
+        ' ',
+        normalize_html_class($body_class)
+    );
     if ($isLogin) {
         $attribute['data-user-id'] = $userId;
     }

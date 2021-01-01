@@ -86,6 +86,10 @@ class Styles extends AbstractDependencies
             $ver = $obj->ver ? $obj->ver : $this->default_version;
         }
 
+        $ver = $this->hooks
+            ? $this->hooks->apply('style_loader_ver', $ver, $handle, $obj->src)
+            : $ver;
+
         if (isset($this->args[$handle])) {
             $ver = $ver ? $ver . '&amp;' . $this->args[$handle] : $this->args[$handle];
         }
@@ -151,7 +155,7 @@ class Styles extends AbstractDependencies
 
         $tag = $this->hooks
             ? $this->hooks->apply('style_loader_tag', $tag, $handle, $href, $media)
-            : $this;
+            : $tag;
 
         if ('rtl' === $this->text_direction && isset($obj->extra['rtl']) && $obj->extra['rtl']) {
             if (is_bool($obj->extra['rtl']) || 'replace' === $obj->extra['rtl']) {
