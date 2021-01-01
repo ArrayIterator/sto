@@ -281,7 +281,8 @@ body {
 footer#footer-bottom {
     position: absolute;
     bottom: 0;
-    margin:0;
+    /*top: 100%;*/
+    margin:10px 0 0 0;
     padding: 10px 0;
     display:block;
     left: 20px;
@@ -676,7 +677,7 @@ body.login-page .interim .admin-login-text {
     margin: 0;
     padding: 0 15px;
     position: relative;
-    padding-bottom: 7.5rem;
+    padding-bottom: 12rem;
 }
 .js .sidebar-closed #left-area + #right-area {
     margin-left: 0;
@@ -693,6 +694,9 @@ body.login-page .interim .admin-login-text {
  ------------------------ */
 .select2-container--default .select2-search--dropdown .select2-search__field {
     border-radius: 2px;
+}
+.row [class*=col-] .select2-container {
+    width: 100% !important;
 }
 .select2-container .select2-selection--single .select2-selection__rendered:focus,
 .select2-container--default .select2-search--dropdown .select2-search__field,

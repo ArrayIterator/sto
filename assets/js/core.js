@@ -118,6 +118,9 @@
     Url.parse = function (url) {
         var ret_val = {},
             split = url.split('?');
+        if (split.length === 1 && /^((https?:)\/)?\//gi.test(split[0])) {
+            return ret_val;
+        }
         url = split[1] || (split.length === 1 ? split[0] : '');
         if (url === '') {
             return ret_val;

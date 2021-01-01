@@ -215,15 +215,15 @@ get_admin_header_template();
                 </thead>
                 <tbody>
                     <tr>
-                        <th><?php esc_html_e('Code');?></th>
+                        <th><?php esc_html_trans_e('Code');?></th>
                         <td><%= data.code %></td>
                     </tr>
                     <tr>
-                        <th><?php esc_html_e('Name');?></th>
+                        <th><?php esc_html_trans_e('Name');?></th>
                         <td><%= data.name %></td>
                     </tr>
                     <tr>
-                        <th><?php esc_html_e('Status');?></th>
+                        <th><?php esc_html_trans_e('Status');?></th>
                         <td><%= data.status %></td>
                     </tr>
                 </tbody>
@@ -249,18 +249,18 @@ get_admin_header_template();
                     </tbody>
                 </table>
             <% } else { %>
-                <div class="alert alert-info"><?php esc_html_e('Class does not assigned teachers yet.');?></div>
+                <div class="alert alert-info"><?php esc_html_trans_e('Class does not assigned teachers yet.');?></div>
             <% } %>
             <div class="note">
                 <table class="table">
                     <thead class="thead-dark">
-                    <tr><th><?php esc_html_trans_e('Note'); ?></th></tr>
+                    <tr><th class="font-weight-lighter"><?php esc_html_trans_e('Note'); ?></th></tr>
                     </thead>
                 </table>
                 <% if (data.note && data.note.trim() !== '') { %>
                 <div class="text-wrap small text-monospace"><%= data.note %></div>
                 <% } else { %>
-                    <div class="alert alert-info"><?php esc_html_e('Class does not assigned note yet.');?></div>
+                    <div class="alert alert-info"><?php esc_html_trans_e('Class does not assigned note yet.');?></div>
                 <% } %>
             </div>
         <% } %>
@@ -377,16 +377,17 @@ get_admin_header_template();
                 }
 
                 $overlay.remove();
+                $overlay = $('<div id="overlay-result-class"><div class="overlay-inner loading"><div class="lds-dual-ring"></div></div></div>');
+                $cBody.prepend($overlay);
                 $serialize.limit = limit;
                 $serialize.offset = offset;
 
                 if (data.sd[key]) {
+                    $overlay.fadeOut();
                     fallback(data.sd[key]);
                     return;
                 }
 
-                $overlay = $('<div id="overlay-result-class"><div class="overlay-inner loading"><div class="lds-dual-ring"></div></div></div>');
-                $cBody.prepend($overlay);
                 data.ip = $.get(
                     <?= json_ns(get_api_url('/classes/'));?>,
                     $serialize,

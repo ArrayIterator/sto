@@ -12,6 +12,10 @@ return [
     'name' => 'nama',
     'Code' => 'Kode',
     'kode' => 'kode',
+    'Preview' => 'Pratinjau',
+    'preview' => 'pratinjau',
+    'Edit' => 'Sunting',
+    'edit' => 'sunting',
 
     // TITLE
     'Login To Admin Area' => 'Masuk Ke Area Admin',
@@ -127,5 +131,8 @@ return [
     'Notes' => 'Keterangan',
     'User Does Not Exists' => 'Pengguna Tidak Ada',
     // CLASS
-    'Class code must be contains only alpha numeric, underscore and dashes. Must be started and ending with alphabet or numeric with format: <code>%s</code>' => 'Kode kelas hanya boleh berisi alfa numerik, garis bawah, dan tanda hubung. Harus dimulai dan diakhiri dengan alfabet atau numerik dengan format: <code>%s</code>'
+    'Teach Year' => 'Tahun Mengajar',
+    'Class code must be contains only alpha numeric, underscore and dashes. Must be started and ending with alphabet or numeric with format: <code>%s</code>' => 'Kode kelas hanya boleh berisi alfa numerik, garis bawah, dan tanda hubung. Harus dimulai dan diakhiri dengan alfabet atau numerik dengan format: <code>%s</code>',
+    'Class does not assigned teachers yet.' => 'Belum ada guru kelas yang ditugaskan.',
+    'Class does not assigned note yet.' => 'Belum ada catatan kelas yang ditetapkan.',
 ];
