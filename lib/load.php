@@ -31,6 +31,7 @@ require_once __DIR__ . '/functions/admin.environment.php';
 require_once __DIR__ . '/functions/meta.php';
 require_once __DIR__ . '/functions/permissions.php';
 require_once __DIR__ . '/functions/metadata/classes.php';
+require_once __DIR__ . '/functions/metadata/flash.php';
 require_once __DIR__ . '/functions/metadata/options.php';
 require_once __DIR__ . '/functions/metadata/sites.php';
 require_once __DIR__ . '/functions/metadata/translations.php';
@@ -220,4 +221,3 @@ if (! site_status_is_active()) {
     route_not_found();
     do_exit(0);
 }
-

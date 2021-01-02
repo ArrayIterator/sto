@@ -69,15 +69,11 @@ class ClassesController extends BaseController
             return;
         }
 
-        if (!is_user_logged() || is_supervisor() && !is_admin_active()) {
-            route_not_found();
+        if (!current_supervisor_can('view_classes')) {
+            json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied'));
             return;
         }
 
-        if (!current_supervisor_can('view_classes')) {
-            json(401, trans('Access Denied'));
-            return;
-        }
         $limit  = query_param_int(PARAM_LIMIT_QUERY);
         $offset = query_param_int(PARAM_OFFSET_QUERY);
         $siteIds = get_super_admin_site_ids_params();
@@ -197,7 +193,7 @@ class ClassesController extends BaseController
         } catch (Exception $e) {
             json(500, $e);
         }
-        json(200, $data);
+        json($data);
     }
 
     /**
@@ -206,13 +202,8 @@ class ClassesController extends BaseController
      */
     public function getClass(Route $r, array $params = [])
     {
-        if (!is_user_logged() || is_supervisor() && !is_admin_active()) {
-            route_not_found();
-            return;
-        }
-
         if (!current_supervisor_can('view_class')) {
-            json(401, trans('Access Denied'));
+            json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied'));
             return;
         }
         $siteIds = get_super_admin_site_ids_params();
@@ -247,7 +238,7 @@ class ClassesController extends BaseController
             }
         }
 
-        json(200, $result);
+        json($result);
     }
 
     /**
@@ -256,15 +247,10 @@ class ClassesController extends BaseController
      */
     public function saveClass(Route $r, array $params = [])
     {
-        if (!is_user_logged() || is_supervisor() && !is_admin_active()) {
-            route_not_found();
-            return;
-        }
-
         if (!current_supervisor_can('edit_class')
             && !current_supervisor_can('add_class')
         ) {
-            json(401, trans('Access Denied'));
+            json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied'));
             return;
         }
 
@@ -282,7 +268,7 @@ class ClassesController extends BaseController
         $original = is_int($id) && $id > 0 ? get_classes_by_id($id) : null;
         if (empty($original)) {
             if ($is_update && $id !== null) {
-                json(412, trans_sprintf(
+                json(HTTP_CODE_PRECONDITION_FAILED, trans_sprintf(
                     'Class id %s has not exists',
                     is_numeric($id) ? $id : ''
                 ));
@@ -296,7 +282,7 @@ class ClassesController extends BaseController
         if ($is_update) {
             // prevent update
             if (!current_supervisor_can('edit_class')) {
-                json(401, trans('Access Denied'));
+                json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied'));
                 return;
             }
 
@@ -310,12 +296,12 @@ class ClassesController extends BaseController
                     post('code')
                 );
                 $data['result'] = get_class_by_id($id);
-                json(200, $data);
+                json($data);
                 return;
             }
         } else {
             if (!current_supervisor_can('add_class')) {
-                json(401, trans('Access Denied'));
+                json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied'));
                 return;
             }
 
@@ -329,7 +315,7 @@ class ClassesController extends BaseController
                 $data['result'] = $response;
                 unset($response);
 
-                json(200, $data);
+                json($data);
                 return;
             }
         }
@@ -339,7 +325,7 @@ class ClassesController extends BaseController
                 'Class %s could not be empty!',
                 trans('Code')
             );
-            json(412, $data);
+            json(HTTP_CODE_PRECONDITION_REQUIRED, $data);
             return;
         }
         if ($response === -3) {
@@ -347,7 +333,7 @@ class ClassesController extends BaseController
                 'Class %s could not be empty!',
                 trans('Name')
             );
-            json(412, $data);
+            json(HTTP_CODE_PRECONDITION_REQUIRED, $data);
             return;
         }
 
@@ -356,7 +342,7 @@ class ClassesController extends BaseController
                 'Class %s is duplicate!',
                 sprintf('%s %s', trans('Code'), post('code'))
             );
-            json(412, $data);
+            json(HTTP_CODE_CONFLICT, $data);
             return;
         }
 
@@ -365,33 +351,28 @@ class ClassesController extends BaseController
                 'Class %s is duplicate!',
                 sprintf('%s %s', trans('Name'), post('name'))
             );
-            json(412, $data);
+            json(HTTP_CODE_CONFLICT, $data);
             return;
         }
 
-        json(406, trans('Error save data!'));
+        json(HTTP_CODE_NOT_ACCEPTABLE, trans('Error save data!'));
     }
 
     public function searchClasses(Route $route, array $params = [])
     {
-        if (!is_user_logged() || is_supervisor() && !is_admin_active()) {
-            route_not_found();
-            return;
-        }
-
         if (!current_supervisor_can('view_classes')) {
-            json(401, trans('Access Denied'));
+            json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied'));
             return;
         }
 
         $type = $params[PARAM_TYPE_QUERY]??query_param(PARAM_TYPE_QUERY);
         $type = is_string($type) ? trim(strtolower($type)) : '';
         if (!$type || !in_array($type, ['name', 'code'])) {
-            json(412, trans('Search type is invalid!'));
+            json(HTTP_CODE_PRECONDITION_FAILED, trans('Search type is invalid!'));
         }
         $search = $params[PARAM_SEARCH_QUERY]??query_param(PARAM_SEARCH_QUERY);
         if (!$search || !is_string($search) || trim($search) === '') {
-            json(428, trans('Search query could not be empty!'));
+            json(HTTP_CODE_PRECONDITION_REQUIRED, trans('Search query could not be empty!'));
             return;
         }
 
@@ -490,12 +471,12 @@ class ClassesController extends BaseController
             );
         }
 
-        json(200, $data);
+        json($data);
     }
 
     protected function registerController(RouteStorage $route)
     {
-        if (!is_user_logged() || is_supervisor() && !is_admin_active()) {
+        if (!current_supervisor_can('view_classes')) {
             return;
         }
 

@@ -68,11 +68,37 @@ function serve_json_data(string $data, int $code = 200)
 }
 
 /**
- * @param int $code
+ * @param $code
  * @param mixed ...$data
  */
-function json(int $code, ...$data)
+function json($code, ...$data)
 {
+    $statuses = get_status_header_list();
+    if (func_num_args() === 1) {
+        if (!is_int($code) && (
+            !is_numeric($code) || !isset($statuses[$code])
+            ) || ! isset($statuses[$code])
+        ) {
+            $data = [$code];
+            $code = 200;
+        } else {
+            $code = (int) $code;
+            $data = [$statuses[$code]];
+        }
+    } elseif (!is_int($code)) {
+        if (is_numeric($statuses) && !is_int($data[0]) && isset($statuses[$code])) {
+            $code = (int) $code;
+        } elseif (is_int($data[0]) && isset($statuses[$data[0]])) {
+            $oldCode = $code;
+            $code = $data[0];
+            array_shift($data);
+            array_unshift($data, $oldCode);
+        } else {
+            array_unshift($data, $code);
+            $code = 200;
+        }
+    }
+
     $data = $code < 300 ? json_success(...$data) : json_error(...$data);
     serve_json_data($data, $code);
     do_exit();

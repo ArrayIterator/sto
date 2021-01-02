@@ -132,6 +132,20 @@ CREATE TABLE `sto_exam_student_assign`
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `sto_metadata`
+--
+
+CREATE TABLE `sto_metadata` (
+    `id` bigint(20) NOT NULL,
+    `meta_name` varchar(255) NOT NULL,
+    `meta_value` longtext NOT NULL,
+    `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `sto_options`
 --
 
@@ -856,6 +870,13 @@ ALTER TABLE `sto_exam_student_assign`
     ADD KEY `exam_id` (`student_id`) USING BTREE;
 
 --
+-- Indexes for table `sto_metadata`
+--
+ALTER TABLE `sto_metadata`
+    ADD PRIMARY KEY (`id`),
+    ADD UNIQUE KEY `meta_name` (`meta_name`) USING BTREE;
+
+--
 -- Indexes for table `sto_options`
 --
 ALTER TABLE `sto_options`
@@ -1099,6 +1120,12 @@ ALTER TABLE `sto_classes`
 -- AUTO_INCREMENT for table `sto_exam`
 --
 ALTER TABLE `sto_exam`
+    MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `sto_metadata`
+--
+ALTER TABLE `sto_metadata`
     MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --

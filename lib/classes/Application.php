@@ -85,6 +85,11 @@ class Application
     protected $timezone;
 
     /**
+     * @var Flash
+     */
+    protected $flash;
+
+    /**
      * Application constructor.
      */
     final private function __construct()
@@ -264,5 +269,16 @@ class Application
         }
 
         return $this->site;
+    }
+
+    /**
+     * @return Flash
+     */
+    public function getFlash(): Flash
+    {
+        if (!$this->flash) {
+            $this->flash = new Flash($this->getDatabase());
+        }
+        return $this->flash;
     }
 }

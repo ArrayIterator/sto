@@ -94,4 +94,12 @@ class AbstractInfo
     {
         return $this->getName();
     }
+
+    /**
+     * @return array
+     */
+    public function toArray() : array
+    {
+        return $this->info;
+    }
 }

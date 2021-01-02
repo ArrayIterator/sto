@@ -6,6 +6,7 @@ use ArrayIterator\Database;
 use ArrayIterator\Dependency\Scripts;
 use ArrayIterator\Dependency\Styles;
 use ArrayIterator\Dependency\Translation;
+use ArrayIterator\Flash;
 use ArrayIterator\Helper\Area\TimeZone;
 use ArrayIterator\Helper\TimeZoneConvert;
 use ArrayIterator\Hooks;
@@ -176,6 +177,14 @@ function option(): Option
 function site(): Site
 {
     return application()->getSite();
+}
+
+/**
+ * @return Flash
+ */
+function flash() : Flash
+{
+    return application()->getFlash();
 }
 
 /**

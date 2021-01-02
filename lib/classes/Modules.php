@@ -29,6 +29,11 @@ final class Modules
     protected $invalidList = [];
 
     /**
+     * @var string[]
+     */
+    protected $lowerNames = [];
+
+    /**
      * @var string[][]
      */
     protected $headers = [
@@ -97,6 +102,8 @@ final class Modules
                 'type' => is_dir($path) ? 'd' : 'f',
                 'name' => $entry,
             ];
+
+            $this->lowerNames[strtolower($entry)] = $entry;
             if ($mods[$entry]['type'] === 'd') {
                 $dir2 = dir($path);
                 if (!$dir2) {
@@ -152,7 +159,10 @@ final class Modules
         if (isset($this->modules[$name])) {
             return $this->modules[$name];
         }
-
+        $lowerName = strtolower($name);
+        if (isset($this->lowerNames[$lowerName])) {
+            $name = $this->lowerNames[$lowerName];
+        }
         if (isset($this->invalidList[$name])) {
             return false;
         }
@@ -171,7 +181,7 @@ final class Modules
         $path = $this->modulesDir . DIRECTORY_SEPARATOR . $name . DIRECTORY_SEPARATOR . $data['plugin'];
         if (!is_array($data['info'])) {
             $data['info'] = $this->readModuleInfo($path);
-            $data['base_module_name'] = $name;
+            $data['info']['base_module_name'] = $name;
             self::$fileLists[$this->modulesDir][$name]['info'] = $data['info'];
         }
 

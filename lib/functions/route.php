@@ -329,13 +329,23 @@ function register_route_api_controller($controller) : bool
  */
 function route_slash_it(string $str) : string
 {
-    if (preg_match('#^(.*)?([^\]])([\]]+)?$#', $str, $match)) {
+    if (preg_match('/(?:\[(.*([^\]]))([\]]+))$/', $str, $match, PREG_OFFSET_CAPTURE)) {
+        if ($match[2][0] !== '/') {
+            $str = substr($str, 0, $match[0][1]);
+            $str .= $match[2][0] === '[' ? "[{$match[1][0]}/]]": "[{$match[1][0]}[/]]";
+        }
+        return $str;
+    } elseif (preg_match('#^(.*)?([^\]])([\]]+)?$#', $str, $match)) {
         $slash = $match[2]??'';
         $close = $match[3]??'';
         $slash = $slash !== '/' ? "{$slash}[/]" : "[/]";
-        $str = $match[1] . $slash . $close;
+        $str = "{$match[1]}{$slash}{$close}";
+        if (preg_match('#[\[]{2,}[/]\]\]#', $str)) {
+            $str = "{$match[1]}/{$close}";
+        }
         return $str;
     }
     $str = preg_replace('#(\[[/]+\]|[/]+)$#', '', $str);
-    return "{$str}[/]";
+    $str = "{$str}[/]";
+    return $str;
 }

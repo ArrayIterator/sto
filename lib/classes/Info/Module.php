@@ -46,26 +46,29 @@ class Module extends AbstractInfo
     private $className;
 
     /**
-     * @var int|false
+     * @var int|null
      */
-    protected $loaded_time = false;
+    protected $loaded_time = null;
 
     /**
      * @var bool
      */
-    protected $active_time = false;
+    protected $active_time = null;
 
     /**
      * Module constructor.
      * @param string $path
      * @param array $info
      */
-    public function __construct(string $path, array $info)
-    {
+    public function __construct(
+        string $path,
+        array $info
+    ) {
         $this->className = get_class($this);
         if (!isset(self::$loaded[$this->className])) {
             self::$loaded[$this->className] = [];
         }
+
         parent::__construct($path, $info);
         $this->valid = isset($this->info['name']) && is_string($this->info['name']);
         $this->valid = $this->valid && trim($this->info['name']) !== '';
@@ -113,7 +116,10 @@ class Module extends AbstractInfo
      */
     public function getBaseModuleName() : string
     {
-        return $this->info['base_module_name']??'';
+        if (!isset($this->info['base_module_name'])) {
+            $this->info['base_module_name'] = basename($this->getDirname());
+        }
+        return $this->info['base_module_name'];
     }
 
     /**
@@ -135,7 +141,7 @@ class Module extends AbstractInfo
         if (file_exists($this->getPath())) {
             $active_time = !is_numeric($active_time) ? null : $active_time;
             $active_time = $active_time ? abs($active_time) : null;
-            $this->loaded_time = time();
+            $this->loaded_time = strtotime(gmdate('Y-m-d H:i:s'));
             $this->active_time = $active_time??$this->loaded_time;
             self::$loaded[$this->className][$path] =& $this;
             /** @noinspection PhpIncludeInspection */
@@ -144,6 +150,14 @@ class Module extends AbstractInfo
         }
 
         return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isActive() : bool
+    {
+        return $this->loaded_time && $this->active_time;
     }
 
     /**
@@ -200,5 +214,27 @@ class Module extends AbstractInfo
         }
 
         return $this->logo;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getBaseModuleName(),
+            'name' => $this->getName(),
+            'description' => $this->getDescription(),
+            'license' => $this->getLicense(),
+            'version' => $this->getVersion(),
+            'uri' => $this->getUri(),
+            'author' => $this->getAuthor(),
+            'author_uri' => $this->getAuthorUri(),
+            'site_wide' => $this->isSiteWide(),
+            'valid' => $this->isValid(),
+            'active' => $this->isActive(),
+            'active_time' => $this->getActiveTime(),
+            'loaded_time' => $this->getLoadedTime(),
+        ];
     }
 }

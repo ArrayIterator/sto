@@ -45,7 +45,7 @@ class StatusController extends BaseController
             ];
         }
 
-        json(200, hook_apply('route_ping_result', [
+        json(hook_apply('route_ping_result', [
             'site_id' => get_current_site_id(),
             'login' => !empty($loggedAs),
             'as' => $loggedAs,

@@ -76,7 +76,10 @@ function route_not_found()
 
 function route_json_not_allowed_handler()
 {
-    json(405, hook_apply('route_json_not_allowed', 'Method not allowed'));
+    json(
+        HTTP_CODE_METHOD_NOT_ALLOWED,
+        hook_apply('route_json_not_allowed', 'Method not allowed')
+    );
 }
 
 /**

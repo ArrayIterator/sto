@@ -37,6 +37,7 @@ class Tables implements QueryPrepareInterface
         "sto_exam_classes_id",
         "sto_exam_room_id",
         "sto_exam_student_assign",
+        "sto_metadata",
         "sto_options",
         "sto_post",
         "sto_question",
