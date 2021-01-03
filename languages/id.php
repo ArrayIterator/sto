@@ -120,6 +120,7 @@ return [
     'Class name %s is duplicate!' => 'Duplikasi pada nama kelas %s!',
     'Class %s is duplicate! Data has been reverted!' => 'Duplikasi pada %s kelas! Data telah dikembalikan!',
     'Error save data!' => 'Terjadi masalah saat menyimpan data',
+    'There was an error' => 'Terjadi Kesalahan',
     'Search query could not be empty' => 'Kueri pencarian tidak boleh kosong',
     'Search type is invalid!' => 'Jenis pencarian salah!',
     'Data could not be empty' => 'Data tidak boleh kosong',
@@ -135,4 +136,7 @@ return [
     'Class code must be contains only alpha numeric, underscore and dashes. Must be started and ending with alphabet or numeric with format: <code>%s</code>' => 'Kode kelas hanya boleh berisi alfa numerik, garis bawah, dan tanda hubung. Harus dimulai dan diakhiri dengan alfabet atau numerik dengan format: <code>%s</code>',
     'Class does not assigned teachers yet.' => 'Belum ada guru kelas yang ditugaskan.',
     'Class does not assigned note yet.' => 'Belum ada catatan kelas yang ditetapkan.',
+    // MODULE
+    'Permission denied to change module status' => 'Izin ditolak untuk mengubah status modul',
+    'Module %s has not exists' => 'Modul %s tidak ada',
 ];

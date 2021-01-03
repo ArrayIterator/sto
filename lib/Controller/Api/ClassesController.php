@@ -56,7 +56,7 @@ class ClassesController extends BaseController
     public function getClasses(Route $r)
     {
         $type = query_param_string(PARAM_TYPE_QUERY);
-        $search = query_param_string(PARAM_SEARCH_QUERY, true);
+        $search = query_param_string(PARAM_SEARCH_QUERY, '', true);
         // fallback to query
         if (in_array($type, ['name', 'code']) && $search !== '') {
             $this->searchClasses(

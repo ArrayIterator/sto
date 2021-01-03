@@ -23,10 +23,15 @@ class ModuleController extends BaseController
             json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied'));
         }
 
+        $isAdmin = is_admin();
+        $isSuperAdmin = is_super_admin();
         $name = $params['name']??null;
         if ($name === null) {
             $data = [];
             foreach (modules()->getModules() as $module) {
+                if (!$isAdmin || ! $isSuperAdmin && ! $module->isSiteWide()) {
+                    continue;
+                }
                 $data[] = $module->toArray();
             }
             json($data);
@@ -42,7 +47,7 @@ class ModuleController extends BaseController
         }
 
         $mod = modules()->getModule($name);
-        if (!$mod) {
+        if (!$mod || !$isSuperAdmin && ! $mod->isSiteWide()) {
             json(
                 HTTP_CODE_EXPECTATION_FAILED,
                 trans_sprintf('Module %s has not found', $name)

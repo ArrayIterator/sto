@@ -100,35 +100,41 @@ function cookie($key = null)
 
 /**
  * @param string|null $key
+ * @param $found
  * @return mixed
  * @noinspection PhpMissingReturnTypeInspection
  */
-function post($key = null)
+function post($key = null, &$found = null)
 {
     if ($key === null) {
+        $found = true;
         return posts();
     }
-
+    $found = false;
     if (!is_numeric($key) && !is_string($key)) {
         return null;
     }
-
-    return posts()[$key] ?? null;
+    $found = array_key_exists($key, posts());
+    return $found ? posts()[$key] : null;
 }
 
 /**
  * @param string|null $key
+ * @param $found
  * @return mixed
  */
-function query_param($key = null)
+function query_param($key = null, &$found = null)
 {
     if ($key === null) {
+        $found = true;
         return server_request()->getQueryParams();
     }
     if (!is_numeric($key) && !is_string($key)) {
         return null;
     }
-    return server_request()->getQueryParams()[$key] ?? null;
+    $found = false;
+    $found = array_key_exists($key, server_request()->getQueryParams());
+    return $found ? server_request()->getQueryParams()[$key] : null;
 }
 
 /**
@@ -137,7 +143,16 @@ function query_param($key = null)
  */
 function has_query_param(string $key) : bool
 {
-    return isset(server_request()->getQueryParams()[$key]);
+    return array_key_exists($key, server_request()->getQueryParams());
+}
+
+/**
+ * @param string $key
+ * @return bool
+ */
+function has_post_param(string $key) : bool
+{
+    return array_key_exists($key, posts());
 }
 
 /**
@@ -147,7 +162,19 @@ function has_query_param(string $key) : bool
  */
 function query_param_int(string $key, int $default = 0) : int
 {
-    $value = query_param($key)??$default;
+    $value = query_param($key, $found);
+    if (!$found) {
+        $value = $default;
+    }
+    return !is_numeric($value) ? $default : (int)$value;
+}
+
+function post_param_int(string $key, int $default = 0) : int
+{
+    $value = post($key, $found);
+    if (!$found) {
+        $value = $default;
+    }
     return !is_numeric($value) ? $default : (int)$value;
 }
 
@@ -172,6 +199,27 @@ function query_param_string(
 
     return !is_string($value) ? $default : ($trim ? trim($value) : $value);
 }
+/**
+ * @param string $key
+ * @param string $default
+ * @param bool $trim
+ * @return string
+ */
+function post_param_string(
+    string $key,
+    string $default = '',
+    bool $trim = false
+) : string {
+    $value = post($key)??$default;
+    if (is_string($value)) {
+        return $trim ? trim($value) : $value;
+    }
+    if (is_numeric($value) || is_object($value) && method_exists($value, '__tostring')) {
+        $value = (string) $value;
+    }
+
+    return !is_string($value) ? $default : ($trim ? trim($value) : $value);
+}
 
 /**
  * @param bool $recreate
@@ -179,7 +227,6 @@ function query_param_string(
  */
 function clean_buffer(bool $recreate = true): array
 {
-
     $c = 4;
     $data = [];
     $cleaned = false;

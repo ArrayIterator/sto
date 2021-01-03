@@ -32,6 +32,7 @@ require_once __DIR__ . '/functions/meta.php';
 require_once __DIR__ . '/functions/permissions.php';
 require_once __DIR__ . '/functions/metadata/classes.php';
 require_once __DIR__ . '/functions/metadata/flash.php';
+require_once __DIR__ . '/functions/metadata/module.php';
 require_once __DIR__ . '/functions/metadata/options.php';
 require_once __DIR__ . '/functions/metadata/sites.php';
 require_once __DIR__ . '/functions/metadata/translations.php';
@@ -130,6 +131,15 @@ if (defined('COOKIE_MULTI_DOMAIN') && COOKIE_MULTI_DOMAIN) {
     define('COOKIE_DOMAIN', get_host());
 }
 
+if (!is_user_logged()) {
+    define('FLASH_PREFIX', sprintf('flash_%s', get_token_cookie()));
+} else {
+    define('FLASH_PREFIX', sprintf('flash_uid_%s_%d', get_current_user_type(), get_current_user_id()));
+}
+
+// SET FLASH
+set_flash_prefix(FLASH_PREFIX);
+
 // no globals variable please!
 unset($configBaseName);
 
@@ -173,7 +183,7 @@ if (!defined('DISABLE_MODULES') || !DISABLE_MODULES) {
             continue;
         }
 
-        if (!($module = get_module($moduleName)) || ! $module->isSiteWide()) {
+        if (!($module = get_module($moduleName)) || !site_is_global() && ! $module->isSiteWide()) {
             continue;
         }
 

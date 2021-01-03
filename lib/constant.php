@@ -75,11 +75,19 @@ define('PARAM_SITE_ID_QUERY', 'site_id');
 define('PARAM_SITE_IDS_QUERY', 'site_ids');
 define('PARAM_ACTION_QUERY', 'action');
 define('PARAM_STATUS_QUERY', 'status');
+define('PARAM_MESSAGE_QUERY', 'message');
 define('PARAM_ERROR_QUERY', 'error');
 define('PARAM_SUCCESS_QUERY', 'success');
+define('PARAM_FAILED_QUERY', 'failed');
 define('PARAM_LOGIN_QUERY', 'login');
 define('PARAM_USER_ID_QUERY', 'user_id');
 define('PARAM_RESPONSE_QUERY', 'response');
+define('PARAM_ACTION_ACTIVATE', 'activate');
+define('PARAM_ACTION_DEACTIVATE', 'deactivate');
+define('PARAM_RESPONSE_DEACTIVATED', 'deactivated');
+define('PARAM_RESPONSE_ACTIVATED', 'activated');
+define('PARAM_RESPONSE_DENIED', 'denied');
+define('PARAM_RESPONSE_EMPTY', 'empty');
 
 // ----------------------------------------------------------
 // ENV

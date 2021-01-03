@@ -13,3 +13,5 @@
 if (!defined('ROOT_DIR')) {
     return;
 }
+
+throw new Exception();

@@ -157,7 +157,7 @@ class Module extends AbstractInfo
      */
     public function isActive() : bool
     {
-        return $this->loaded_time && $this->active_time;
+        return $this->isLoaded();
     }
 
     /**

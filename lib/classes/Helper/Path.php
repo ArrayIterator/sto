@@ -105,7 +105,7 @@ class Path
      */
     public static function normalizeDirectory(string $dir): string
     {
-        return str_replace('/', DIRECTORY_SEPARATOR, self::normalize($dir));
+        return str_replace(['/', '\\'], DIRECTORY_SEPARATOR, self::normalize($dir));
     }
 
     /**

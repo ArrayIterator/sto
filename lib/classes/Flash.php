@@ -37,6 +37,11 @@ final class Flash
     protected static $currentFlash = [];
 
     /**
+     * @var array|bool[]
+     */
+    protected $previousPrefix = [];
+
+    /**
      * @var array
      */
     private $ids = [];
@@ -44,10 +49,19 @@ final class Flash
     /**
      * Flash constructor.
      * @param Database $database
+     * @param string|null $prefix
      */
-    public function __construct(Database $database)
+    public function __construct(Database $database, string $prefix = null)
     {
         $this->database = $database;
+        if ($prefix) {
+            $this->prefix = $prefix;
+        }
+    }
+
+    protected function normalizePrefix(string $name)
+    {
+        return str_replace(['[', '['], '', $name);
     }
 
     /**
@@ -58,10 +72,44 @@ final class Flash
         return $this->tableName;
     }
 
-    public function setPrefix(string $name)
+    /**
+     * @param string $name
+     * @return string
+     */
+    public function setPrefix(string $name) : string
     {
-        $name = str_replace(['[', '['], '', $name);
+        $previousPrefix = $this->prefix;
+        $name = $this->normalizePrefix($name);
         $this->prefix = $name;
+        if (isset($this->previousPrefix[$previousPrefix])) {
+            unset($this->previousPrefix[$previousPrefix]);
+        }
+
+        unset($this->previousPrefix[$name]);
+        $this->previousPrefix[$previousPrefix] = true;
+        return $this->prefix;
+    }
+
+    /**
+     * @return false|string
+     */
+    public function restorePrefix()
+    {
+        if (empty($this->previousPrefix)) {
+            return false;
+        }
+        end($this->previousPrefix);
+        $name = key($this->previousPrefix);
+        reset($this->previousPrefix);
+        return $this->setPrefix($name);
+    }
+
+    /**
+     * @return bool[]
+     */
+    public function getPreviousPrefix(): array
+    {
+        return $this->previousPrefix;
     }
 
     public function getPrefix() : string
@@ -71,16 +119,17 @@ final class Flash
 
     protected function createNameFor(string $name, $prefix = null) : string
     {
-        $prefix = $prefix ? str_replace(['[', '['], '', $prefix) : $this->getPrefix();
+        $prefix = $prefix ? $this->normalizePrefix($prefix) : $this->getPrefix();
         return sprintf('flash[%s][%s]', $prefix, $name);
     }
 
     /**
      * @param string $name
+     * @param string|null $prefix
      * @param null $default
      * @return mixed|null
      */
-    public function get(string $name, $default = null)
+    public function get(string $name, string $prefix = null, $default = null)
     {
         $data = $this->getData($name);
         return $data ? ($data['meta_value']??null): $default;
@@ -88,12 +137,13 @@ final class Flash
 
     /**
      * @param string $name
-     * @return mixed
+     * @param string|null $prefix
+     * @return mixed|null
      */
-    public function getData(string $name)
+    public function getData(string $name, string $prefix = null)
     {
         $table = $this->tableName;
-        $prefix = $this->getPrefix();
+        $prefix = ! $prefix ? $this->getPrefix() : $this->normalizePrefix($prefix);
         if (!isset(self::$previousFlash[$prefix])) {
             self::$previousFlash[$prefix] = [];
             $stmt = $this
@@ -131,9 +181,9 @@ final class Flash
         unset(self::$currentFlash[$prefix][$name]);
     }
 
-    public function set(string $name, $value)
+    public function set(string $name, $value, string $prefix = null)
     {
-        $prefix = $this->getPrefix();
+        $prefix = !$prefix ? $this->getPrefix() : $this->normalizePrefix($prefix);
         if (!isset(self::$currentFlash[$prefix])) {
             self::$currentFlash[$prefix] = [];
         }
@@ -143,11 +193,12 @@ final class Flash
     /**
      * @param string $name
      * @param $value
+     * @param string|null $prefix
      * @return bool
      */
-    public function add(string $name, $value) : bool
+    public function add(string $name, $value, string $prefix = null) : bool
     {
-        $prefix = $this->getPrefix();
+        $prefix = !$prefix ? $this->getPrefix() : $this->normalizePrefix($prefix);
         if (isset(self::$currentFlash[$prefix], self::$currentFlash[$prefix][$name])) {
             return false;
         }

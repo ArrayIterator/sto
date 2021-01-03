@@ -54,8 +54,10 @@ function current_supervisor_can(
 
         case 'view_module':
         case 'view_modules':
-        case 'change_module':
+        case 'deactivate_module':
+        case 'deactivate_modules':
         case 'activate_module':
+        case 'activate_modules':
 
         case 'delete_class':
         case 'delete_classes':
