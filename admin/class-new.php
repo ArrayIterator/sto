@@ -285,7 +285,7 @@ if (has_cookie_succeed() && $allowed_message && $referer && $is_edit && ($status
 get_admin_header_template();
 ?>
     <div class="form-post panel-form">
-        <form method="post" id="form-edit-class" action="<?= esc_attr(remove_query_args(['success', 'response'],get_current_url()));?>">
+        <form method="post" id="form-edit-class" action="<?= esc_attr(remove_query_args(['success', 'response'], get_current_url()));?>">
             <div class="card">
                 <div class="card-header">
                     <div class="text-muted small"><?php trans_e(get_admin_title());?></div>

@@ -281,3 +281,14 @@ function is_true_value($data) : bool
 
     return (bool) hook_apply('is_true_value', $returnValue, $data);
 }
+
+/**
+ * @param string $data
+ * @param string $replacer
+ * @return string
+ */
+function replace_root_dir_string(string $data, string $replacer = '[ROOT_DIR]') : string
+{
+    $root_dir = preg_quote(normalize_directory(ROOT_DIR));
+    return preg_replace("#{$root_dir}#", $replacer, $data);
+}

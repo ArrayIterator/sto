@@ -17,7 +17,7 @@ function shutdown_handler()
 
     if (defined('ROUTE_API') && ROUTE_API) {
         if (DEBUG) {
-            json(500, $error['message'], $error);
+            json(500, replace_root_dir_string($error['message']), $error);
         }
         json(500, 'Internal Server Error');
         return;

@@ -77,6 +77,7 @@ define('PARAM_ACTION_QUERY', 'action');
 define('PARAM_STATUS_QUERY', 'status');
 define('PARAM_MESSAGE_QUERY', 'message');
 define('PARAM_ERROR_QUERY', 'error');
+define('PARAM_ALL_QUERY', 'all');
 define('PARAM_SUCCESS_QUERY', 'success');
 define('PARAM_FAILED_QUERY', 'failed');
 define('PARAM_LOGIN_QUERY', 'login');

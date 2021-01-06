@@ -13,8 +13,7 @@
      * JQUERY FN INJECT
      * -------------------------------------------- */
     (function ($) {
-        $.json_encode = function json_encode(params, space)
-        {
+        $.json_encode = function json_encode(params, space) {
             var cache = [];
             if (typeof space !== "number") {
                 space = typeof space === "string" ? space.length : 0;
@@ -167,7 +166,7 @@
         Request.prototype.delete = function (...args) {
             var deleted = 0,
                 i = 0;
-            for (; args.length > i;i++) {
+            for (; args.length > i; i++) {
                 if (!args[i]) {
                     continue;
                 }
@@ -179,7 +178,7 @@
                     continue;
                 }
                 if (typeof args[i] === "object") {
-                    deleted +=this.delete(...Object.values(args[i]));
+                    deleted += this.delete(...Object.values(args[i]));
                 }
             }
             return deleted;
@@ -224,8 +223,8 @@
                     continue;
                 }
                 var params = this.queue[key] && typeof this.queue[key] === "object"
-                        ? this.queue[key]
-                        : null;
+                    ? this.queue[key]
+                    : null;
                 if (!params
                     || typeof params !== "object"
                     || typeof params.url !== "string"
@@ -339,12 +338,12 @@
 
         var $body = $('body'),
 
-        /*! NAVIGATION
-         * ---------------------- */
-        nav_top = '.nav-menu[data-navigation=navigation-top]',
-        nav_sidebar = '.nav-menu[data-navigation=navigation-sidebar]',
-        h_a_s = 'has-active-submenu',
-        $n = $('.nav-menu[data-navigation=navigation-top]');
+            /*! NAVIGATION
+             * ---------------------- */
+            nav_top = '.nav-menu[data-navigation=navigation-top]',
+            nav_sidebar = '.nav-menu[data-navigation=navigation-sidebar]',
+            h_a_s = 'has-active-submenu',
+            $n = $('.nav-menu[data-navigation=navigation-top]');
 
         $(document).on('click', function (event) {
             var $c = $('.navbar-nav[data-navigation=navigation-account]:checked').parent(),
@@ -379,54 +378,65 @@
             }
         });
 
-        $('[data-switch] > .switcher').on('click', function (e) {
-            e.preventDefault();
-            var parent = $(this).closest('[data-switch]'),
-                className = parent.attr('data-class') || 'sidebar-closed',
-                cookieName = parent.attr('data-cookie') || 'sidebar-closed';
-            if ($body.hasClass(className)) {
-                Sto.cookie.delete(cookieName);
-                $body.removeClass(className);
-            } else {
-                $body.addClass(className);
-                Sto.cookie.set(cookieName, 'true');
-            }
-        });
+        $(document)
+            .on(
+                'click',
+                '[data-switch] > .switcher',
+                function (e) {
+                    e.preventDefault();
+                    var parent = $(this).closest('[data-switch]'),
+                        className = parent.attr('data-class') || 'sidebar-closed',
+                        cookieName = parent.attr('data-cookie') || 'sidebar-closed';
+                    if ($body.hasClass(className)) {
+                        Sto.cookie.delete(cookieName);
+                        $body.removeClass(className);
+                    } else {
+                        $body.addClass(className);
+                        Sto.cookie.set(cookieName, 'true');
+                    }
+                });
 
         /*! CHECKBOX
          * ---------------------- */
-        var checkBoxAll = $('input[type=checkbox][data-action=check]');
-        checkBoxAll.on('change', function () {
-            var $this = $(this),
-                is_checked = this.checked,
-                target = $this.attr('data-target');
+        $(document)
+            .on(
+                'change',
+                'input[type=checkbox][data-action=check]',
+                function () {
+                    var $this = $(this),
+                        is_checked = this.checked,
+                        target = $this.attr('data-target'),
+                        checkBoxAll = $('input[type=checkbox][data-action=check]');
+                    if (!target) return;
 
-            if (!target) return;
-
-            var selector = 'input[type=checkbox][data-source='+$.escapeSelector(target)+']',
-                $target = $(selector);
-            $target
-                .unbind('change')
-                .on('change', function (e) {
-                    var match = $(selector + ':checked').length === $target.length;
-                    $this[0].checked = false;
-                    checkBoxAll.each(function () {
-                        this.checked = match;
+                    var selector = 'input[type=checkbox][data-source=' + $.escapeSelector(target) + ']',
+                        $target = $(selector);
+                    $target
+                        .unbind('change')
+                        .on('change', function (e) {
+                            var match = $(selector + ':checked').length === $target.length;
+                            $this[0].checked = false;
+                            checkBoxAll.each(function () {
+                                this.checked = match;
+                            });
+                        });
+                    $target.each(function () {
+                        this.checked = is_checked
+                    });
+                    checkBoxAll.not($this).each(function () {
+                        this.checked = is_checked
                     });
                 });
-            $target.each(function () {this.checked = is_checked});
-            checkBoxAll.not($this).each(function () {this.checked = is_checked});
-        });
 
         /*! SELECT
          * ---------------------- */
         var parse_element_attributes = function (attributes) {
                 var data = {data: {}};
-                if (typeof attributes !== 'object' || ! attributes.length) {
+                if (typeof attributes !== 'object' || !attributes.length) {
                     return data;
                 }
                 try {
-                    for (var i =0; attributes.length > i;i++) {
+                    for (var i = 0; attributes.length > i; i++) {
                         /* safe */
                         if (typeof attributes[i].nodeName === "undefined") {
                             return data;
@@ -471,7 +481,7 @@
                     data = parse_element_attributes(e.element.attributes);
                 if ($template) {
                     try {
-                        data = $.extend(true, {}, data, {data:element.data()});
+                        data = $.extend(true, {}, data, {data: element.data()});
 
                         $template = _.template(
                             $template
@@ -484,124 +494,130 @@
 
                 return e.text;
             };
-        $('select[data-change-submit=true]').on('change', function () {
-            if (this.form) {
-                $(this.form).submit();
-            }
-        });
-        $('select[data-change=true][data-target]').on('change', function () {
-            var $this = $(this),
-                data_target = $this.attr('data-target'),
-                data_template = $this.attr('data-template'),
-                $selected = $this.find('option:selected'),
-                $data_target;
+        $(document)
+            .on(
+                'change',
+                'select[data-change-submit=true]',
+                function () {
+                    if (this.form) {
+                        $(this.form).submit();
+                    }
+                });
+        $(document)
+            .on(
+                'change',
+                'select[data-change=true][data-target]',
+                function () {
+                    var $this = $(this),
+                        data_target = $this.attr('data-target'),
+                        data_template = $this.attr('data-template'),
+                        $selected = $this.find('option:selected'),
+                        $data_target;
 
-            if (!data_target || ! $selected.length) {
-                return;
-            }
-            try {
-                $data_target = $this.closest(data_target);
-                if (!$data_target.length) {
-                    $data_target = $this.parents().find(data_target);
-                }
-            } catch (e) {
-                $data_target = $this.closest($.escapeSelector(data_target));
-            }
-            if (!$data_target.length) {
-                return;
-            }
+                    if (!data_target || !$selected.length) {
+                        return;
+                    }
+                    try {
+                        $data_target = $this.closest(data_target);
+                        if (!$data_target.length) {
+                            $data_target = $this.parents().find(data_target);
+                        }
+                    } catch (e) {
+                        $data_target = $this.closest($.escapeSelector(data_target));
+                    }
+                    if (!$data_target.length) {
+                        return;
+                    }
+                    var data = parse_element_attributes(this.attributes),
+                        data_option = parse_element_attributes($selected[0].attributes),
+                        html = $selected.html();
 
-            var data   = parse_element_attributes(this.attributes),
-                data_option = parse_element_attributes($selected[0].attributes),
-                html = $selected.html();
+                    data = $.extend(true, {}, data, {data: $this.data()});
+                    data = $.extend(true, {}, data, data_option);
+                    data = $.extend(true, {}, data, {data: $selected.data()});
+                    if (data_template && typeof data_template === 'string') {
+                        try {
+                            html = _.template(data_template)(data);
+                        } catch (e) {
+                            html = $selected.html();
+                        }
+                    }
 
-            data  = $.extend(true, {}, data, {data:$this.data()});
-            data  = $.extend(true,  {}, data, data_option);
-            data  = $.extend(true, {}, data, {data: $selected.data()});
-            if (data_template && typeof data_template === 'string') {
-                try {
-                    html = _.template(
-                        data_template
-                    )(data);
-                } catch (e) {
-                    html = $selected.html();
-                }
-            }
-
-            $data_target.html(html);
-        });
+                    $data_target.html(html);
+                });
 
         /*! SELECT2
          * ---------------------- */
         if ($.fn.select2) {
-            $('select[data-select=select2]').each(function () {
-                var $this = $(this),
-                    config = {},
-                    placeholder = $this.data('placeholder'),
-                    allowClear = $this.data('clear'),
-                    allowHtml = $this.data('tag'),
-                    data_options = $this.attr('data-options');
+            $('select[data-select=select2]')
+                .each(function () {
+                    var $this = $(this),
+                        config = {},
+                        placeholder = $this.data('placeholder'),
+                        allowClear = $this.data('clear'),
+                        allowHtml = $this.data('tag'),
+                        data_options = $this.attr('data-options');
 
-                if (!data_options) {
-                    data_options = $this.attr('data-option');
-                }
-                if (data_options) {
-                    try {
-                        if (typeof data_options === 'string') {
-                            try {
-                                if (/\{([^":]+\s*:[^,]+[,]?)*}$/g.test(data_options)
-                                    && !/\([^)]*\)/g.test(data_options)
-                                ) {
-                                    var obj = (function (e) {
-                                        try {
-                                            var data_options;
-                                            eval('data_options =' + e);
-                                            if (data_options && typeof data_options === 'object') {
-                                                return data_options;
-                                            }
-                                        } catch (e) {
-                                            /* console.log(e); */
-                                        }
-                                    })(data_options);
-                                    if (obj && typeof obj === 'object') {
-                                        data_options = obj;
-                                    }
-                                }
-                            } catch (E) {
-                                /* pass */
-                            }
-                        }
-
-                        data_options = typeof data_options === 'object' ? data_options : JSON.parse(data_options);
-                        if (data_options && typeof data_options === 'object') {
-                            for (var i in data_options) {
-                                if (!data_options.hasOwnProperty(i)
-                                    || typeof i === "number"
-                                ) {
-                                    continue;
-                                }
-                                config[i] = data_options[i];
-                            }
-                        }
-                    } catch (e) {
-
+                    if (!data_options) {
+                        data_options = $this.attr('data-option');
                     }
-                }
-                if (placeholder) {
-                    config['placeholder'] = placeholder;
-                }
-                if (allowClear === true || allowClear === '1' || allowClear === 'yes' || allowClear === 'true') {
-                    config['allowClear'] = true;
-                }
-                if (allowHtml === true || allowHtml === 'true' || allowHtml === '1' || allowHtml === 'yes') {
-                    config['escapeMarkup'] = function (e) {
-                        return e;
-                    };
-                    config['templateResult'] = callback_template_select;
-                    config['templateSelection'] = callback_template_select;
-                }
-                $this.select2(config);
-            })
+                    if (data_options) {
+                        try {
+                            if (typeof data_options === 'string') {
+                                try {
+                                    if (/\{([^":]+\s*:[^,]+[,]?)*}$/g.test(data_options)
+                                        && !/\([^)]*\)/g.test(data_options)
+                                    ) {
+                                        var obj = (function (e) {
+                                            try {
+                                                var data_options;
+                                                eval('data_options =' + e);
+                                                if (data_options && typeof data_options === 'object') {
+                                                    return data_options;
+                                                }
+                                            } catch (e) {
+                                                /* console.log(e); */
+                                            }
+                                        })(data_options);
+                                        if (obj && typeof obj === 'object') {
+                                            data_options = obj;
+                                        }
+                                    }
+                                } catch (E) {
+                                    /* pass */
+                                }
+                            }
+
+                            data_options = typeof data_options === 'object' ? data_options : JSON.parse(data_options);
+                            if (data_options && typeof data_options === 'object') {
+                                for (var i in data_options) {
+                                    if (!data_options.hasOwnProperty(i)
+                                        || typeof i === "number"
+                                    ) {
+                                        continue;
+                                    }
+                                    config[i] = data_options[i];
+                                }
+                            }
+                        } catch (e) {
+
+                        }
+                    }
+                    if (placeholder) {
+                        config['placeholder'] = placeholder;
+                    }
+                    if (allowClear === true || allowClear === '1' || allowClear === 'yes' || allowClear === 'true') {
+                        config['allowClear'] = true;
+                    }
+                    if (allowHtml === true || allowHtml === 'true' || allowHtml === '1' || allowHtml === 'yes') {
+                        config['escapeMarkup'] = function (e) {
+                            return e;
+                        };
+                        config['templateResult'] = callback_template_select;
+                        config['templateSelection'] = callback_template_select;
+                    }
+                    $this.select2(config);
+                })
         }
 
         /*! MODALS
@@ -610,7 +626,9 @@
             $modal_template = $('script#underscore_template_modal'),
             cached_modal_data = {};
         /* freed */
-        $(window).on('unload', function () {cached_modal_data = {}});
+        $(window).on('unload', function () {
+            cached_modal_data = {}
+        });
         $(document).on(
             'click',
             '[data-modal=true][data-api][data-template-id]',
@@ -624,7 +642,7 @@
                     template_id = attr['templateId'],
                     use_cache = attr['cache'] !== false && attr['cache'] !== 0,
                     apis_path = attr['api'] || null,
-                    $template = template_id ? $('script#'+$.escapeSelector(template_id)).html() : null,
+                    $template = template_id ? $('script#' + $.escapeSelector(template_id)).html() : null,
                     $modal,
                     $mod,
                     data = {
@@ -665,8 +683,8 @@
                 }
 
                 $.request.abort(bs_last_id);
-                function process_modal_data(data)
-                {
+
+                function process_modal_data(data) {
                     var html = null;
                     try {
                         html = _.template($template)(data);
@@ -705,8 +723,10 @@
                         .find('.loading[data-modal=loading]')
                         .replaceWith(process_modal_data(x));
                 };
-                params.fail = function () {};
-                params.done = function () {};
+                params.fail = function () {
+                };
+                params.done = function () {
+                };
                 params.always = function () {
                     bs_last_id = null;
                 };
@@ -723,6 +743,34 @@
             }
         );
 
+        $(document).on(
+            'click',
+            '[data-filter][data-wrap]',
+            function (e) {
+                var filterName = $(this).data('filter'),
+                    filterWrap = $(this).data('wrap'),
+                    filterClass = $(this).data('class');
+                if (!filterName || !filterWrap) {
+                    return;
+                }
+
+                if (!filterClass || typeof filterClass !== 'string') {
+                    filterClass = 'hidden';
+                }
+                // e.preventDefault();
+                var $target = $('[data-wrap-target=' + $.escapeSelector(filterWrap) + ']'),
+                    $filters = $target.find('[data-filter-source]'),
+                    $filter = $target.find('[data-filter-source=' + $.escapeSelector(filterName) + ']');
+                if (!$filter.length && (filterName === 'all' || $(this).data('reset') === true)) {
+                    $filters.removeClass(filterClass.split(' '));
+                    return;
+                }
+
+                $filters.not($filter).addClass(filterClass.split(' '));
+                $filter.removeClass(filterClass);
+            }
+        );
+
         /*! CLOCKS
          * ---------------------- */
         $('[data-clock=text]').each(function () {
@@ -736,7 +784,7 @@
                 time_zone = window.timezone_string || null,
                 format = $this.attr('data-format') || 'D MMMM YYYY [-] H:mm:ss [(%location%)]',
                 moment_js = typeof time === "number" && time > 0
-                    ? moment.unix(time/1000).tz(utcZ)
+                    ? moment.unix(time / 1000).tz(utcZ)
                     : moment.tz(utcZ);
             if (typeof format !== 'string') {
                 format = 'D MMMM YYYY [-] H:mm:ss [(%location%)]';
@@ -750,6 +798,7 @@
             }
 
             format = format.replace(/%location%/, moment_js.tz());
+
             function update() {
                 moment_js.add(1, 'seconds');
                 $this.html(moment_js.format(format));

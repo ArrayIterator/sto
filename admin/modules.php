@@ -7,6 +7,9 @@ if (!admin_is_allowed(__FILE__) || !is_admin()) {
 
 $canActivatedModule = current_supervisor_can('activate_module');
 $canDeActivatedModule = current_supervisor_can('deactivate_module');
+/*!
+ * MODULE ACTIVATION
+ */
 if (is_method_post()) {
     $current_url = get_current_url();
     $action = post_param_string(PARAM_ACTION_QUERY, '', true);
@@ -17,11 +20,13 @@ if (is_method_post()) {
             [PARAM_ACTION_ACTIVATE, PARAM_ACTION_DEACTIVATE]
         )
     );
-    $current_url = remove_query_args(PARAM_RESPONSE_QUERY);
+
+    $current_url = remove_query_args(PARAM_RESPONSE_QUERY, $current_url);
     if (!$hasAction || $module === '') {
         redirect($current_url);
         return;
     }
+
     if (!$canDeActivatedModule && !$canActivatedModule) {
         flash_set(
             'module_message',
@@ -37,7 +42,6 @@ if (is_method_post()) {
         return;
     }
     $mod = module_get($module);
-
     if (!$mod) {
         flash_set(
             'module_message',
@@ -54,6 +58,11 @@ if (is_method_post()) {
         );
         return;
     }
+    $id_tag = post_param_string(PARAM_ID_QUERY, '');
+    if ($id_tag !== '') {
+        $current_url .= "#{$id_tag}";
+    }
+
     switch ($action) {
         case PARAM_ACTION_ACTIVATE:
             if (!$canActivatedModule) {
@@ -166,7 +175,8 @@ if (is_method_post()) {
                 add_query_args(
                     [
                         PARAM_RESPONSE_QUERY => PARAM_SUCCESS_QUERY,
-                        PARAM_ACTION_QUERY => PARAM_RESPONSE_ACTIVATED
+                        PARAM_ACTION_QUERY => PARAM_RESPONSE_ACTIVATED,
+                        PARAM_STATUS_QUERY => PARAM_ALL_QUERY,
                     ],
                     $current_url
                 )
@@ -183,7 +193,7 @@ if (is_method_post()) {
                     FLASH_PREFIX
                 );
                 redirect(add_query_args([
-                    PARAM_RESPONSE_QUERY => PARAM_RESPONSE_DENIED
+                    PARAM_RESPONSE_QUERY => PARAM_RESPONSE_DENIED,
                 ], $current_url));
             }
 
@@ -192,7 +202,8 @@ if (is_method_post()) {
                     add_query_args(
                         [
                             PARAM_RESPONSE_QUERY => PARAM_SUCCESS_QUERY,
-                            PARAM_ACTION_QUERY => PARAM_RESPONSE_DEACTIVATED
+                            PARAM_ACTION_QUERY => PARAM_RESPONSE_DEACTIVATED,
+                            PARAM_STATUS_QUERY => PARAM_ALL_QUERY
                         ],
                         $current_url
                     )
@@ -232,7 +243,8 @@ if (is_method_post()) {
                 add_query_args(
                     [
                         PARAM_RESPONSE_QUERY => PARAM_SUCCESS_QUERY,
-                        PARAM_ACTION_QUERY => PARAM_RESPONSE_DEACTIVATED
+                        PARAM_ACTION_QUERY => PARAM_RESPONSE_DEACTIVATED,
+                        PARAM_STATUS_QUERY => PARAM_ALL_QUERY
                     ],
                     $current_url
                 )
@@ -255,16 +267,11 @@ if (is_array($messages) && isset($messages[PARAM_STATUS_QUERY], $messages[PARAM_
         if ($message instanceof Throwable) {
             $message_ = sprintf('<p>%s</p>', trans('There was an error'));
             if (DEBUG && is_super_admin()) {
-                $message = (string) $message;
-                $root_dir = preg_quote(normalize_directory(ROOT_DIR));
-//                print_r($root_dir);exit;
-                $message = preg_replace("#{$root_dir}#", '[ROOT_DIR]', $message);
-                $message_ .= '<pre class="pre-code-notice">' . $message . '</pre>';
+                $message_ .= '<pre class="pre-code-notice">' . replace_root_dir_string((string) $message) . '</pre>';
             } else {
-                $root_dir = preg_quote(normalize_directory(ROOT_DIR));
-                $message = preg_replace("#{$root_dir}#", '[ROOT_DIR]', $message->getMessage());
-                $message_ .= sprintf('<p>%s</p>', $message_);
+                $message_ .= sprintf('<p>%s</p>', replace_root_dir_string((string) $message));
             }
+
             $message = $message_;
             unset($message_);
         }
@@ -288,7 +295,7 @@ switch (query_param(PARAM_STATUS_QUERY)) {
 get_admin_header_template();
 
 $moduleInputStatusName = 'module_status';
-$moduleStatusName = 'status';
+$moduleStatusName = PARAM_STATUS_QUERY;
 
 $moduleStatus = query_param($moduleStatusName);
 $moduleSearchStatus = query_param($moduleInputStatusName);
@@ -379,7 +386,7 @@ foreach (modules()->getModules() as $name => $module) {
             <div class="row">
                 <div class="col-md-8">
                     <?php foreach ($moduleStatusesLists as $item) : ?>
-                        <label class="custom-label-radio">
+                        <label class="custom-label-radio" data-filter="<?php esc_attr_e($item); ?>" data-wrap="modules" data-class="hidden hide">
                             <input name="<?= $moduleInputStatusName; ?>" type="radio" class="module-status-filter"
                                    value="<?php esc_attr_e($item); ?>"<?= $chosenSearchStatus === $item ? ' checked' : '' ?>>
                             <span><?php esc_attr_trans_e(sprintf('%s Modules', ucwords($item))); ?></span>
@@ -398,7 +405,7 @@ foreach (modules()->getModules() as $name => $module) {
         </form>
     </div>
     <div class="card-area standard-card">
-        <div class="card-columns">
+        <div data-wrap-target="modules" class="card-columns">
             <?php
             $regex_1 = '#' . preg_quote($moduleSearch, '#') . '#i';
             $regex_2 = '#' . preg_quote(preg_replace('#\s+#', '', $moduleSearch), '#') . '#i';
@@ -457,8 +464,7 @@ foreach (modules()->getModules() as $name => $module) {
                 $count++;
                 ?>
 
-                <div class="<?= $class; ?>" id="<?= $item['id']; ?>"
-                     data-status="<?= $item['active'] ? 'active' : 'inactive'; ?>">
+                <div class="<?= $class; ?>" id="<?= $item['id']; ?>" data-filter-source="<?= $item['active'] ? 'active' : 'inactive'; ?>" data-status="<?= $item['active'] ? 'active' : 'inactive'; ?>">
                     <div class="card-image"<?= $bg; ?>>
                         <?= !empty($item['description']) ? sprintf('<div class="card-description">%s</div>',
                             esc_html($item['description'])) : ''; ?>
@@ -491,7 +497,7 @@ foreach (modules()->getModules() as $name => $module) {
                                     <input type="hidden" class="hidden hide" name="module" value="<?= esc_attr($identifier); ?>">
                                     <input type="hidden" class="hidden hide" name="global" value="yes">
                                     <input type="hidden" class="hidden hide" name="global_only" value="yes">
-                                    <button type="submit" class="btn btn-sm btn-dark btn-block">
+                                    <button type="submit" name="<?= PARAM_ID_QUERY;?>" class="btn btn-sm btn-dark btn-block">
                                         <?php esc_html_trans_e('Deactivate Global Only'); ?>
                                     </button>
                                     </div>
@@ -502,14 +508,14 @@ foreach (modules()->getModules() as $name => $module) {
                                             <input type="hidden" name="<?= PARAM_ACTION_QUERY; ?>" value="<?= PARAM_ACTION_ACTIVATE; ?>">
                                             <input type="hidden" class="hidden hide" name="module" value="<?= esc_attr($identifier); ?>">
                                             <input type="hidden" class="hidden hide" name="global" value="yes">
-                                            <button type="submit" class="btn btn-sm btn-success btn-block">
+                                            <button type="submit" name="<?= PARAM_ID_QUERY;?>" value="<?= $item['id'];?>" class="btn btn-sm btn-success btn-block">
                                                 <?php esc_html_trans_e('Activate Global'); ?>
                                             </button>
                                         </div>
                                     </form>
                                 <?php } else { ?>
-                                    <div class="form-group">
-                                        <button type="button" class="btn btn-sm btn-secondary btn-block disabled" disabled><?php trans_e('Site Module');?></button>
+                                    <div class="form-group pt-1 pb-1">
+                                        <div class="pt-1 pb-1 mt-2 mb-2"></div>
                                     </div>
                                 <?php } ?>
                             <?php } ?>
@@ -518,17 +524,21 @@ foreach (modules()->getModules() as $name => $module) {
                                 <input type="hidden" class="hidden hide" name="module" value="<?= esc_attr($identifier); ?>">
                                 <?php if (is_super_admin() && site_is_global()) { ?>
                                         <?php if (!$item['active']) { ?>
-                                        <div class="form-group">
+                                        <div class="form-group pt-1 pb-1">
+                                            <?php if ($item['site_wide']) { ?>
                                             <div class="custom-control custom-switch">
-                                                <input type="checkbox" name="global" value="yes" class="custom-control-input" id="checkbox-<?= $item['id']; ?>"<?= $item['active'] && module_is_global($identifier) ? ' checked' : ''; ?>>
+                                                <input type="checkbox" name="global" value="yes" class="custom-control-input" id="checkbox-<?= $item['id']; ?>"<?= $item['active'] && module_is_global($identifier) ? ' checked' : ''; ?><?= $item['site_wide'] ? '' : ' disabled';?>>
                                                 <label class="custom-control-label text-muted" for="checkbox-<?= $item['id']; ?>">
                                                     <?php trans_e('Global'); ?>
                                                 </label>
                                             </div>
+                                            <?php } else { ?>
+                                                <div class="pt-1 pb-1 mt-2 mb-2"></div>
+                                            <?php } ?>
                                         </div>
                                         <?php } ?>
                                 <?php } ?>
-                                <button type="submit" class="btn btn-sm btn-<?= !$item['active'] ? 'primary' : 'danger'; ?> btn-block">
+                                <button type="submit" name="<?= PARAM_ID_QUERY;?>" value="<?= $item['id'] ;?>" class="btn btn-sm btn-<?= !$item['active'] ? 'primary' : 'danger'; ?> btn-block">
                                     <?php $item['active'] ? esc_html_trans_e('Deactivate') : esc_html_trans_e('Activate'); ?>
                                 </button>
                             </form>
@@ -553,33 +563,16 @@ foreach (modules()->getModules() as $name => $module) {
             if (!$) {
                 return;
             }
-            var $chosen_status = <?= json_ns($chosenSearchStatus);?>;
+
             var $card_area = $('.card-area');
             var $form = $('form.module-form');
             var $formSearch = $form.find(' #module-form-search-input');
-            if ($chosen_status !== 'active' && $chosen_status !== 'inactive') {
-                $chosen_status = 'all';
-            }
-            $('.module-form input[type=radio].module-status-filter')
-                .on('change', function (e) {
-                    var must_change = false;
-                    switch (this.value) {
-                        case 'active':
-                        case 'inactive':
-                            must_change = true;
-                            $chosen_status = this.value;
-                            break;
-                        default:
-                            must_change = 'all';
-                            $chosen_status = 'all';
-                    }
-                    $formSearch.trigger('keyup');
-                });
-
             $formSearch.on('keyup', function (e) {
                 // e.preventDefault();
                 var val = this.value ? this.value.trim() : '';
                 var $card;
+                var $chosen_status = $('.module-form input[type=radio]:checked').val();
+                $chosen_status = $chosen_status !== 'inactive' && $chosen_status !== 'active' ? 'all' : $chosen_status;
                 if (val === '') {
                     if ($chosen_status === 'all') {
                         $card_area.find('.card').removeClass('hide');

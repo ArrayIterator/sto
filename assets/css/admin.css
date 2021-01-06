@@ -480,6 +480,7 @@ body.login-page .interim .admin-login-text {
 #admin-sidebar .sidebar-menu {
     position: absolute;
     height: 100%;
+    /*height: calc(100% - 50px);*/
     width: 100%;
     margin: 0;
     border: 0;
@@ -511,9 +512,15 @@ body.login-page .interim .admin-login-text {
     text-decoration:none;
 }
 #admin-sidebar .admin-logo  + .sidebar-menu {
-    padding-bottom: 100px;
+    /*     padding-bottom: 100px; */
     padding-top: 0;
 }
+#admin-sidebar .admin-logo  + .sidebar-menu::after {
+    display: block;
+    padding: 0 0 100px 0;
+    content:'';
+}
+
 #admin-sidebar .admin-logo img {
     position:relative;
     display:block;
@@ -625,6 +632,11 @@ body.login-page .interim .admin-login-text {
 .sidebar-menu > li {
     display: block;
 }
+/*.sidebar-menu > li:last-child::after {*/
+/*    content: '';*/
+/*    height: 50px;*/
+/*    display: block;*/
+/*}*/
 .sidebar-menu > li > a {
     padding: 12px 10px;
     display: block;

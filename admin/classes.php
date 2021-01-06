@@ -311,6 +311,7 @@ get_admin_header_template();
         if (!$table.length || !template || !opt || !empty) {
             return;
         }
+        var inLoopSubmit = false;
         $('form#result-filter')
             .on('submit', function (e) {
                 e.preventDefault();
@@ -328,6 +329,19 @@ get_admin_header_template();
                     offset = asIntDefault($serialize['page'], data.cp),
                     limit = asIntDefault($serialize['limit'], data.pp),
                     fallback = function (e) {
+                        var $selectPage = $('select[name=page]');
+                        if (!inLoopSubmit && e.data.total > 0 && offset >= e.data.total) {
+                            var $cY = $selectPage.find('option[value=1]');
+                            if ($cY.length) {
+                                $selectPage.find('option').not($cY).attr('selected', false);
+                                $cY.attr('selected', true);
+                                inLoopSubmit = true;
+                                $this.trigger('submit');
+                                return;
+                            }
+                        }
+
+                        inLoopSubmit = false;
                         data.sd[key] = e;
                         data.td = e.data.total;
                         data.tr = e.data.count;
@@ -339,7 +353,6 @@ get_admin_header_template();
                                 data.tr < 1 ? empty : template
                             )({strip, items:e.data.results})
                         );
-                        var $selectPage = $('select[name=page]');
                         $selectPage.find('option:not([disabled])').remove();
                         $selectPage.find('option[disabled]').attr('selected', true);
                         $selectPage.append(
