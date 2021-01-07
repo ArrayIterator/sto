@@ -34,6 +34,7 @@ require_once __DIR__ . '/functions/metadata/classes.php';
 require_once __DIR__ . '/functions/metadata/flash.php';
 require_once __DIR__ . '/functions/metadata/module.php';
 require_once __DIR__ . '/functions/metadata/options.php';
+require_once __DIR__ . '/functions/metadata/religion.php';
 require_once __DIR__ . '/functions/metadata/sites.php';
 require_once __DIR__ . '/functions/metadata/translations.php';
 require_once __DIR__ . '/functions/metadata/user.php';

@@ -204,7 +204,10 @@ get_admin_header_template();
         </tr>
     </script>
     <script type="text/template" id="underscore_template_class_preview" data-template="preview">
-        <% if (typeof data === "object") { %>
+        <%
+            if (typeof data === "object" && data.length && (data[0] && typeof data[0] === 'object')) {
+                var newData = data[0];
+        %>
             <table class="table table-striped font-weight-lighter">
                 <thead class="thead-dark">
                     <tr>
@@ -216,19 +219,19 @@ get_admin_header_template();
                 <tbody>
                     <tr>
                         <th><?php esc_html_trans_e('Code');?></th>
-                        <td><%= data.code %></td>
+                        <td><%= newData.code %></td>
                     </tr>
                     <tr>
                         <th><?php esc_html_trans_e('Name');?></th>
-                        <td><%= data.name %></td>
+                        <td><%= newData.name %></td>
                     </tr>
                     <tr>
                         <th><?php esc_html_trans_e('Status');?></th>
-                        <td><%= data.status %></td>
+                        <td><%= newData.status %></td>
                     </tr>
                 </tbody>
             </table>
-            <% if (data.teachers.length) { %>
+            <% if (newData.teachers.length) { %>
                 <table class="table table-striped">
                     <thead class="thead-dark">
                         <tr>
@@ -240,7 +243,7 @@ get_admin_header_template();
                         </tr>
                     </thead>
                     <tbody>
-                    <% _.each(data.teachers, function(item, key, arr) { %>
+                    <% _.each(newData.teachers, function(item, key, arr) { %>
                         <tr>
                             <td><%= item.name %></td>
                             <td><%= item.teach_year || '' %></td>
@@ -257,12 +260,14 @@ get_admin_header_template();
                     <tr><th class="font-weight-lighter"><?php esc_html_trans_e('Note'); ?></th></tr>
                     </thead>
                 </table>
-                <% if (data.note && data.note.trim() !== '') { %>
-                <div class="text-wrap small text-monospace"><%= data.note %></div>
+                <% if (newData.note && newData.note.trim() !== '') { %>
+                <div class="text-wrap small text-monospace"><%= newData.note %></div>
                 <% } else { %>
                     <div class="alert alert-info"><?php esc_html_trans_e('Class does not assigned note yet.');?></div>
                 <% } %>
             </div>
+        <% } else { %>
+            <div class="alert alert-info text-center"><?php esc_html_trans_e('Data not found');?></div>
         <% } %>
     </script>
     <script type="text/javascript">

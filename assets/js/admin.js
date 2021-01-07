@@ -757,7 +757,10 @@
                 if (!filterClass || typeof filterClass !== 'string') {
                     filterClass = 'hidden';
                 }
-                // e.preventDefault();
+
+                if ($(this).is('a')) {
+                    e.preventDefault();
+                }
                 var $target = $('[data-wrap-target=' + $.escapeSelector(filterWrap) + ']'),
                     $filters = $target.find('[data-filter-source]'),
                     $filter = $target.find('[data-filter-source=' + $.escapeSelector(filterName) + ']');

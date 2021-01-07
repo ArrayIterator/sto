@@ -208,13 +208,34 @@ function admin_sidebar_menu_array(): array
                 ],
             ]
         ],
+        'religions' => [
+            'name' => trans('Religions'),
+            'link' => get_admin_url('religions.php'),
+            'hide' => !admin_is_allowed('religions.php'),
+            'icon' => 'connection',
+            'position' => 600,
+            'menus' => [
+                'students' => [
+                    'name' => trans('All Religions'),
+                    'link' => get_admin_url('religions.php'),
+                    'hide' => !admin_is_allowed('religions.php'),
+                    'position' => 600,
+                ],
+                'new_student' => [
+                    'name' => trans('Add New Religion'),
+                    'link' => get_admin_url('religion-new.php'),
+                    'hide' => !admin_is_allowed('religion-new.php'),
+                    'position' => 650,
+                ],
+            ]
+        ],
         'tools' => [
             'name' => trans('Tools'),
             'link' => get_admin_url('tools.php'),
             'hide' => !admin_is_allowed('tools.php'),
             'icon' => 'tools-alt-2',
 //            'icon' => 'tools',
-            'position' => 600,
+            'position' => 700,
             'menus' => [
 
             ]
@@ -226,25 +247,25 @@ function admin_sidebar_menu_array(): array
             'hide' => !admin_is_allowed('modules.php'),
 //            'icon' => 'addons',
             'icon' => 'plugin',
-            'position' => 700,
+            'position' => 800,
             'menus' => [
                 'all_modules' => [
                     'name' => trans('All Modules'),
                     'link' => get_admin_url('modules.php'),
                     'hide' => !admin_is_allowed('modules.php'),
-                    'position' => 700,
+                    'position' => 800,
                 ],
                 'active_modules' => [
                     'name' => trans('Active Modules'),
                     'link' => get_admin_url('modules.php?status=active'),
                     'hide' => !admin_is_allowed('modules.php'),
-                    'position' => 720,
+                    'position' => 820,
                 ],
                 'inactive_modules' => [
                     'name' => trans('Inactive Modules'),
                     'link' => get_admin_url('modules.php?status=inactive'),
                     'hide' => !admin_is_allowed('modules.php'),
-                    'position' => 730,
+                    'position' => 830,
                 ],
             ]
         ],
@@ -253,7 +274,7 @@ function admin_sidebar_menu_array(): array
             'link' => get_admin_url('themes.php'),
             'hide' => !admin_is_allowed('themes.php'),
             'icon' => 'paint',
-            'position' => 800,
+            'position' => 900,
         ],
         'settings' => [
             'name' => trans('Settings'),
@@ -261,19 +282,19 @@ function admin_sidebar_menu_array(): array
             'hide' => !admin_is_allowed('settings.php'),
 //            'icon' => 'gears',
             'icon' => 'settings',
-            'position' => 900,
+            'position' => 1000,
             'menus' => [
                 'settings' => [
                     'name' => trans('General Settings'),
                     'link' => get_admin_url('settings.php'),
                     'hide' => !admin_is_allowed('settings.php'),
-                    'position' => 900,
+                    'position' => 1000,
                 ],
                 'admin-settings' => [
                     'name' => trans('Global Settings'),
                     'link' => get_admin_url('admin.php'),
                     'hide' => !admin_is_allowed('admin.php'),
-                    'position' => 930,
+                    'position' => 1030,
                 ]
             ]
         ],
@@ -282,19 +303,19 @@ function admin_sidebar_menu_array(): array
             'link' => get_admin_url('sites.php'),
             'hide' => !admin_is_allowed('sites.php'),
             'icon' => 'web',
-            'position' => 1000,
+            'position' => 1100,
             'menus' => [
                 'sites' => [
                     'name' => trans('Site Management'),
                     'link' => get_admin_url('sites.php'),
                     'hide' => !admin_is_allowed('sites.php'),
-                    'position' => 1000,
+                    'position' => 1100,
                 ],
                 'site_new' => [
                     'name' => trans('Add New Site'),
                     'link' => get_admin_url('site-new.php'),
                     'hide' => !admin_is_allowed('site-new.php'),
-                    'position' => 1050,
+                    'position' => 1150,
                 ]
             ]
         ],
@@ -303,13 +324,13 @@ function admin_sidebar_menu_array(): array
             'link' => get_admin_url('profile.php'),
             'hide' => !admin_is_allowed('profile.php'),
             'icon' => 'key',
-            'position' => 1100,
+            'position' => 1200,
             'menus' => [
                 'profile' => [
                     'name' => trans('Profile'),
                     'link' => get_admin_url('profile.php'),
                     'hide' => !admin_is_allowed('profile.php'),
-                    'position' => 1100
+                    'position' => 1200
                 ],
                 'logout' => [
                     'name' => trans('Logout'),
@@ -320,7 +341,7 @@ function admin_sidebar_menu_array(): array
                         'class' => 'logout color-red',
                         'onclick' => 'return confirm(' . json_ns(trans('Are You Sure ... ?')) . ');'
                     ],
-                    'position' => 1100
+                    'position' => 1280
                 ],
             ]
         ],

@@ -101,6 +101,11 @@ return [
     'Site Management' => 'Manajemen Situs',
     'Add New Site' => 'Tambahkan Situs Baru',
 
+    'Religions' => 'Agama',
+    'All Religions' => 'Semua Agama',
+    'Add New Religion' => 'Tambahkan Agama Baru',
+    'Edit Religion' => 'Sunting Agama',
+
     // TEXT
     'You seem to be offline' => 'Anda sepertinya sedang offline',
     'Reconnecting' => 'Menghubungkan ulang',
@@ -119,18 +124,28 @@ return [
     'Class %s could not be empty!' => '%s Kelas Tidak Boleh Kosong!',
     'Class name %s is duplicate!' => 'Duplikasi pada nama kelas %s!',
     'Class %s is duplicate! Data has been reverted!' => 'Duplikasi pada %s kelas! Data telah dikembalikan!',
-    'Error save data!' => 'Terjadi masalah saat menyimpan data',
+    'Error save data!' => 'Terjadi masalah saat menyimpan data!',
     'There was an error' => 'Terjadi Kesalahan',
     'Search query could not be empty' => 'Kueri pencarian tidak boleh kosong',
     'Search type is invalid!' => 'Jenis pencarian salah!',
     'Data could not be empty' => 'Data tidak boleh kosong',
     'Invalid Format' => 'Format Salah',
     'Duplicate Data' => 'Data Duplikat',
-    'Edit Class: %s' => 'Ubah Kelas: %s',
+    'Edit Class: %s' => 'Sunting Kelas: %s',
     'Class Name' => 'Nama Kelas',
     'Note' => 'Keterangan',
     'Notes' => 'Keterangan',
     'User Does Not Exists' => 'Pengguna Tidak Ada',
+    // API
+    'Request parameter is empty' => 'Parameter yang diminta kosong',
+    'Class %s : %s is not exists' => '%s Kelas : %s tidak ada',
+    'Supervisor %s : %s is not exists' => '%s Pengawas: %s tidak ada',
+    'Class %s successfully saved!' => 'Kelas %s berhasil disimpan!',
+    'Class %s successfully updated!' => 'Kelas %s berhasil diperbaharui!',
+    'Class id %s has not exists' => 'Kelas id %s tidak ada',
+    'Class %s is duplicate!' => 'Duplikasi pada Kelas %s',
+    'Search query could not be empty!' => 'Kueri pencarian tidak boleh kosong',
+
     // CLASS
     'Teach Year' => 'Tahun Mengajar',
     'Class code must be contains only alpha numeric, underscore and dashes. Must be started and ending with alphabet or numeric with format: <code>%s</code>' => 'Kode kelas hanya boleh berisi alfa numerik, garis bawah, dan tanda hubung. Harus dimulai dan diakhiri dengan alfabet atau numerik dengan format: <code>%s</code>',

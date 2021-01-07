@@ -68,6 +68,7 @@ define('PARAM_SEARCH_QUERY', 'q');
 define('PARAM_TYPE_QUERY', 'type');
 define('PARAM_FILTER_QUERY', 'filter');
 define('PARAM_LIMIT_QUERY', 'limit');
+define('PARAM_ROLE_QUERY', 'role');
 define('PARAM_OFFSET_QUERY', 'offset');
 define('PARAM_PAGE_QUERY', 'page');
 define('PARAM_ID_QUERY', 'id');

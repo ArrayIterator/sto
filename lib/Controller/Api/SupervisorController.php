@@ -12,79 +12,73 @@ if (!defined('ROOT_DIR')) {
     return;
 }
 
-/*
-SELECT
-    class.*,
-    supervisor.*,
-    COUNT(class.id) OVER() AS total
-FROM
-    sto_classes as class
-
-LEFT JOIN
-	(
-        SELECT
-        	sto_classes_teacher.class_id as class_id,
-        	sto_classes_teacher.year as class_year,
-        	sto_supervisor.id as teacher_id,
-        	sto_supervisor.full_name as teacher_full_name,
-        	sto_supervisor.role as teacher_role,
-	        sto_supervisor.site_id as teacher_site_id
-        FROM
-        	sto_classes_teacher
-        LEFT JOIN sto_supervisor ON
-        	sto_supervisor.role = 'teacher' AND sto_classes_teacher.teacher = sto_supervisor.id
-        WHERE role = 'teacher'
-        	AND (sto_supervisor.status = '' OR sto_supervisor.status = 'active')
-    ) as supervisor
-    	ON supervisor.teacher_site_id = class.site_id
-        AND supervisor.class_id = class.id
-
-WHERE
-    class.site_id IS NOT NULL AND class.site_id > 0
-
-ORDER BY
-    class.id,
-    class.site_id
-LIMIT 10
- */
 /**
  * Class ClassesController
  * @package ArrayIterator\Controller\Api
  */
-class ClassesController extends BaseController
+class SupervisorController extends BaseController
 {
-    public function getClasses(Route $r)
+    public function getUsers(Route $r)
     {
         $type = query_param_string(PARAM_TYPE_QUERY);
         $search = query_param_string(PARAM_SEARCH_QUERY, '', true);
+        $role = query_param_string(PARAM_ROLE_QUERY, '', true);
+        $role = $role ? strtolower(trim($role)) : $role;
+        $role = $role ?: null;
+        $type = $type === 'name' ? 'full_name' : $type;
         // fallback to query
-        if (in_array($type, ['name', 'code']) && $search !== '') {
-            $this->searchClasses(
+        if (in_array($type, ['username', 'email', 'full_name']) && $search !== '') {
+            $this->searchUsers(
                 $r,
                 [
                     PARAM_TYPE_QUERY => $type,
-                    PARAM_SEARCH_QUERY => $search
+                    PARAM_SEARCH_QUERY => $search,
+                    PARAM_ROLE_QUERY => $role,
                 ]
             );
             return;
         }
 
-        if (!current_supervisor_can('view_classes')) {
-            json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied'));
+        $is_super_admin = is_super_admin();
+        $is_admin = is_admin();
+        $canViewSupervisors = current_supervisor_can('view_supervisors');
+        $canViewTeachers = current_supervisor_can('view_teachers');
+        $canViewInvigilators = current_supervisor_can('view_invigilators');
+        if (!$is_super_admin && $role === ROLE_SUPER_ADMIN
+            || !$is_admin && ($role === ROLE_ADMIN || $role === ROLE_SUPER_ADMIN)
+            || $role === ROLE_TEACHER && ! $canViewTeachers
+            || $role === ROLE_INVIGILATOR && !$canViewInvigilators
+            || !$role && !$canViewSupervisors
+        ) {
+            json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied! Not enough permission'));
             return;
         }
 
+        $is_superadmin = is_super_admin();
         $limit  = query_param_int(PARAM_LIMIT_QUERY);
         $offset = query_param_int(PARAM_OFFSET_QUERY);
         $siteIds = get_super_admin_site_ids_params();
-        $hasSiteIds = is_super_admin() && has_query_param(PARAM_SITE_IDS_QUERY);
+        $hasSiteIds = $is_superadmin && has_query_param(PARAM_SITE_IDS_QUERY);
         $originalLimit = $limit;
 
         $filter = query_param(PARAM_FILTER_QUERY);
         $filter = !is_string($filter) ? null : trim($filter);
         $filter = $filter ? explode(',', $filter) : [];
+        $filterList = [
+            'username',
+            'role',
+            'email',
+            'id',
+            'site',
+            'site_id',
+            'gender',
+            'religion',
+            'avatar',
+            'created_at',
+            'full_name',
+        ];
         foreach ($filter as $key => $item) {
-            if (!in_array($item, ['code', 'name', 'id', 'note', 'teachers', 'site_id'])) {
+            if (!in_array($item, $filterList)) {
                 unset($filter[$key]);
             }
         }
@@ -116,7 +110,12 @@ class ClassesController extends BaseController
         ];
 
         try {
-            $data = get_classes_data($limit, $offset, $siteIds);
+            $data = get_supervisors_data(
+                $limit,
+                $offset,
+                $role,
+                $siteIds
+            );
             $offset = $data['meta']['query']['offset'];
             if (!empty($filter)) {
                 foreach ($data['results'] as $key => &$item) {
@@ -199,6 +198,22 @@ class ClassesController extends BaseController
         } catch (Exception $e) {
             json(500, $e);
         }
+
+        // hide email & password if not admin
+        if (!is_admin()) {
+            foreach ($data['results'] as &$item) {
+                if (isset($item['disallow_admin'])) {
+                    $item['disallow_admin'] = null;
+                }
+                if (isset($item['email'])) {
+                    $item['email'] = null;
+                }
+                if (isset($item['password'])) {
+                    $item['password'] = null;
+                }
+            }
+        }
+
         json($data);
     }
 
@@ -206,37 +221,50 @@ class ClassesController extends BaseController
      * @param Route $r
      * @param array $params
      */
-    public function getClass(Route $r, array $params = [])
+    public function getUser(Route $r, array $params = [])
     {
-        if (!current_supervisor_can('view_class')) {
+        $is_super_admin = is_super_admin();
+        $is_admin = is_admin();
+        $canViewSupervisors = current_supervisor_can('view_supervisors');
+        $canViewTeachers = current_supervisor_can('view_teachers');
+        $canViewInvigilators = current_supervisor_can('view_invigilators');
+        if (!$canViewSupervisors && !$canViewTeachers && !$canViewInvigilators) {
             json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied'));
             return;
         }
+
         $siteIds = get_super_admin_site_ids_params();
         $method = null;
         $current = null;
         if (isset($params['id'])) {
-            $method = 'get_classes_by_id';
             $current = 'id';
+            $method = 'get_supervisors_list_by_id';
             $param = $params['id']??null;
             $param = is_numeric($param) ? abs($param) : $param;
             if (!is_int($param)) {
                 route_not_found();
             }
-        } elseif (isset($params['name'])) {
-            $current = 'name';
-            $method = 'get_classes_by_name';
-            $param = is_string($params['name']) ? trim($params['name']) : null;
+        } elseif (isset($params['username'])) {
+            $current = 'username';
+            $method = 'get_supervisors_list_by_username';
+            $param = is_string($params['username']) ? trim($params['username']) : null;
             $param = $param !== '' ? $param : null;
-        } elseif (isset($params['code'])) {
-            $current = 'code';
-            $method = 'get_classes_by_code';
-            $param = is_string($params['code']) ? trim($params['code']) : null;
+        } elseif (isset($params['email'])) {
+            $current = 'email';
+            $method = 'get_supervisors_list_by_email';
+            $param = is_string($params['email']) ? trim($params['email']) : null;
+            $param = $param !== '' ? $param : null;
+        } elseif (isset($params['name']) || isset($params['full_name'])) {
+            $current = 'full_name';
+            $param = isset($params['name']) ? $params['name'] : ($params['full_name']??null);
+            $method = 'get_supervisors_list_by_name';
+            $param = $param ? trim($param) : null;
             $param = $param !== '' ? $param : null;
         } else {
             route_not_found();
             return;
         }
+
         if (!$param) {
             json(
                 HTTP_CODE_PRECONDITION_REQUIRED,
@@ -250,24 +278,36 @@ class ClassesController extends BaseController
         $currentSiteId = get_current_site_id();
         if (!is_super_admin()) {
             foreach ($result as $key => $item) {
+                if ($is_super_admin) {
+                    continue;
+                }
                 if ($item['site_id'] <> $currentSiteId) {
                     unset($result[$key]);
+                }
+                $role = $item['role'] ? trim(strtolower($item['role'])) : null;
+                if ($role === ROLE_SUPER_ADMIN
+                    || !$is_admin && ($role === ROLE_ADMIN || $role === ROLE_SUPER_ADMIN)
+                    || $role === ROLE_TEACHER && ! $canViewTeachers
+                    || $role === ROLE_INVIGILATOR && !$canViewInvigilators
+                    || !$role && !$canViewSupervisors
+                ) {
+                    unset($result[$key]);
+                    return;
                 }
             }
         }
 
-        if (empty($result)) {
+        if (!$result) {
             json(
                 HTTP_CODE_NOT_FOUND,
                 trans_sprintf(
-                    'Class %s : %s is not exists',
+                    'Supervisor %s : %s is not exists',
                     ucwords($current),
                     $param
                 )
             );
             return;
         }
-
         json($result);
     }
 
@@ -275,10 +315,10 @@ class ClassesController extends BaseController
      * @param Route $r
      * @param array $params
      */
-    public function saveClass(Route $r, array $params = [])
+    public function saveUser(Route $r, array $params = [])
     {
-        if (!current_supervisor_can('edit_class')
-            && !current_supervisor_can('add_class')
+        if (!current_supervisor_can('edit_user')
+            && !current_supervisor_can('add_user')
         ) {
             json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied'));
             return;
@@ -388,21 +428,43 @@ class ClassesController extends BaseController
         json(HTTP_CODE_NOT_ACCEPTABLE, trans('Error save data!'));
     }
 
-    public function searchClasses(Route $route, array $params = [])
+    public function searchUsers(Route $route, array $params = [])
     {
-        if (!current_supervisor_can('view_classes')) {
+        $canViewSupervisors = current_supervisor_can('view_supervisors');
+        $canViewTeachers = current_supervisor_can('view_teachers');
+        $canViewInvigilators = current_supervisor_can('view_invigilators');
+        if (!$canViewInvigilators && !$canViewInvigilators && !$canViewTeachers) {
             json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied'));
             return;
         }
 
         $type = $params[PARAM_TYPE_QUERY]??query_param(PARAM_TYPE_QUERY);
         $type = is_string($type) ? trim(strtolower($type)) : '';
-        if (!$type || !in_array($type, ['name', 'code'])) {
+        $type = $type === 'name' ? 'full_name' : $type;
+        if (!$type || !in_array($type, ['username', 'email', 'full_name'])) {
             json(HTTP_CODE_PRECONDITION_FAILED, trans('Search type is invalid!'));
+            return;
         }
+
         $search = $params[PARAM_SEARCH_QUERY]??query_param(PARAM_SEARCH_QUERY);
         if (!$search || !is_string($search) || trim($search) === '') {
             json(HTTP_CODE_PRECONDITION_REQUIRED, trans('Search query could not be empty!'));
+            return;
+        }
+
+        $is_super_admin = is_super_admin();
+        $is_admin = is_admin();
+        $role = $params[PARAM_ROLE_QUERY]??query_param_string(PARAM_ROLE_QUERY, '', true);
+        $role = $role ? strtolower(trim($role)) : $role;
+        $role = $role ?: null;
+
+        if (!$is_super_admin && $role === ROLE_SUPER_ADMIN
+            || !$is_admin && ($role === ROLE_ADMIN || $role === ROLE_SUPER_ADMIN)
+            || $role === ROLE_TEACHER && ! $canViewTeachers
+            || $role === ROLE_INVIGILATOR && !$canViewInvigilators
+            || !$role && !$canViewSupervisors
+        ) {
+            json(HTTP_CODE_UNAUTHORIZED, trans('Access Denied! Not enough permission'));
             return;
         }
 
@@ -429,8 +491,21 @@ class ClassesController extends BaseController
         $filter = query_param(PARAM_FILTER_QUERY);
         $filter = !is_string($filter) ? null : trim($filter);
         $filter = $filter ? explode(',', $filter) : [];
+        $filterList = [
+            'username',
+            'role',
+            'email',
+            'id',
+            'site',
+            'site_id',
+            'gender',
+            'religion',
+            'avatar',
+            'created_at',
+            'full_name',
+        ];
         foreach ($filter as $key => $item) {
-            if (!in_array($item, ['code', 'name', 'id', 'note', 'teachers', 'site_id'])) {
+            if (!in_array($item, $filterList)) {
                 unset($filter[$key]);
             }
         }
@@ -447,9 +522,13 @@ class ClassesController extends BaseController
                 : $limit
             );
 
-        $data = $type === 'name'
-            ? search_class_by_name($search, $siteIds, $limit, $offset)
-            : search_class_by_code($search, $siteIds, $limit, $offset);
+        $data = $type === 'email'
+            ? search_supervisors_list_by_email($search, $siteIds, $role, $limit, $offset)
+            : (
+                $type === 'full_name'
+                 ? search_supervisors_list_by_name($search, $siteIds, $role, $limit, $offset)
+                 : search_supervisors_list_by_username($search, $siteIds, $role, $limit, $offset)
+            );
         if (!empty($filter)) {
             foreach ($data['results'] as $key => &$item) {
                 foreach ($item as $k => $v) {
@@ -506,35 +585,46 @@ class ClassesController extends BaseController
 
     protected function registerController(RouteStorage $route)
     {
-        if (!current_supervisor_can('view_classes')) {
+        if (!current_supervisor_can('view_supervisors')) {
             return;
         }
 
         $route->get(
-            '/classes[/]',
-            [$this, 'getClasses']
+            '/supervisors[/]',
+            [$this, 'getUsers']
         );
-        $route->post(
-            '/classes[/]',
-            [$this, 'saveClass']
+
+        /*$route->post(
+            '/supervisors[/]',
+            [$this, 'saveUser']
+        );*/
+
+        $route->get(
+            '/supervisors/id/{id: [0-9]+}[/]',
+            [$this, 'getUser']
+        );
+
+//        $route->get(
+//            '/supervisors/id/{id: [0-9]+}/meta[/]',
+//            [$this, 'getUserMeta']
+//        );
+
+        $route->get(
+            '/supervisors/username/{username: .+}[/]',
+            [$this, 'getUser']
+        );
+        $route->get(
+            '/supervisors/email/{email: .+}[/]',
+            [$this, 'getUser']
+        );
+        $route->get(
+            '/supervisors/{param: (?:name|full_name)}/{name: .+}[/]',
+            [$this, 'getUser']
         );
 
         $route->get(
-            '/classes/id/{id: [0-9]+}[/]',
-            [$this, 'getClass']
-        );
-        $route->get(
-            '/classes/name/{name: .+}[/]',
-            [$this, 'getClass']
-        );
-        $route->get(
-            '/classes/code/{name: .+}[/]',
-            [$this, 'getClass']
-        );
-
-        $route->get(
-            '/classes/search[/]',
-            [$this, 'searchClasses']
+            '/supervisors/search[/]',
+            [$this, 'searchUsers']
         );
     }
 }

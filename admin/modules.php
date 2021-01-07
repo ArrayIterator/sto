@@ -153,6 +153,13 @@ if (is_method_post()) {
                 );
                 return;
             }
+
+            hook_run(
+                'before_module_activated',
+                $mod,
+                $mod->getBaseModuleName(),
+                $isGlobal
+            );
             $status = $isGlobal
                 ? set_globals_active_module($mod)
                 : set_site_active_module($mod);
@@ -216,6 +223,12 @@ if (is_method_post()) {
                 && is_true_value(post_param_string('global'))
                 && module_is_global($mod)
                 && $mod->isSiteWide();
+            hook_run(
+                'before_module_deactivated',
+                $mod,
+                $mod->getBaseModuleName(),
+                $isGlobal
+            );
             if ($isGlobal) {
                 remove_global_active_module($mod);
                 set_site_active_module($mod);
@@ -396,7 +409,7 @@ foreach (modules()->getModules() as $name => $module) {
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="module-form-search-input" class="sr-only">Search Module</label>
-                        <input class="form-control" id="module-form-search-input" type="search"
+                        <input class="form-control" id="module-form-search-input" maxlength="30" type="search"
                                name="<?= esc_attr(PARAM_SEARCH_QUERY); ?>" value="<?= esc_attr($moduleSearch); ?>"
                                placeholder="<?php esc_attr_trans_e('Type To Search ...'); ?>">
                     </div>
@@ -407,6 +420,7 @@ foreach (modules()->getModules() as $name => $module) {
     <div class="card-area standard-card">
         <div data-wrap-target="modules" class="card-columns">
             <?php
+            $counted = 0;
             $regex_1 = '#' . preg_quote($moduleSearch, '#') . '#i';
             $regex_2 = '#' . preg_quote(preg_replace('#\s+#', '', $moduleSearch), '#') . '#i';
             $count = 0;
@@ -423,6 +437,7 @@ foreach (modules()->getModules() as $name => $module) {
                 if ($chosenStatus === 'inactive' && $item['active']) {
                     continue;
                 }
+                $counted++;
                 $identifier = $k;
                 $class = 'card';
                 $isHide = false;
@@ -551,22 +566,33 @@ foreach (modules()->getModules() as $name => $module) {
                 </div>
             <?php
             endforeach;
-            // for compat display
-            //    if (($count % 3) === 1) {
-            //        echo '<div class="card" style="opacity: 0"><div class="card-image"></div><div class="card-body"></div><div class="card-footer"></div></div>';
-            //    }
             ?>
         </div>
+        <?php if ($counted === 0) { ?>
+        <div class="alert alert-danger mt-4 text-center">
+            <h5><?php esc_attr_trans_sprintf_e('%s Module is empty', ucwords($chosenStatus));?></h5>
+        </div>
+        <?php } ?>
     </div>
+    <script type="text/template" id="underscore_template_empty">
+        <div class="alert alert-danger mt-4 text-center" id="alert-not-found-module">
+            <h5><?php trans_printf('Module \'%s\' has not found', '<%= value %>');?></h5>
+        </div>
+    </script>
     <script type="text/javascript">
         (function ($) {
             if (!$) {
                 return;
             }
 
-            var $card_area = $('.card-area');
-            var $form = $('form.module-form');
-            var $formSearch = $form.find(' #module-form-search-input');
+            var $card_area = $('.card-area'),
+                empty_template = $('script#underscore_template_empty').html(),
+                $form = $('form.module-form'),
+                $formSearch = $form.find(' #module-form-search-input');
+            $form.on('submit', function (e) {
+                // e.preventDefault();
+            });
+            <?php if ($counted > 0) { ?>
             $formSearch.on('keyup', function (e) {
                 // e.preventDefault();
                 var val = this.value ? this.value.trim() : '';
@@ -582,11 +608,12 @@ foreach (modules()->getModules() as $name => $module) {
                     $card_area.find('.card[data-status=' + $chosen_status + ']').removeClass('hide');
                     return;
                 }
-
+                $('#alert-not-found-module').remove();
                 val = val.replace(/\s+/, ' ');
                 $card = $chosen_status !== 'all'
                     ? $card_area.find('.card[data-status=' + $chosen_status + ']')
                     : $card_area.find('.card');
+                var found = 0;
                 $card.each(function () {
                     var $name = $(this).find('.card-title');
                     if (!$name.length) {
@@ -603,19 +630,19 @@ foreach (modules()->getModules() as $name => $module) {
                     var $name2 = $name.replace(/\s/g, '');
                     if (re.exec($name) || re2.exec($name) || re.exec($name2) || re2.exec($name2)) {
                         $(this).removeClass('hide');
+                        found++;
                         return;
                     }
                     $(this).addClass('hide');
                 });
-            });
-            $form.on('submit', function (e) {
-                // e.preventDefault();
-            });
-            $(document).ready(function () {
-                if ($formSearch.val().toString().trim() !== '') {
-                    // $formSearch.trigger('keyup');
+                if (found === 0) {
+                    $card_area.append(_.template(empty_template)({
+                        chosen: $chosen_status,
+                        value: val,
+                    }));
                 }
             });
+            <?php } ?>
         })(window.jQuery);
     </script>
 <?php

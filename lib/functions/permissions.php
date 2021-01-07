@@ -54,6 +54,7 @@ function current_supervisor_can(
 
         case 'view_module':
         case 'view_modules':
+
         case 'deactivate_module':
         case 'deactivate_modules':
         case 'activate_module':
@@ -62,6 +63,11 @@ function current_supervisor_can(
         case 'delete_class':
         case 'delete_classes':
         case 'add_room':
+
+        case 'delete_religion':
+        case 'delete_religions':
+        case 'edit_religion':
+        case 'add_religion':
 
         case 'edit_class':
         case 'edit_classes':
@@ -131,6 +137,7 @@ function current_supervisor_can(
         case 'view_rooms':
         case 'view_room':
         case 'view_status':
+        case 'view_religion':
             $result = $teacher_admin_grant
                 || $invigilator
                 || current_supervisor_can(

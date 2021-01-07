@@ -38,6 +38,27 @@ function database_quote(string $quote) : string
     return database()->quote($quote);
 }
 
+function database_quote_like(string $quote, string $before = '', string $after = '') : string
+{
+    $quote = str_replace(['\\', '_', '%'], ['\\\\', '\\_', '\\%'], $quote);
+    return database_quote($before.$quote.$after);
+}
+
+function database_quote_like_all(string $quote) : string
+{
+    return database_quote_like($quote, '%', '%');
+}
+
+function database_quote_like_left(string $quote) : string
+{
+    return database_quote_like($quote, '%', '');
+}
+
+function database_quote_like_right(string $quote) : string
+{
+    return database_quote_like($quote, '', '%');
+}
+
 /**
  * @param string $query
  * @return PdoResult|false

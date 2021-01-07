@@ -11,6 +11,7 @@ use ArrayIterator\Helper\Area\TimeZone;
 use ArrayIterator\Helper\TimeZoneConvert;
 use ArrayIterator\Hooks;
 use ArrayIterator\Menus;
+use ArrayIterator\Model\Religion;
 use ArrayIterator\Model\StudentLogs;
 use ArrayIterator\Model\SupervisorLogs;
 use ArrayIterator\Model\TranslationsDictionary;
@@ -169,6 +170,18 @@ function translation(): Translation
 function option(): Option
 {
     return application()->getOption();
+}
+
+/**
+ * @return Religion
+ */
+function religion() : Religion
+{
+    static $religion;
+    if (!$religion) {
+        $religion = new Religion(database());
+    }
+    return $religion;
 }
 
 /**

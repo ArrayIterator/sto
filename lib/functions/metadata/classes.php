@@ -72,6 +72,7 @@ function filter_classes_status($classesStatus) : string
     }
     return $classesStatus;
 }
+
 /**
  * @param array $data
  * @return array
@@ -227,7 +228,7 @@ function get_classes_data(
                 $total = (int) ($stmt->fetchClose(PDO::FETCH_ASSOC)['total']??$total);
             }
         } catch (Exception $e) {
-            // passs
+            // pass
         }
     }
 
@@ -456,8 +457,8 @@ function search_classes_by(
     $name = trim($name);
     $table = get_classes_table_name();
 
-    $likeSearch = database_quote(sprintf('%%%s%%', $name));
-    $likeLeft = database_quote(sprintf('%s%%', $name));
+    $likeSearch = database_quote_like_all($name);
+    $likeLeft = database_quote_like_left($name);
     $nameQuery = database_quote($name);
 
     if (!empty($siteIds)) {
@@ -494,9 +495,9 @@ function search_classes_by(
     $stmt = database_prepare_execute(
         "
         SELECT count(class.id) as total FROM {$table} as class
-            WHERE class.site_id {$siteIdWhere} AND class.name LIKE {$likeSearch}
+            WHERE class.site_id {$siteIdWhere} AND class.{$type} LIKE {$likeSearch}
                 ORDER BY
-                    IF(class.name = {$nameQuery}, 2, IF(class.name LIKE {$likeLeft},1,0)) 
+                    IF(class.{$type} = {$nameQuery}, 2, IF(class.{$type} LIKE {$likeLeft},1,0)) 
     "
     );
 
@@ -570,7 +571,7 @@ function search_class_by_name(
     int $offset = 0,
     &$result = null
 ) : array {
-    return search_classes_by('name', $name, $siteIds, $limit, $offset, $result);
+    return search_classes_by('name', $name, $siteIds, $limit, $offset, $result)?:[];
 }
 
 /**
@@ -588,7 +589,7 @@ function search_class_by_code(
     int $offset = 0,
     &$result = null
 ) : array {
-    return search_classes_by('code', $code, $siteIds, $limit, $offset, $result);
+    return search_classes_by('code', $code, $siteIds, $limit, $offset, $result)?:[];
 }
 
 /**
