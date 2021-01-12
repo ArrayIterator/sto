@@ -20,9 +20,9 @@ class SupervisorController extends BaseController
 {
     public function getUsers(Route $r)
     {
-        $type = query_param_string(PARAM_TYPE_QUERY);
+        $type = query_param_string(PARAM_TYPE);
         $search = query_param_string(PARAM_SEARCH_QUERY, '', true);
-        $role = query_param_string(PARAM_ROLE_QUERY, '', true);
+        $role = query_param_string(PARAM_ROLE, '', true);
         $role = $role ? strtolower(trim($role)) : $role;
         $role = $role ?: null;
         $type = $type === 'name' ? 'full_name' : $type;
@@ -31,9 +31,9 @@ class SupervisorController extends BaseController
             $this->searchUsers(
                 $r,
                 [
-                    PARAM_TYPE_QUERY => $type,
+                    PARAM_TYPE => $type,
                     PARAM_SEARCH_QUERY => $search,
-                    PARAM_ROLE_QUERY => $role,
+                    PARAM_ROLE => $role,
                 ]
             );
             return;
@@ -55,13 +55,13 @@ class SupervisorController extends BaseController
         }
 
         $is_superadmin = is_super_admin();
-        $limit  = query_param_int(PARAM_LIMIT_QUERY);
-        $offset = query_param_int(PARAM_OFFSET_QUERY);
+        $limit  = query_param_int(PARAM_LIMIT);
+        $offset = query_param_int(PARAM_OFFSET);
         $siteIds = get_super_admin_site_ids_params();
-        $hasSiteIds = $is_superadmin && has_query_param(PARAM_SITE_IDS_QUERY);
+        $hasSiteIds = $is_superadmin && has_query_param(PARAM_SITE_IDS);
         $originalLimit = $limit;
 
-        $filter = query_param(PARAM_FILTER_QUERY);
+        $filter = query_param(PARAM_FILTER);
         $filter = !is_string($filter) ? null : trim($filter);
         $filter = $filter ? explode(',', $filter) : [];
         $filterList = [
@@ -438,7 +438,7 @@ class SupervisorController extends BaseController
             return;
         }
 
-        $type = $params[PARAM_TYPE_QUERY]??query_param(PARAM_TYPE_QUERY);
+        $type = $params[PARAM_TYPE]??query_param(PARAM_TYPE);
         $type = is_string($type) ? trim(strtolower($type)) : '';
         $type = $type === 'name' ? 'full_name' : $type;
         if (!$type || !in_array($type, ['username', 'email', 'full_name'])) {
@@ -454,7 +454,7 @@ class SupervisorController extends BaseController
 
         $is_super_admin = is_super_admin();
         $is_admin = is_admin();
-        $role = $params[PARAM_ROLE_QUERY]??query_param_string(PARAM_ROLE_QUERY, '', true);
+        $role = $params[PARAM_ROLE]??query_param_string(PARAM_ROLE, '', true);
         $role = $role ? strtolower(trim($role)) : $role;
         $role = $role ?: null;
 
@@ -471,12 +471,12 @@ class SupervisorController extends BaseController
         $siteIds = [];
         $hasSiteIds = false;
 
-        if (has_query_param(PARAM_SITE_IDS_QUERY)) {
+        if (has_query_param(PARAM_SITE_IDS)) {
             $hasSiteIds = true;
             $siteIds = get_super_admin_site_ids_param();
         }
 
-        if (has_query_param(PARAM_SITE_ID_QUERY)) {
+        if (has_query_param(PARAM_SITE_ID)) {
             $siteId = get_super_admin_site_id_param();
             $siteId = $siteId === 0 ? false : $siteId;
             if ($siteId !== false && !in_array($siteId, $siteIds)) {
@@ -488,7 +488,7 @@ class SupervisorController extends BaseController
             $siteIds = [get_current_site_id()];
         }
 
-        $filter = query_param(PARAM_FILTER_QUERY);
+        $filter = query_param(PARAM_FILTER);
         $filter = !is_string($filter) ? null : trim($filter);
         $filter = $filter ? explode(',', $filter) : [];
         $filterList = [
@@ -512,8 +512,8 @@ class SupervisorController extends BaseController
 
         $filter = array_values($filter);
         $filter = array_flip($filter);
-        $offset = query_param_int(PARAM_OFFSET_QUERY);
-        $limit = query_param(PARAM_LIMIT_QUERY);
+        $offset = query_param_int(PARAM_OFFSET);
+        $limit = query_param(PARAM_LIMIT);
         $originalLimit = $limit;
         $limit = !is_numeric($limit) ? MYSQL_DEFAULT_SEARCH_LIMIT : abs(intval($limit));
         $limit = $limit <= 1 ? 1 : (

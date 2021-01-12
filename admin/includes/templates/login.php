@@ -138,7 +138,7 @@ get_admin_header_template();
                     <?php hook_run('admin_login_after_login_text'); ?>
                     <?php
                     $message_error = null;
-                    switch (query_param(PARAM_ERROR_QUERY)) {
+                    switch (query_param(PARAM_ERROR)) {
                         case 'empty_username':
                             $message_error = trans('Username Could Not Be Empty');
                             break;
@@ -163,7 +163,7 @@ get_admin_header_template();
                     }
                     $is_cookie_exists = has_cookie_succeed();
                     if ($is_cookie_exists && $message_error !== null) {
-                        $message_err = hook_apply('login_message_error', $message_error, query_param(PARAM_ERROR_QUERY));
+                        $message_err = hook_apply('login_message_error', $message_error, query_param(PARAM_ERROR));
                         $message_err = !is_string($message_err) ? $message_error : $message_err;
                         printf(
                             '<div class="alert alert-danger alert-dismissible fade show" role="alert">%s<button class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>',

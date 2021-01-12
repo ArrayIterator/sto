@@ -283,6 +283,15 @@ function is_true_value($data) : bool
 }
 
 /**
+ * @param $value
+ * @return bool
+ */
+function is_true_and_int_one($value) : bool
+{
+    return $value === true || $value === 1;
+}
+
+/**
  * @param string $data
  * @param string $replacer
  * @return string

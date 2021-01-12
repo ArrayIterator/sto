@@ -739,10 +739,10 @@ function calculate_page_query(
 }
 
 /**
- * @param array|null $siteIds
+ * @param array|int|null $siteIds
  * @return array
  */
-function get_generate_site_ids(array $siteIds = null) : array
+function get_generate_site_ids($siteIds = null) : array
 {
     $currentSiteId = get_current_site_id();
     if ($siteIds === null) {
@@ -751,7 +751,7 @@ function get_generate_site_ids(array $siteIds = null) : array
             $siteIds = [$currentSiteId];
         }
     }
-
+    $siteIds = (array) $siteIds;
     foreach ($siteIds as $key => $item) {
         if (!is_numeric($item) || !is_int(abs($item))) {
             unset($siteIds[$key]);
@@ -778,8 +778,12 @@ function get_generate_site_ids(array $siteIds = null) : array
  * @param int $limit
  * @return int
  */
-function get_generate_max_search_result_limit(int $limit) : int
+function get_generate_max_search_result_limit(int $limit = null) : int
 {
+    if ($limit === null) {
+        return MYSQL_DEFAULT_SEARCH_LIMIT;
+    }
+
     $limit = $limit <= 1 ? 1 : (
     $limit > MYSQL_MAX_SEARCH_LIMIT
         ? MYSQL_MAX_SEARCH_LIMIT

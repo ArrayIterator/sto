@@ -284,10 +284,10 @@ function invigilator_can_see_supervisor() : bool
  */
 function get_super_admin_site_id_param()
 {
-    $siteId = query_param(PARAM_SITE_ID_QUERY);
+    $siteId = query_param(PARAM_SITE_ID);
     if (is_super_admin()) {
         $siteId = is_string($siteId) ? trim($siteId) : $siteId;
-        if (!has_query_param(PARAM_SITE_ID_QUERY) || !is_numeric($siteId) || abs($siteId) < 1) {
+        if (!has_query_param(PARAM_SITE_ID) || !is_numeric($siteId) || abs($siteId) < 1) {
             $siteId = false;
         } else {
             $siteId = (int) abs(intval($siteId));
@@ -305,7 +305,7 @@ function get_super_admin_site_id_param()
  */
 function get_super_admin_site_ids_param() : array
 {
-    $siteIds = query_param(PARAM_SITE_IDS_QUERY);
+    $siteIds = query_param(PARAM_SITE_IDS);
     if (!is_super_admin()) {
         return [get_current_site_id()];
     }
@@ -329,11 +329,11 @@ function get_super_admin_site_ids_param() : array
 function get_super_admin_site_ids_params() : array
 {
     $siteIds = [];
-    if (has_query_param(PARAM_SITE_IDS_QUERY)) {
+    if (has_query_param(PARAM_SITE_IDS)) {
         $siteIds = get_super_admin_site_ids_param();
     }
 
-    if (has_query_param(PARAM_SITE_ID_QUERY)) {
+    if (has_query_param(PARAM_SITE_ID)) {
         $siteId = get_super_admin_site_id_param();
         $siteId = $siteId === 0 ? false : $siteId;
         if ($siteId !== false && !in_array($siteId, $siteIds)) {

@@ -79,16 +79,64 @@ function create_filter_search_form_select(
 ) {
     $formTarget = esc_attr($formTarget);
     $value      = query_param_string($name);
+    $class_site_id = query_param_int(PARAM_SITE_ID);
     $name       = esc_attr($name);
     $searchData = query_param_string(PARAM_SEARCH_QUERY, '', true);
     $searchId   = sprintf('%s%s', $prefixId, PARAM_SEARCH_QUERY);
     $id = esc_attr(sprintf('%s%s', $prefixId, $name));
+    $is_super_admin = is_super_admin();
+    $all_sites = [];
+    if ($is_super_admin) {
+        $all_sites = get_all_sites();
+    }
 ?>
     <div class="row" data-filter-form="<?=$formTarget;?>">
         <div class="col-lg-6 col-md-4">
+            <?php
+            if ($is_super_admin) {
+                $selected = !$class_site_id || !isset($all_sites[$class_site_id]) ? ' selected': '';
+            ?>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="col-form-label sr-only" for="site_id_<?= $id;?>"></label>
+                            <select form="<?= $formTarget; ?>" id="site_id_<?= $id;?>" class="custom-select" data-select="select2"
+                                data-tag="true" data-options="{tags: true}" name="site_id"
+                                data-info-text="<?= esc_attr_trans('Host:'); ?>" data-change="true"
+                                data-target=".target-host"
+                                data-template="<div class='message-inner'><span class='message-name'><%= data.infoText %></span><span class='message-value'><code><%= data.host %></code></span></div>">
+                            <option value=""<?=$selected;?>
+                                    data-host="<?php esc_attr_trans_e('All Sites');?>"
+                                    data-site-id="&radic;"
+                                    data-name="<?php esc_attr_trans_e('All Sites');?>"
+                                    data-template="<span class='site-id-sep'><%= data['site-id'] || '' %></span><span class='site-name-sep'><%= data.name || ''%></span>">
+                                    [ &radic; ] <?php esc_html_trans_e('All Site'); ?>
+                            </option>
+                            <?php
+                            $selectedHost = '';
+                            foreach ($all_sites as $siteId => $site) {
+                                unset($all_sites[$siteId]);
+                                $selected = $class_site_id === $siteId ? ' selected' : '';
+                                if ($class_site_id === $siteId) {
+                                    $selectedHost = $site->get('host');
+                                }
+                                ?>
+                                <option value="<?= $siteId; ?>"<?= $selected; ?>
+                                        data-host="<?= $site->get('host'); ?>"
+                                        data-site-id="<?= $site->getSiteId(); ?>"
+                                        data-name="<?= esc_attr($site->get(PARAM_NAME)); ?>"
+                                        data-template="<span class='site-id-sep'><%= data['site-id'] || '' %></span><span class='site-name-sep'><%= data.name || ''%></span>">
+                                    [ <?= $site->getSiteId(); ?> ] <?php esc_html_e($site->get(PARAM_NAME) ?? ''); ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+            <?php } ?>
             <div class="form-group">
                 <label class="col-form-label sr-only" for="<?= $id;?>"></label>
-                <select form="<?= $formTarget; ?>" id="<?= $id;?>" name="<?= $name;?>" class="form-inline custom-select" data-change-submit="<?= $onChangeSubmit ? 'true' : 'false';?>" data-select="select">
+                <select form="<?= $formTarget; ?>" id="<?= $id;?>" name="<?= $name;?>" class="form-inline custom-select" data-change-submit="<?= $onChangeSubmit ? 'true' : 'false';?>" data-select="select2">
                     <option disabled selected><?php esc_html_trans_e('Search By:');?></option>
 <?php
     if($selectedDefault && !isset($options[$name])) {
@@ -108,11 +156,13 @@ function create_filter_search_form_select(
 <?php } ?>
                 </select>
             </div>
+            <?php if ($is_super_admin) { ?></div></div><?php } ?>
         </div>
         <div class="col-lg-6 col-md-8">
             <label class="text-hide sr-only" for="<?= $searchId;?>>"></label>
             <div class="input-group">
-                <input form="<?= $formTarget;?>" id="<?= $searchId;?>" type="search" class="form-control" name="<?= PARAM_SEARCH_QUERY;?>" value="<?= esc_attr($searchData);?>" placeholder="<?php esc_attr_trans_e('Type Keyword');?>">
+                <label class="col-form-label sr-only" for="<?= $searchId;?>"></label>
+                <input form="<?= $formTarget;?>" id="<?= $searchId;?>" type="search" class="form-control" name="<?= PARAM_SEARCH_QUERY;?>" value="<?= esc_attr($searchData);?>" placeholder="<?php esc_attr_trans_e('Type Keyword & Enter...');?>">
                 <div class="input-group-append">
                     <button class="btn btn-primary" type="submit" form="<?= $formTarget;?>" title="<?php esc_attr_trans_e('Search'); ?>">
                         <i class="icofont icofont-search"></i>

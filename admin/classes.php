@@ -6,25 +6,27 @@ if (!admin_is_allowed(__FILE__)) {
 }
 
 set_admin_title('All Classes');
-$page = query_param_int(PARAM_PAGE_QUERY);
+$page = query_param_int(PARAM_PAGE);
 $page = $page < 1 ? 1 : $page;
 
-$perPage = query_param_int(PARAM_LIMIT_QUERY);
+$perPage = query_param_int(PARAM_LIMIT);
 $perPage = $perPage < 1 ? MYSQL_DEFAULT_DISPLAY_LIMIT : $perPage;
 $perPage = $perPage > MYSQL_MAX_RESULT_LIMIT ? MYSQL_MAX_RESULT_LIMIT : $perPage;
-
 $offset = ($page - 1) * $perPage;
-
+$is_super_admin = is_super_admin();
+$is_admin = $is_super_admin || is_admin();
+$class_site_id = $is_super_admin ? query_param_int(PARAM_SITE_ID) : null;
+$class_site_id = $class_site_id ?: null;
 $searchData = trim(query_param_string(PARAM_SEARCH_QUERY, ''));
-$filter = query_param_string(PARAM_TYPE_QUERY, 'name');
+$filter = query_param_string(PARAM_TYPE, 'name');
 $filter = $filter === 'code' ? $filter : 'name';
 $is_search = ($searchData) !== '';
 $result = !$is_search
-    ? get_classes_data($perPage, $offset)
+    ? get_classes_data($perPage, $offset, $class_site_id)
     : (
          $filter === 'name'
-         ? search_class_by_name($searchData, null, $perPage, $offset)
-         : search_class_by_code($searchData, null, $perPage, $offset)
+         ? search_class_by_name($searchData, $class_site_id, $perPage, $offset)
+         : search_class_by_code($searchData, $class_site_id, $perPage, $offset)
     );
 
 $total_data = $result['total'];
@@ -35,8 +37,10 @@ $current_page = $meta['page']['current'] ?? $total_page;
 $result = $result['results'];
 $can_edit_class = current_supervisor_can('edit_class');
 if ($total_data > 0 && $total_result === 0 && (!$meta['page']['current'] || $meta['page']['current'] > $total_page)) {
-    redirect(add_query_args(['page' => $total_page], get_current_url()));
-    do_exit();
+    if ($total_page !== $current_page) {
+        redirect(add_query_args(['page' => $total_page], get_current_url()));
+        do_exit();
+    }
 }
 
 get_admin_header_template();
@@ -61,12 +65,12 @@ get_admin_header_template();
         <div class="card-header">
             <?php
                 create_filter_search_form_select(
-                    PARAM_TYPE_QUERY,
+                    PARAM_TYPE,
                     'result-filter',
-                    ['name' => trans('Name'), 'code' => trans('Code')],
+                    [PARAM_NAME => trans('Name'), PARAM_CODE => trans('Code')],
                     'input-result-filter-',
                     false,
-                    'name'
+                    PARAM_NAME
                 );
             ?>
         </div>
@@ -98,13 +102,13 @@ get_admin_header_template();
                         <td class="cell-title">
                             <div class="row-title">
                                 <a data-action="<?=
-                                    $can_edit_class ? 'edit': 'preview';
+                                    $can_edit_class ? PARAM_EDIT: PARAM_PREVIEW;
                                 ?>" data-link-id="<?= $row['id'];?>" href="<?= esc_attr(
                                     $can_edit_class
-                                        ? add_query_args(['action' => 'edit', 'id' => $row['id']], get_admin_url('class-new.php'))
+                                        ? add_query_args([PARAM_ACTION => PARAM_EDIT, PARAM_ID => $row['id']], get_admin_url('class-new.php'))
                                         : "#{$identifier}"
-                                );?>">
-                                    <?= esc_html($row['code']); ?>
+                                );?>"<?php if ($can_edit_class) { ?> data-action="preview" data-title="<?php trans_e('Code');?> <?php esc_attr_e($row['code']);?>" data-modal="true" data-cache="true" data-api="/classes/id/<?= $row['id'];?>" data-template-id="underscore_template_class_preview"<?php } ?>>
+                                    <?= esc_html($row[PARAM_CODE]); ?>
                                 </a>
                             </div>
                             <div class="row-action">
@@ -112,7 +116,7 @@ get_admin_header_template();
                                 <a data-link-id="<?= $row['id'];?>" href="<?=
                                     esc_attr(
                                         add_query_args(
-                                            ['action' => 'edit', 'id' => $row['id']],
+                                            [PARAM_ACTION => PARAM_EDIT, PARAM_ID => $row['id']],
                                             get_admin_url('class-new.php')
                                         )
                                     ) ?>"><?php trans_e('Edit');?></a>
@@ -155,13 +159,13 @@ get_admin_header_template();
             </td>
             <td class="cell-title">
                 <div class="row-title">
-                    <a data-action="<?= $can_edit_class ? 'edit': 'preview';?>" data-link-id="<%= item.id %>" href="<?=
+                    <a data-action="<?= $can_edit_class ? PARAM_EDIT : PARAM_PREVIEW;?>" data-link-id="<%= item.id %>" href="<?=
                     $can_edit_class ?
                         esc_attr(
                         add_query_args(
                             [
-                                'action' => 'edit',
-                                'id' => false
+                                PARAM_ACTION => PARAM_EDIT,
+                                PARAM_ID => false
                             ],
                             get_admin_url('class-new.php')
                         )
@@ -173,8 +177,8 @@ get_admin_header_template();
                         <a data-link-id="<%= item.id %>" href="<?= esc_attr(
                             add_query_args(
                                 [
-                                    'action' => 'edit',
-                                    'id' => false
+                                    PARAM_ACTION => PARAM_EDIT,
+                                    PARAM_ID => false
                                 ],
                                 get_admin_url('class-new.php')
                             )
@@ -229,29 +233,38 @@ get_admin_header_template();
                         <th><?php esc_html_trans_e('Status');?></th>
                         <td><%= newData.status %></td>
                     </tr>
+                <?php if ($is_super_admin) { ?>
+                    <tr>
+                        <th><?php esc_html_trans_e('Site Id');?></th>
+                        <td><%= newData.site_id %></td>
+                    </tr>
+                <?php } ?>
                 </tbody>
             </table>
-            <% if (newData.teachers.length) { %>
-                <table class="table table-striped">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th colspan="2" class="font-weight-lighter"><?php esc_html_trans_e('Teachers');?></th>
-                        </tr>
+            <table class="table <%= newData.created_by ? 'table-striped': '' %> ">
+                <thead class="thead-dark">
+                    <tr>
+                        <th colspan="2" class="font-weight-lighter"><?php esc_html_trans_e('Teachers');?></th>
+                    </tr>
+                    <% if (newData.teachers.length) { %>
                         <tr>
                             <th class="bg-light text-dark font-weight-bolder"><?php esc_html_trans_e('Name');?></th>
                             <th class="bg-light text-dark font-weight-bolder"><?php esc_html_trans_e('Teach Year');?></th>
                         </tr>
-                    </thead>
-                    <tbody>
+                    <% } %>
+                </thead>
+                <tbody>
+                <% if (newData.teachers.length) { %>
                     <% _.each(newData.teachers, function(item, key, arr) { %>
                         <tr>
                             <td><%= item.name %></td>
                             <td><%= item.teach_year || '' %></td>
                         </tr>
                     <% }); %>
-                    </tbody>
-                </table>
-            <% } else { %>
+                <% } %>
+                </tbody>
+            </table>
+            <% if (!newData.teachers.length) { %>
                 <div class="alert alert-info"><?php esc_html_trans_e('Class does not assigned teachers yet.');?></div>
             <% } %>
             <div class="note">
@@ -259,13 +272,54 @@ get_admin_header_template();
                     <thead class="thead-dark">
                     <tr><th class="font-weight-lighter"><?php esc_html_trans_e('Note'); ?></th></tr>
                     </thead>
+                    <tbody>
+                    <% if (newData.note && newData.note.trim() !== '') { %>
+                        <tr>
+                            <td>
+                                <div class="text-wrap small text-monospace"><%= newData.note %></div>
+                            </td>
+                        </tr>
+                    <% } %>
+                    </tbody>
                 </table>
-                <% if (newData.note && newData.note.trim() !== '') { %>
-                <div class="text-wrap small text-monospace"><%= newData.note %></div>
-                <% } else { %>
+                <% if (!newData.note || newData.note.trim() === '') { %>
                     <div class="alert alert-info"><?php esc_html_trans_e('Class does not assigned note yet.');?></div>
                 <% } %>
             </div>
+        <?php if ($is_admin) { ?>
+            <table class="table font-weight-lighter <%= newData.created_by ? 'table-striped': '' %>">
+                <thead class="thead-dark">
+                <tr>
+                    <th colspan="2" class="font-weight-lighter">
+                        <?php esc_html_trans_e('Created By');?>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <% if (newData.created_by) { %>
+                    <tr>
+                        <th><?php esc_html_trans_e('Username');?></th>
+                        <td><%= newData.creator_username %></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_trans_e('Id');?></th>
+                        <td><%= newData.created_by %></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_trans_e('Name');?></th>
+                        <td><%= newData.creator_full_name %></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_trans_e('Site Id');?></th>
+                        <td><%= newData.creator_site_id %></td>
+                    </tr>
+                <% } %>
+                </tbody>
+            </table>
+            <% if (!newData.created_by) { %>
+                <div class="alert alert-info"><?php esc_html_trans_e('Creator of class is unknown');?></div>
+            <% } %>
+        <?php } ?>
         <% } else { %>
             <div class="alert alert-info text-center"><?php esc_html_trans_e('Data not found');?></div>
         <% } %>
@@ -376,7 +430,7 @@ get_admin_header_template();
                 offset = asOneOrMore(offset > data.tp ? data.tp : offset);
                 offset = offset >= data.td ? 0 : offset;
                 offset = (offset * limit) - limit;
-                offset = offset > data.td ? 0 : offset;
+                offset = offset > data.td || offset < 0 ? 0 : offset;
                 limit = asOneOrMore(
                     limit > data.td
                         ? (data.dl > limit ? limit : data.dl)

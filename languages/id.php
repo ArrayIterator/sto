@@ -24,8 +24,6 @@ return [
     'Are You Sure ... ?' => 'Apakah Anda Yakin ... ?',
     'Type To Search ...' => 'Ketik Untuk Mencari ...',
     'Version' => 'Versi',
-    'Active' => 'Aktif',
-    'Inactive' => 'Tidak Aktif',
 
     // INPUT
     'Username' => 'Nama Pengguna',
@@ -100,7 +98,9 @@ return [
     'Sites' => 'Situs',
     'Site Management' => 'Manajemen Situs',
     'Add New Site' => 'Tambahkan Situs Baru',
-
+    'DATA NOT FOUND' => 'DATA TIDAK DITEMUKAN',
+    'All Sites' => 'Semua Situs',
+    'Created By' => 'Dibuat Oleh',
     'Religions' => 'Agama',
     'All Religions' => 'Semua Agama',
     'Add New Religion' => 'Tambahkan Agama Baru',
@@ -112,6 +112,14 @@ return [
     'Reconnecting...' => 'Menghubungkan ulang...',
     'Access Denied' => 'Akses Dibatasi',
     'ACCESS DENIED' => 'AKSES DIBATASI',
+    // MODULE
+    'Active' => 'Aktif',
+    'Activate' => 'Aktifkan',
+    'Module %s has not found' => 'Modul %s tidak ditemukan',
+    'Inactive' => 'Tidak Aktif',
+    'Deactivate' => 'Nonaktifkan',
+    'Deactivate Global Only' => 'Nonaktifkan Global',
+    'Activate Global' => 'Aktifkan Global',
 
     // PUBLIC
     'Login To Dashboard' => 'Masuk Ke Dasbor',
@@ -154,4 +162,7 @@ return [
     // MODULE
     'Permission denied to change module status' => 'Izin ditolak untuk mengubah status modul',
     'Module %s has not exists' => 'Modul %s tidak ada',
+    'Creator of class is unknown' => 'Pembuat kelas tidak diketahui',
+    'Class Detail' => 'Detail Kelas',
+    'Site Id' => 'Id Situs',
 ];

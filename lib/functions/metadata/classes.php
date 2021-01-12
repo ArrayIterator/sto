@@ -84,6 +84,10 @@ function get_classes_data_filters(array $data) : array
         $ids[$item['id']] = true;
         if (isset($item['site_id']) && is_numeric($item['site_id'])) {
             $data[$key]['site_id'] = (int) $item['site_id'];
+            continue;
+        }
+        if (isset($item['creator_site_id']) && is_numeric($item['creator_site_id'])) {
+            $item['creator_site_id'] = abs($item['creator_site_id']);
         }
     }
 
@@ -94,25 +98,21 @@ function get_classes_data_filters(array $data) : array
     $implodedIds = implode(',', array_keys($ids));
 
     $where = count($ids) === 1
-        ? " class_id={$implodedIds} "
-        : "class_id IN ({$implodedIds})";
+        ? "teacher.class_id={$implodedIds} "
+        : "teacher.class_id IN ({$implodedIds})";
 
-    $teacher_table = get_classes_teacher_table_name();
-    $site_table = site()->getTableName();
-    $supervisor_table = supervisor()->getTableName();
     $sql = "
-SELECT
-   sto_classes_teacher.class_id as class_id,
-   ss.id as id,
-   ss.full_name as name,
-   sto_classes_teacher.year as teach_year,
-   ss.site_id as site_id,
-   site.name as site_name
-FROM {$teacher_table}
-    LEFT JOIN {$supervisor_table} ss on sto_classes_teacher.teacher = ss.id
-    LEFT JOIN {$site_table} site on ss.site_id = site.id
-WHERE {$where}
-";
+SELECT 
+   teacher.class_id AS class_id,
+   supervisor.id AS id,
+   supervisor.full_name AS name,
+   teacher.year AS teach_year,
+   supervisor.site_id AS site_id,
+   site.name AS site_name
+FROM sto_classes_teacher AS teacher
+    LEFT JOIN sto_supervisor AS supervisor ON teacher.teacher = supervisor.id
+    LEFT JOIN sto_sites AS site ON supervisor.site_id = site.id
+WHERE {$where}";
 
     $stmt = database_unbuffered_query($sql);
     while ($row = $stmt->fetchAssoc()) {
@@ -163,16 +163,14 @@ WHERE {$where}
 function get_classes_data(
     int $limit = null,
     int $offset = null,
-    array $siteIds = null
+    $siteIds = null
 ) : array {
-
+    $siteIds = (array) $siteIds;
     $siteIds = get_generate_site_ids($siteIds);
-    $table = get_classes_table_name();
-    $where = 'site_id ';
+    $where  = 'class.site_id ';
     $where .= !empty($siteIds)
-        ? sprintf(count($siteIds) === 1 ? ' = %d ' : 'IN (%s) ', implode(',', $siteIds))
-        : 'IS NOT NULL AND site_id > 0 ';
-    $sql = "SELECT *, count(id) OVER() as total FROM {$table} WHERE ";
+        ? sprintf(count($siteIds) === 1 ? ' = %d' : 'IN (%s)', implode(',', $siteIds))
+        : "IS NOT NULL AND class.site_id > 0";
     $limit = $limit < 1 ? MYSQL_MAX_RESULT_LIMIT : $limit;
     $offset = $offset > 0 ? $offset : 0;
     $sqlLimit = "LIMIT {$limit}";
@@ -180,8 +178,16 @@ function get_classes_data(
         $sqlLimit .= " OFFSET {$offset}";
     }
 
-    $sql .= $where;
-    $sql .= $sqlLimit;
+    $sql = "
+SELECT 
+    class.*,
+    supervisor.username as creator_username,
+    supervisor.full_name as creator_full_name,
+    (count(class.id) OVER()) as total
+FROM sto_classes as class
+    LEFT OUTER JOIN sto_supervisor as supervisor 
+        ON supervisor.id = class.created_by
+WHERE {$where} {$sqlLimit}";
     $stmt = database_unbuffered_query($sql);
     $data = [
         'total'  => 0,
@@ -220,8 +226,11 @@ function get_classes_data(
 
     $stmt->closeCursor();
     if ($total === 0) {
-        $sql = "SELECT count(id) as total FROM {$table} WHERE ";
-        $sql .= $where;
+        $sql = "
+SELECT
+    count(id) as total
+FROM sto_supervisor
+WHERE {$where}";
         try {
             $stmt = database_unbuffered_query_execute($sql);
             if ($stmt) {
@@ -270,8 +279,16 @@ function get_classes_by_id(int $id) : array
         return $cache ? [$cache] : [];
     }
 
-    $table = get_classes_table_name();
-    $sql = "SELECT * FROM {$table} WHERE id={$id} LIMIT 1";
+    $sql = "
+SELECT 
+    class.*,
+    supervisor.username as creator_username,
+    supervisor.full_name as creator_full_name,
+    supervisor.site_id as creator_site_id
+FROM sto_classes as class 
+    LEFT OUTER JOIN sto_supervisor as supervisor
+        ON supervisor.id = class.created_by
+WHERE class.id={$id} LIMIT 1";
     $stmt = database_query_execute($sql);
     $data = [];
     if ($stmt) {
@@ -323,17 +340,25 @@ function get_classes_by_name(string $name, array $siteId = null) : array
         }
     }
 
-    $table = get_classes_table_name();
+    $siteIdWhere = 'class.site_id';
     if (!empty($siteIds)) {
-        $siteIdWhere = sprintf(
+        $siteIdWhere .= sprintf(
             count($siteIds) === 1 ? ' =%d ' : ' IN (%s) ',
             implode(',', $siteIds)
         );
     } else {
-        $siteIdWhere = ' IS NOT NULL AND site_id > 0 ';
+        $siteIdWhere .= ' IS NOT NULL AND class.site_id > 0 ';
     }
-
-    $sql = " SELECT * FROM {$table} WHERE name=? AND site_id{$siteIdWhere}";
+    $sql = "
+SELECT
+    class.*,
+    supervisor.username as creator_username,
+    supervisor.full_name as creator_full_name,
+    supervisor.site_id as creator_site_id
+FROM sto_classes as class 
+    LEFT OUTER JOIN sto_supervisor as supervisor
+        ON supervisor.id = class.created_by
+WHERE class.name=? AND {$siteIdWhere}";
     $stmt = database_prepare_execute($sql, [$name]);
     $data = [];
     if ($stmt) {
@@ -369,8 +394,9 @@ function get_class_by_name(string $name, int $siteIds = null)
  * @param array|null $siteIds
  * @return array|array[]
  */
-function get_classes_by_code(string $code, array $siteIds = null) : array
+function get_classes_by_code(string $code, $siteIds = null) : array
 {
+    $siteIds = (array) $siteIds;
     $siteIds = get_generate_site_ids($siteIds);
 
     $code = trim($code);
@@ -388,17 +414,26 @@ function get_classes_by_code(string $code, array $siteIds = null) : array
         }
     }
 
-    $table = get_classes_table_name();
+    $siteIdWhere = 'class.site_id';
     if (!empty($siteIds)) {
-        $siteIdWhere = sprintf(
-            count($siteIds) === 1 ? ' =%d ' : ' IN (%s) ',
+        $siteIdWhere .= sprintf(
+            count($siteIds) === 1 ? '=%d ' : ' IN (%s) ',
             implode(',', $siteIds)
         );
     } else {
-        $siteIdWhere = ' IS NOT NULL AND site_id > 0 ';
+        $siteIdWhere .= " IS NOT NULL AND class.site_id > 0 ";
     }
 
-    $sql = " SELECT * FROM {$table} WHERE code=? AND site_id{$siteIdWhere}";
+    $sql = "
+SELECT
+    class.*,
+    supervisor.username as creator_username,
+    supervisor.full_name as creator_full_name,
+    supervisor.site_id as creator_site_id
+FROM sto_classes as class 
+    LEFT OUTER JOIN sto_supervisor as supervisor
+        ON supervisor.id = class.created_by
+WHERE class.code=? AND {$siteIdWhere}";
     $stmt = database_prepare_execute($sql, [$code]);
     $data = [];
     if ($stmt) {
@@ -440,7 +475,7 @@ function get_class_by_code(string $code, int $siteIds = null)
 function search_classes_by(
     string $type,
     string $name,
-    array $siteIds = null,
+    $siteIds = null,
     int $limit = MYSQL_DEFAULT_SEARCH_LIMIT,
     int $offset = 0,
     &$result = null
@@ -449,25 +484,30 @@ function search_classes_by(
     if ($type !== 'name' && $type !== 'code') {
         return false;
     }
-
+    $siteIds = (array) $siteIds;
     $siteIds = get_generate_site_ids($siteIds);
     $limit  = get_generate_max_search_result_limit($limit);
     $offset = get_generate_min_offset($offset);
+    $limit = $limit < 1 ? MYSQL_MAX_RESULT_LIMIT : $limit;
+    $offset = $offset > 0 ? $offset : 0;
+    $sqlLimit = "LIMIT {$limit}";
+    if ($offset > 0) {
+        $sqlLimit .= " OFFSET {$offset}";
+    }
 
     $name = trim($name);
-    $table = get_classes_table_name();
-
     $likeSearch = database_quote_like_all($name);
     $likeLeft = database_quote_like_left($name);
     $nameQuery = database_quote($name);
 
+    $siteIdWhere = 'class.site_id';
     if (!empty($siteIds)) {
-        $siteIdWhere = sprintf(
-            count($siteIds) === 1 ? ' =%d ' : ' IN (%s) ',
+        $siteIdWhere .= sprintf(
+            count($siteIds) === 1 ? '=%d ' : ' IN (%s) ',
             implode(',', $siteIds)
         );
     } else {
-        $siteIdWhere = ' IS NOT NULL AND site_id > 0 ';
+        $siteIdWhere .= ' IS NOT NULL AND class.site_id > 0 ';
     }
 
     $data = [
@@ -491,29 +531,30 @@ function search_classes_by(
         ],
         'results' => []
     ];
+    $sql = "
+SELECT 
+    count(class.id) as total
+FROM sto_classes as class
+WHERE {$siteIdWhere} AND class.{$type} LIKE {$likeSearch}";
 
-    $stmt = database_prepare_execute(
-        "
-        SELECT count(class.id) as total FROM {$table} as class
-            WHERE class.site_id {$siteIdWhere} AND class.{$type} LIKE {$likeSearch}
-                ORDER BY
-                    IF(class.{$type} = {$nameQuery}, 2, IF(class.{$type} LIKE {$likeLeft},1,0)) 
-    "
-    );
+    $stmt = database_prepare_execute($sql);
 
     $res = $stmt ? $stmt->fetchClose(PDO::FETCH_ASSOC) : false;
     $total = $res ? abs($res['total']??0) : 0;
     unset($res);
-    $stmt = database_unbuffered_query_execute(
-        "
-SELECT *
-    FROM {$table} as class
-        WHERE class.site_id {$siteIdWhere} AND class.{$type} LIKE {$likeSearch}
-        ORDER BY 
-             IF(class.{$type} = {$nameQuery}, 2, IF(class.{$type} LIKE {$likeLeft},1,0))
-                DESC LIMIT {$limit} OFFSET {$offset}
-    "
-    );
+    $sql = "
+SELECT class.*,
+    supervisor.username as creator_username,
+    supervisor.full_name as creator_full_name,
+    supervisor.site_id as creator_site_id
+FROM sto_classes as class
+LEFT JOIN sto_supervisor as supervisor
+    ON supervisor.id = class.created_by
+WHERE {$siteIdWhere} AND class.{$type} LIKE {$likeSearch}
+ORDER BY 
+     IF(class.{$type} = {$nameQuery}, 2, IF(class.{$type} LIKE {$likeLeft},1,0)) DESC
+{$sqlLimit}";
+    $stmt = database_unbuffered_query_execute($sql);
 
     $result = [];
     while ($row = $stmt->fetchAssoc()) {
@@ -566,7 +607,7 @@ SELECT *
  */
 function search_class_by_name(
     string $name,
-    array $siteIds = null,
+    $siteIds = null,
     int $limit = MYSQL_DEFAULT_SEARCH_LIMIT,
     int $offset = 0,
     &$result = null
@@ -584,7 +625,7 @@ function search_class_by_name(
  */
 function search_class_by_code(
     string $code,
-    array $siteIds = null,
+    $siteIds = null,
     int $limit = MYSQL_DEFAULT_SEARCH_LIMIT,
     int $offset = 0,
     &$result = null
@@ -707,7 +748,6 @@ function update_class_data(int $classId, array $classes)
         return RESULT_ERROR_OK;
     }
 
-    $table = get_classes_table_name();
     $newClass = [];
     $args = [];
 
@@ -728,7 +768,7 @@ function update_class_data(int $classId, array $classes)
 
     $res = false;
     $set = implode(', ', $newClass);
-    $sql = "UPDATE {$table} SET {$set} WHERE id={$classId}";
+    $sql = "UPDATE sto_classes SET {$set} WHERE id={$classId}";
     try {
         $stmt = database_prepare_execute($sql, $args);
         if ($stmt) {
@@ -817,7 +857,6 @@ function insert_class_data(array $classes)
         return RESULT_ERROR_EXIST_NAME;
     }
 
-    $table = get_classes_table_name();
     $args     = [];
     foreach ($classes as $key => $item) {
         $keyName = ":_{$key}";
@@ -826,16 +865,15 @@ function insert_class_data(array $classes)
 
     $columns = implode(', ', array_keys($classes));
     $val = implode(', ', array_keys($args));
-    $sql = "INSERT INTO {$table} ({$columns}) VALUE({$val})";
+    $sql = "INSERT INTO sto_classes({$columns}) VALUE({$val})";
     try {
-        $stmt = database_prepare_execute($sql);
+        $stmt = database_prepare_execute($sql, $args);
         if (($stmt)) {
             $stmt->closeCursor();
             cache_delete_current($code, 'classes_code', $site_id);
             cache_delete_current($name, 'classes_name', $site_id);
             return get_class_by_code($code, $site_id);
         }
-
     } catch (Exception $e) {
         return false;
     }

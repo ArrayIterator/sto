@@ -12,41 +12,6 @@ if (!defined('ROOT_DIR')) {
     return;
 }
 
-/*
-SELECT
-    class.*,
-    supervisor.*,
-    COUNT(class.id) OVER() AS total
-FROM
-    sto_classes as class
-
-LEFT JOIN
-	(
-        SELECT
-        	sto_classes_teacher.class_id as class_id,
-        	sto_classes_teacher.year as class_year,
-        	sto_supervisor.id as teacher_id,
-        	sto_supervisor.full_name as teacher_full_name,
-        	sto_supervisor.role as teacher_role,
-	        sto_supervisor.site_id as teacher_site_id
-        FROM
-        	sto_classes_teacher
-        LEFT JOIN sto_supervisor ON
-        	sto_supervisor.role = 'teacher' AND sto_classes_teacher.teacher = sto_supervisor.id
-        WHERE role = 'teacher'
-        	AND (sto_supervisor.status = '' OR sto_supervisor.status = 'active')
-    ) as supervisor
-    	ON supervisor.teacher_site_id = class.site_id
-        AND supervisor.class_id = class.id
-
-WHERE
-    class.site_id IS NOT NULL AND class.site_id > 0
-
-ORDER BY
-    class.id,
-    class.site_id
-LIMIT 10
- */
 /**
  * Class ClassesController
  * @package ArrayIterator\Controller\Api
@@ -55,14 +20,14 @@ class ClassesController extends BaseController
 {
     public function getClasses(Route $r)
     {
-        $type = query_param_string(PARAM_TYPE_QUERY);
+        $type = query_param_string(PARAM_TYPE);
         $search = query_param_string(PARAM_SEARCH_QUERY, '', true);
         // fallback to query
         if (in_array($type, ['name', 'code']) && $search !== '') {
             $this->searchClasses(
                 $r,
                 [
-                    PARAM_TYPE_QUERY => $type,
+                    PARAM_TYPE => $type,
                     PARAM_SEARCH_QUERY => $search
                 ]
             );
@@ -74,13 +39,13 @@ class ClassesController extends BaseController
             return;
         }
 
-        $limit  = query_param_int(PARAM_LIMIT_QUERY);
-        $offset = query_param_int(PARAM_OFFSET_QUERY);
+        $limit  = query_param_int(PARAM_LIMIT);
+        $offset = query_param_int(PARAM_OFFSET);
         $siteIds = get_super_admin_site_ids_params();
-        $hasSiteIds = is_super_admin() && has_query_param(PARAM_SITE_IDS_QUERY);
+        $hasSiteIds = is_super_admin() && has_query_param(PARAM_SITE_IDS);
         $originalLimit = $limit;
 
-        $filter = query_param(PARAM_FILTER_QUERY);
+        $filter = query_param(PARAM_FILTER);
         $filter = !is_string($filter) ? null : trim($filter);
         $filter = $filter ? explode(',', $filter) : [];
         foreach ($filter as $key => $item) {
@@ -395,7 +360,7 @@ class ClassesController extends BaseController
             return;
         }
 
-        $type = $params[PARAM_TYPE_QUERY]??query_param(PARAM_TYPE_QUERY);
+        $type = $params[PARAM_TYPE]??query_param(PARAM_TYPE);
         $type = is_string($type) ? trim(strtolower($type)) : '';
         if (!$type || !in_array($type, ['name', 'code'])) {
             json(HTTP_CODE_PRECONDITION_FAILED, trans('Search type is invalid!'));
@@ -409,12 +374,12 @@ class ClassesController extends BaseController
         $siteIds = [];
         $hasSiteIds = false;
 
-        if (has_query_param(PARAM_SITE_IDS_QUERY)) {
+        if (has_query_param(PARAM_SITE_IDS)) {
             $hasSiteIds = true;
             $siteIds = get_super_admin_site_ids_param();
         }
 
-        if (has_query_param(PARAM_SITE_ID_QUERY)) {
+        if (has_query_param(PARAM_SITE_ID)) {
             $siteId = get_super_admin_site_id_param();
             $siteId = $siteId === 0 ? false : $siteId;
             if ($siteId !== false && !in_array($siteId, $siteIds)) {
@@ -426,7 +391,7 @@ class ClassesController extends BaseController
             $siteIds = [get_current_site_id()];
         }
 
-        $filter = query_param(PARAM_FILTER_QUERY);
+        $filter = query_param(PARAM_FILTER);
         $filter = !is_string($filter) ? null : trim($filter);
         $filter = $filter ? explode(',', $filter) : [];
         foreach ($filter as $key => $item) {
@@ -437,8 +402,8 @@ class ClassesController extends BaseController
 
         $filter = array_values($filter);
         $filter = array_flip($filter);
-        $offset = query_param_int(PARAM_OFFSET_QUERY);
-        $limit = query_param(PARAM_LIMIT_QUERY);
+        $offset = query_param_int(PARAM_OFFSET);
+        $limit = query_param(PARAM_LIMIT);
         $originalLimit = $limit;
         $limit = !is_numeric($limit) ? MYSQL_DEFAULT_SEARCH_LIMIT : abs(intval($limit));
         $limit = $limit <= 1 ? 1 : (

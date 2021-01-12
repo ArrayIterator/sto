@@ -12,16 +12,16 @@ $canDeActivatedModule = current_supervisor_can('deactivate_module');
  */
 if (is_method_post()) {
     $current_url = get_current_url();
-    $action = post_param_string(PARAM_ACTION_QUERY, '', true);
+    $action = post_param_string(PARAM_ACTION, '', true);
     $module = post_param_string('module', '', true);
-    $hasAction = (has_post_param(PARAM_ACTION_QUERY)
+    $hasAction = (has_post_param(PARAM_ACTION)
         && in_array(
-            post_param_string(PARAM_ACTION_QUERY, '', true),
-            [PARAM_ACTION_ACTIVATE, PARAM_ACTION_DEACTIVATE]
+            post_param_string(PARAM_ACTION, '', true),
+            [PARAM_ACTIVATE, PARAM_DEACTIVATE]
         )
     );
 
-    $current_url = remove_query_args(PARAM_RESPONSE_QUERY, $current_url);
+    $current_url = remove_query_args(PARAM_RESPONSE, $current_url);
     if (!$hasAction || $module === '') {
         redirect($current_url);
         return;
@@ -31,13 +31,13 @@ if (is_method_post()) {
         flash_set(
             'module_message',
             [
-                PARAM_STATUS_QUERY => PARAM_ERROR_QUERY,
-                PARAM_MESSAGE_QUERY => trans('Permission denied to change module status')
+                PARAM_STATUS => PARAM_ERROR,
+                PARAM_MESSAGE => trans('Permission denied to change module status')
             ],
             FLASH_PREFIX
         );
         redirect(add_query_args([
-            PARAM_RESPONSE_QUERY => PARAM_RESPONSE_DENIED
+            PARAM_RESPONSE => PARAM_DENIED
         ], $current_url));
         return;
     }
@@ -46,36 +46,36 @@ if (is_method_post()) {
         flash_set(
             'module_message',
             [
-                PARAM_STATUS_QUERY => PARAM_ERROR_QUERY,
-                PARAM_MESSAGE_QUERY => trans_sprintf('Module %s has not exists', $module)
+                PARAM_STATUS => PARAM_ERROR,
+                PARAM_MESSAGE => trans_sprintf('Module %s has not exists', $module)
             ],
             FLASH_PREFIX
         );
         redirect(
             add_query_args([
-                PARAM_RESPONSE_QUERY => PARAM_RESPONSE_EMPTY
+                PARAM_RESPONSE => PARAM_EMPTY
             ], $current_url)
         );
         return;
     }
-    $id_tag = post_param_string(PARAM_ID_QUERY, '');
+    $id_tag = post_param_string(PARAM_ID, '');
     if ($id_tag !== '') {
         $current_url .= "#{$id_tag}";
     }
 
     switch ($action) {
-        case PARAM_ACTION_ACTIVATE:
+        case PARAM_ACTIVATE:
             if (!$canActivatedModule) {
                 flash_set(
                     'module_message',
                     [
-                        PARAM_STATUS_QUERY => PARAM_ERROR_QUERY,
-                        PARAM_MESSAGE_QUERY => trans('Permission denied to change module status')
+                        PARAM_STATUS => PARAM_ERROR,
+                        PARAM_MESSAGE => trans('Permission denied to change module status')
                     ],
                     FLASH_PREFIX
                 );
                 redirect(add_query_args([
-                    PARAM_RESPONSE_QUERY => PARAM_RESPONSE_DENIED
+                    PARAM_RESPONSE => PARAM_DENIED
                 ], $current_url));
                 return;
             }
@@ -116,13 +116,13 @@ if (is_method_post()) {
                     flash_set(
                         'module_message',
                         [
-                            PARAM_STATUS_QUERY => PARAM_ERROR_QUERY,
-                            PARAM_MESSAGE_QUERY => $err
+                            PARAM_STATUS => PARAM_ERROR,
+                            PARAM_MESSAGE => $err
                         ]
                     );
                     redirect(
                         add_query_args([
-                            PARAM_RESPONSE_QUERY => PARAM_ERROR_QUERY
+                            PARAM_RESPONSE => PARAM_ERROR
                         ], $current_url)
                     );
                     exit;
@@ -141,14 +141,14 @@ if (is_method_post()) {
                 flash_set(
                     'module_message',
                     [
-                        PARAM_STATUS_QUERY => PARAM_ERROR_QUERY,
-                        PARAM_MESSAGE_QUERY => $err
+                        PARAM_STATUS => PARAM_ERROR,
+                        PARAM_MESSAGE => $err
                     ]
                 );
                 redirect(
                     add_query_args([
-                        PARAM_ACTION_QUERY => PARAM_FAILED_QUERY,
-                        PARAM_RESPONSE_QUERY => PARAM_ERROR_QUERY
+                        PARAM_ACTION => PARAM_FAILED,
+                        PARAM_RESPONSE => PARAM_ERROR
                     ], $current_url)
                 );
                 return;
@@ -167,8 +167,8 @@ if (is_method_post()) {
             flash_set(
                 'module_message',
                 [
-                    PARAM_STATUS_QUERY => PARAM_SUCCESS_QUERY,
-                    PARAM_MESSAGE_QUERY => $isGlobal ? trans_sprintf(
+                    PARAM_STATUS => PARAM_SUCCESS,
+                    PARAM_MESSAGE => $isGlobal ? trans_sprintf(
                             'Module %s successfully activated as global',
                             $mod->getName()
                         ) : trans_sprintf(
@@ -181,26 +181,26 @@ if (is_method_post()) {
             redirect(
                 add_query_args(
                     [
-                        PARAM_RESPONSE_QUERY => PARAM_SUCCESS_QUERY,
-                        PARAM_ACTION_QUERY => PARAM_RESPONSE_ACTIVATED,
-                        PARAM_STATUS_QUERY => PARAM_ALL_QUERY,
+                        PARAM_RESPONSE => PARAM_SUCCESS,
+                        PARAM_ACTION => PARAM_ACTIVATED,
+                        PARAM_STATUS => PARAM_ALL,
                     ],
                     $current_url
                 )
             );
             return;
-        case PARAM_ACTION_DEACTIVATE:
+        case PARAM_DEACTIVATE:
             if (!$canDeActivatedModule) {
                 flash_set(
                     'module_message',
                     [
-                        PARAM_STATUS_QUERY => PARAM_ERROR_QUERY,
-                        PARAM_MESSAGE_QUERY => trans('Permission denied to change module status')
+                        PARAM_STATUS => PARAM_ERROR,
+                        PARAM_MESSAGE => trans('Permission denied to change module status')
                     ],
                     FLASH_PREFIX
                 );
                 redirect(add_query_args([
-                    PARAM_RESPONSE_QUERY => PARAM_RESPONSE_DENIED,
+                    PARAM_RESPONSE => PARAM_DENIED,
                 ], $current_url));
             }
 
@@ -208,9 +208,9 @@ if (is_method_post()) {
                 redirect(
                     add_query_args(
                         [
-                            PARAM_RESPONSE_QUERY => PARAM_SUCCESS_QUERY,
-                            PARAM_ACTION_QUERY => PARAM_RESPONSE_DEACTIVATED,
-                            PARAM_STATUS_QUERY => PARAM_ALL_QUERY
+                            PARAM_RESPONSE => PARAM_SUCCESS,
+                            PARAM_ACTION => PARAM_DEACTIVATED,
+                            PARAM_STATUS => PARAM_ALL
                         ],
                         $current_url
                     )
@@ -241,8 +241,8 @@ if (is_method_post()) {
             flash_set(
                 'module_message',
                 [
-                    PARAM_STATUS_QUERY => PARAM_SUCCESS_QUERY,
-                    PARAM_MESSAGE_QUERY => $isGlobal ? trans_sprintf(
+                    PARAM_STATUS => PARAM_SUCCESS,
+                    PARAM_MESSAGE => $isGlobal ? trans_sprintf(
                         'Module %s successfully deactivated from global',
                         $mod->getName()
                     ) : trans_sprintf(
@@ -255,28 +255,28 @@ if (is_method_post()) {
             redirect(
                 add_query_args(
                     [
-                        PARAM_RESPONSE_QUERY => PARAM_SUCCESS_QUERY,
-                        PARAM_ACTION_QUERY => PARAM_RESPONSE_DEACTIVATED,
-                        PARAM_STATUS_QUERY => PARAM_ALL_QUERY
+                        PARAM_RESPONSE => PARAM_SUCCESS,
+                        PARAM_ACTION => PARAM_DEACTIVATED,
+                        PARAM_STATUS => PARAM_ALL
                     ],
                     $current_url
                 )
             );
-            break;
+            return;
     }
     redirect($current_url);
     return;
 }
 
 $messages = flash_get('module_message', FLASH_PREFIX);
-if (is_array($messages) && isset($messages[PARAM_STATUS_QUERY], $messages[PARAM_MESSAGE_QUERY])) {
-    if ($messages[PARAM_STATUS_QUERY] === PARAM_SUCCESS_QUERY) {
+if (is_array($messages) && isset($messages[PARAM_STATUS], $messages[PARAM_MESSAGE])) {
+    if ($messages[PARAM_STATUS] === PARAM_SUCCESS) {
         add_admin_success_message(
             'module_status',
-            $messages[PARAM_MESSAGE_QUERY]
+            $messages[PARAM_MESSAGE]
         );
-    } elseif ($messages[PARAM_STATUS_QUERY] === PARAM_ERROR_QUERY) {
-        $message = $messages[PARAM_MESSAGE_QUERY];
+    } elseif ($messages[PARAM_STATUS] === PARAM_ERROR) {
+        $message = $messages[PARAM_MESSAGE];
         if ($message instanceof Throwable) {
             $message_ = sprintf('<p>%s</p>', trans('There was an error'));
             if (DEBUG && is_super_admin()) {
@@ -294,7 +294,7 @@ if (is_array($messages) && isset($messages[PARAM_STATUS_QUERY], $messages[PARAM_
     }
 }
 
-switch (query_param(PARAM_STATUS_QUERY)) {
+switch (query_param(PARAM_STATUS)) {
     case STATUS_ACTIVE:
         set_admin_title('Active Modules');
         break;
@@ -308,7 +308,7 @@ switch (query_param(PARAM_STATUS_QUERY)) {
 get_admin_header_template();
 
 $moduleInputStatusName = 'module_status';
-$moduleStatusName = PARAM_STATUS_QUERY;
+$moduleStatusName = PARAM_STATUS;
 
 $moduleStatus = query_param($moduleStatusName);
 $moduleSearchStatus = query_param($moduleInputStatusName);
@@ -508,11 +508,11 @@ foreach (modules()->getModules() as $name => $module) {
                                 <?php if (module_is_global($identifier)) { ?>
                                 <form method="post">
                                     <div class="form-group">
-                                    <input type="hidden" name="<?= PARAM_ACTION_QUERY; ?>" value="<?= PARAM_ACTION_DEACTIVATE; ?>">
+                                    <input type="hidden" name="<?= PARAM_ACTION; ?>" value="<?= PARAM_DEACTIVATE; ?>">
                                     <input type="hidden" class="hidden hide" name="module" value="<?= esc_attr($identifier); ?>">
                                     <input type="hidden" class="hidden hide" name="global" value="yes">
                                     <input type="hidden" class="hidden hide" name="global_only" value="yes">
-                                    <button type="submit" name="<?= PARAM_ID_QUERY;?>" class="btn btn-sm btn-dark btn-block">
+                                    <button type="submit" name="<?= PARAM_ID;?>" class="btn btn-sm btn-dark btn-block">
                                         <?php esc_html_trans_e('Deactivate Global Only'); ?>
                                     </button>
                                     </div>
@@ -520,10 +520,10 @@ foreach (modules()->getModules() as $name => $module) {
                                 <?php } elseif ($item['site_wide']) { ?>
                                     <form method="post">
                                         <div class="form-group">
-                                            <input type="hidden" name="<?= PARAM_ACTION_QUERY; ?>" value="<?= PARAM_ACTION_ACTIVATE; ?>">
+                                            <input type="hidden" name="<?= PARAM_ACTION; ?>" value="<?= PARAM_ACTIVATE; ?>">
                                             <input type="hidden" class="hidden hide" name="module" value="<?= esc_attr($identifier); ?>">
                                             <input type="hidden" class="hidden hide" name="global" value="yes">
-                                            <button type="submit" name="<?= PARAM_ID_QUERY;?>" value="<?= $item['id'];?>" class="btn btn-sm btn-success btn-block">
+                                            <button type="submit" name="<?= PARAM_ID;?>" value="<?= $item['id'];?>" class="btn btn-sm btn-success btn-block">
                                                 <?php esc_html_trans_e('Activate Global'); ?>
                                             </button>
                                         </div>
@@ -535,7 +535,7 @@ foreach (modules()->getModules() as $name => $module) {
                                 <?php } ?>
                             <?php } ?>
                             <form method="post">
-                                <input type="hidden" name="<?= PARAM_ACTION_QUERY; ?>" value="<?= $item['active'] ? PARAM_ACTION_DEACTIVATE : PARAM_ACTION_ACTIVATE; ?>">
+                                <input type="hidden" name="<?= PARAM_ACTION; ?>" value="<?= $item['active'] ? PARAM_DEACTIVATE : PARAM_ACTIVATE; ?>">
                                 <input type="hidden" class="hidden hide" name="module" value="<?= esc_attr($identifier); ?>">
                                 <?php if (is_super_admin() && site_is_global()) { ?>
                                         <?php if (!$item['active']) { ?>
@@ -553,7 +553,7 @@ foreach (modules()->getModules() as $name => $module) {
                                         </div>
                                         <?php } ?>
                                 <?php } ?>
-                                <button type="submit" name="<?= PARAM_ID_QUERY;?>" value="<?= $item['id'] ;?>" class="btn btn-sm btn-<?= !$item['active'] ? 'primary' : 'danger'; ?> btn-block">
+                                <button type="submit" name="<?= PARAM_ID;?>" value="<?= $item['id'] ;?>" class="btn btn-sm btn-<?= !$item['active'] ? 'primary' : 'danger'; ?> btn-block">
                                     <?php $item['active'] ? esc_html_trans_e('Deactivate') : esc_html_trans_e('Activate'); ?>
                                 </button>
                             </form>
@@ -576,7 +576,7 @@ foreach (modules()->getModules() as $name => $module) {
     </div>
     <script type="text/template" id="underscore_template_empty">
         <div class="alert alert-danger mt-4 text-center" id="alert-not-found-module">
-            <h5><?php trans_printf('Module \'%s\' has not found', '<%= value %>');?></h5>
+            <h5><?php trans_printf('Module %s has not found', '\'<%= value %>\'');?></h5>
         </div>
     </script>
     <script type="text/javascript">

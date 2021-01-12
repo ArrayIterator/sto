@@ -267,7 +267,6 @@ function upload_avatar(AbstractUserModel $model, string $name = 'avatar')
     }
 
     $baseFile = '/' . ltrim(substr($fileTarget, strlen($avatarPath)), '/');
-    $tableName = $model->getTableName();
     try {
         $file->moveTo($fileTarget);
     } catch (Throwable $e) {
@@ -285,9 +284,7 @@ function upload_avatar(AbstractUserModel $model, string $name = 'avatar')
     }
 
     try {
-        $stmt = database_prepare(
-            sprintf('UPDATE %s SET avatar=? WHERE id=?', $tableName)
-        );
+        $stmt = database_prepare('UPDATE sto_supervisor SET avatar=? WHERE id=?');
         $stmt->execute([$baseFile, $userId]);
         if ($userAvatar && is_file($userAvatar) && is_writable($userAvatar)) {
             unlink($userAvatar);
@@ -619,7 +616,6 @@ function upload_logo(string $name = 'logo', int $siteId = null)
     }
 
     $baseFile = '/' . ltrim($baseName, '/');
-    $tableName = $site->getTableName();
     try {
         $file->moveTo($fileTarget);
     } catch (Throwable $e) {
@@ -637,9 +633,7 @@ function upload_logo(string $name = 'logo', int $siteId = null)
     }
 
     try {
-        $stmt = database_prepare(
-            sprintf('UPDATE %s SET logo=? WHERE id=?', $tableName)
-        );
+        $stmt = database_prepare('UPDATE sto_sites SET logo=? WHERE id=?');
         $stmt->execute([$baseFile, $siteId]);
         if ($siteLogo && is_file($siteLogo) && is_writable($siteLogo)) {
             unlink($siteLogo);

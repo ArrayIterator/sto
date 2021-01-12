@@ -555,6 +555,7 @@ function get_student_online_status(int $studentId)
     cache_set($key, $data, 'users_online');
     return $data;
 }
+
 /**
  * @param int $supervisor
  * @return AbstractOnlineModel|false|mixed
@@ -598,7 +599,6 @@ function is_supervisor_online(int $supervisorId) : bool
     return (bool) ($status['online']??null);
 }
 
-
 /**
  * @param array $data
  * @return array
@@ -626,11 +626,9 @@ function get_users_data_filters(array $data) : array
 
     $implodedIds = implode(',', array_keys($ids));
     $where = count($ids) === 1
-        ? " id={$implodedIds} "
+        ? "id={$implodedIds} "
         : "id IN ({$implodedIds})";
-    $site_table = site()->getTableName();
-    $sql = "SELECT * FROM {$site_table} WHERE {$where}";
-
+    $sql = "SELECT * FROM sto_sites WHERE {$where}";
     $stmt = database_unbuffered_query($sql);
     while ($row = $stmt->fetchAssoc()) {
         $row['id'] = (int) $row['id'];
@@ -694,19 +692,18 @@ function get_users_data_filters(array $data) : array
  * @return array[]
  */
 function get_supervisors_data(
-    int $limit = null,
+    int $limit = MYSQL_DEFAULT_DISPLAY_LIMIT,
     int $offset = null,
     string $role = null,
-    array $siteIds = null
+    $siteIds = null
 ) : array {
-
+    $siteIds = (array) $siteIds;
     $siteIds = get_generate_site_ids($siteIds);
     $limit  = get_generate_max_search_result_limit($limit);
-    $table = supervisor()->getTableName();
-    $where = "{$table}.site_id ";
+    $where = 'user.site_id ';
     $where .= !empty($siteIds)
         ? sprintf(count($siteIds) === 1 ? ' = %d ' : 'IN (%s) ', implode(',', $siteIds))
-        : "IS NOT NULL AND {$table}.site_id > 0 ";
+        : "IS NOT NULL AND user.site_id > 0 ";
     $role = $role ? strtolower(trim($role)) : null;
     $role = $role?:null;
 
@@ -714,10 +711,10 @@ function get_supervisors_data(
     $is_admin = is_admin();
 
     if (!$is_super_admin) {
-        $where .= " AND LOWER(TRIM({$table}.role)) != '".ROLE_SUPER_ADMIN."' ";
+        $where .= " AND LOWER(TRIM(user.role)) != '".ROLE_SUPER_ADMIN."' ";
     }
     if ($role && ($is_super_admin || $role !== ROLE_SUPER_ADMIN)) {
-        $where .= " AND LOWER(TRIM({$table}.role))=".database_quote($role);
+        $where .= " AND LOWER(TRIM(user.role))=".database_quote($role);
     }
 
     $data = [
@@ -755,16 +752,6 @@ function get_supervisors_data(
         return $data;
     }
 
-    $religion_table = get_religion_table_name();
-    $sql = "
-SELECT count({$table}.id) OVER() as total,
-  {$table}.*,
-	{$religion_table}.code as religion_code,
-    {$religion_table}.name as religion_name
-	FROM {$table} 
-        LEFT JOIN {$religion_table} ON {$religion_table}.code = {$table}.religion
-    WHERE ";
-
     $limit = $limit < 1 ? MYSQL_MAX_RESULT_LIMIT : $limit;
     $offset = $offset > 0 ? $offset : 0;
     $sqlLimit = "LIMIT {$limit}";
@@ -772,8 +759,17 @@ SELECT count({$table}.id) OVER() as total,
         $sqlLimit .= " OFFSET {$offset}";
     }
 
-    $sql .= $where;
-    $sql .= $sqlLimit;
+    $sql = "
+SELECT 
+    count(user.id) OVER() as total,
+    user.*,
+	rel.code as religion_code,
+    rel.name as religion_name
+FROM sto_supervisor as user
+    LEFT JOIN sto_religion as rel
+        ON rel.code = user.religion
+WHERE {$where} {$sqlLimit}";
+
     $stmt = database_unbuffered_query($sql);
     $result = [];
     $total = 0;
@@ -795,8 +791,10 @@ SELECT count({$table}.id) OVER() as total,
 
     $stmt->closeCursor();
     if ($total === 0) {
-        $sql = "SELECT count({$table}.id) as total FROM {$table} WHERE ";
-        $sql .= $where;
+        $sql = "
+SELECT count(user.id) as total 
+FROM sto_supervisor as user
+WHERE {$where}";
         try {
             $stmt = database_unbuffered_query_execute($sql);
             if ($stmt) {
@@ -851,16 +849,17 @@ function get_supervisors_list_by_id(int $id) : array
     }
 
     unset($cache);
-    $table = supervisor()->getTableName();
-    $religion_table = get_religion_table_name();
     $sql = "
 SELECT
-  {$table}.*,
-	{$religion_table}.code as religion_code,
-    {$religion_table}.name as religion_name
-	FROM {$table} 
-        LEFT JOIN {$religion_table} ON {$religion_table}.code = {$table}.religion
-    WHERE {$table}.id={$id} LIMIT 1";
+    user.*,
+	rel.code as religion_code,
+    rel.name as religion_name
+FROM sto_supervisor as user 
+    LEFT JOIN sto_religion as rel
+        ON user.religion = rel.code
+WHERE
+      user.id={$id} 
+LIMIT 1";
 
     $result = [];
     $stmt = database_query($sql);
@@ -885,15 +884,15 @@ SELECT
 
 /**
  * @param string $name
- * @param array|int[]|null $siteId
+ * @param array|int[]|int|null $siteId
  * @return array|array[]
  */
-function get_supervisors_list_by_name(string $name, array $siteId = null) : array
+function get_supervisors_list_by_name(string $name, $siteId = null) : array
 {
     if (trim($name) === '') {
         return [];
     }
-
+    $siteId = (array) $siteId;
     $name = trim($name);
     $siteIds = get_generate_site_ids($siteId);
     if (count($siteIds) === 1) {
@@ -912,26 +911,25 @@ function get_supervisors_list_by_name(string $name, array $siteId = null) : arra
     $siteIdWhere = '';
     if (!empty($siteIds)) {
         $siteIdWhere = sprintf(
-            count($siteIds) === 1 ? ' =%d ' : ' IN (%s) ',
+            count($siteIds) === 1 ? '=%d ' : 'IN (%s) ',
             implode(',', $siteIds)
         );
     }
 
-    $table = supervisor()->getTableName();
-    $religion_table = get_religion_table_name();
     $name = database_quote(trim(strtolower($name)));
     if ($siteIdWhere !== '') {
-        $siteIdWhere = " {$table}.site_id {$siteIdWhere} ";
+        $siteIdWhere = "AND user.site_id {$siteIdWhere} ";
     }
     $sql = "
 SELECT
-  {$table}.*,
-	{$religion_table}.code as religion_code,
-    {$religion_table}.name as religion_name
-	FROM {$table} 
-        LEFT JOIN {$religion_table} ON {$religion_table}.code = {$table}.religion
-    WHERE LOWER({$table}.full_name)={$name} {$siteIdWhere}";
-
+    user.*,
+    rel.code as religion_code,
+    rel.name as religion_name
+FROM sto_supervisor as user
+    LEFT JOIN sto_religion AS rel
+        ON user.religion = rel.code
+WHERE
+      LOWER(user.full_name)={$name} {$siteIdWhere}";
     $result = [];
     $stmt = database_query($sql);
     while ($row = $stmt->fetchAssoc()) {
@@ -954,15 +952,15 @@ SELECT
 
 /**
  * @param string $username
- * @param array|int[]|null $siteId
+ * @param array|int[]|int|null $siteId
  * @return array|array[]
  */
-function get_supervisors_list_by_username(string $username, array $siteId = null) : array
+function get_supervisors_list_by_username(string $username, $siteId = null) : array
 {
     if (trim($username) === '') {
         return [];
     }
-
+    $siteId = (array) $siteId;
     $username = trim(strtolower($username));
     $siteIds = get_generate_site_ids($siteId);
 
@@ -982,25 +980,24 @@ function get_supervisors_list_by_username(string $username, array $siteId = null
     $siteIdWhere = '';
     if (!empty($siteIds)) {
         $siteIdWhere = sprintf(
-            count($siteIds) === 1 ? ' =%d ' : ' IN (%s) ',
+            count($siteIds) === 1 ? ' =%d ' : 'IN (%s) ',
             implode(',', $siteIds)
         );
     }
 
-    $table = supervisor()->getTableName();
-    $religion_table = get_religion_table_name();
     $username = database_quote(trim(strtolower($username)));
     if ($siteIdWhere !== '') {
-        $siteIdWhere = " {$table}.site_id {$siteIdWhere} ";
+        $siteIdWhere = "AND user.site_id {$siteIdWhere} ";
     }
     $sql = "
 SELECT
-  {$table}.*,
-	{$religion_table}.code as religion_code,
-    {$religion_table}.name as religion_name
-	FROM {$table} 
-        LEFT JOIN {$religion_table} ON {$religion_table}.code = {$table}.religion
-    WHERE LOWER({$table}.username)={$username} {$siteIdWhere}";
+    user.*,
+    rel.code as religion_code,
+    rel.name as religion_name
+FROM sto_supervisor as user 
+    LEFT JOIN sto_religion AS rel 
+        ON user.religion = rel.code
+WHERE LOWER(user.username)={$username} {$siteIdWhere}";
 
     $result = [];
     $stmt = database_query($sql);
@@ -1027,12 +1024,12 @@ SELECT
  * @param array|int[]|null $siteId
  * @return array|array[]
  */
-function get_supervisors_list_by_email(string $email, array $siteId = null) : array
+function get_supervisors_list_by_email(string $email, $siteId = null) : array
 {
     if (trim($email) === '') {
         return [];
     }
-
+    $siteId = (array) $siteId;
     $email = trim(strtolower($email));
     $siteIds = get_generate_site_ids($siteId);
     if (count($siteIds) === 1) {
@@ -1051,25 +1048,24 @@ function get_supervisors_list_by_email(string $email, array $siteId = null) : ar
     $siteIdWhere = '';
     if (!empty($siteIds)) {
         $siteIdWhere = sprintf(
-            count($siteIds) === 1 ? ' =%d ' : ' IN (%s) ',
+            count($siteIds) === 1 ? '=%d ' : 'IN (%s) ',
             implode(',', $siteIds)
         );
     }
 
-    $table = supervisor()->getTableName();
-    $religion_table = get_religion_table_name();
     $email = database_quote(trim(strtolower($email)));
     if ($siteIdWhere !== '') {
-        $siteIdWhere = " {$table}.site_id {$siteIdWhere} ";
+        $siteIdWhere = "AND user.site_id {$siteIdWhere} ";
     }
     $sql = "
 SELECT
-  {$table}.*,
-	{$religion_table}.code as religion_code,
-    {$religion_table}.name as religion_name
-	FROM {$table} 
-        LEFT JOIN {$religion_table} ON {$religion_table}.code = {$table}.religion
-    WHERE LOWER(TRIM({$table}.email))={$email} {$siteIdWhere}";
+    user.*,
+    rel.code as religion_code,
+    rel.name as religion_name
+FROM sto_supervisor as user
+    LEFT JOIN sto_religion as rel
+        ON rel.code = user.religion
+WHERE LOWER(TRIM(user.email))={$email} {$siteIdWhere}";
     $result = [];
     $stmt = database_query($sql);
     while ($row = $stmt->fetchAssoc()) {
@@ -1104,55 +1100,31 @@ SELECT
 function search_supervisors_list_by(
     string $type,
     string $name,
-    array $siteIds = null,
+    $siteIds = null,
     string $role = null,
     int $limit = MYSQL_DEFAULT_SEARCH_LIMIT,
     int $offset = 0,
     &$result = null
 ) {
     $type = trim(strtolower($type));
-    if ($type === 'name') {
+    // typo on full_name
+    if ($type === 'name' || $type === 'fullname') {
         $type = 'full_name';
     }
-
-    if ($type !== 'username' && $type !== 'email' && $type !== 'full_name') {
+    $allowed_type = [
+        'username',
+        'email',
+        'full_name'
+    ];
+    if (!in_array($type, $allowed_type)) {
         return false;
     }
-
+    $siteIds = (array) $siteIds;
     $siteIds = get_generate_site_ids($siteIds);
     $limit  = get_generate_max_search_result_limit($limit);
-
     $offset = get_generate_min_offset($offset);
-
-    $name = trim($name);
-    $table = supervisor()->getTableName();
-    $likeSearch = database_quote_like_all($name);
-    $likeLeft = database_quote_like_left($name);
-    $nameQuery = database_quote($name);
-
-    if (!empty($siteIds)) {
-        $siteIdWhere = sprintf(
-            count($siteIds) === 1 ? ' =%d ' : ' IN (%s) ',
-            implode(',', $siteIds)
-        );
-    } else {
-        $siteIdWhere = " IS NOT NULL AND {$table}.site_id > 0 ";
-    }
-
-    $role = $role ? strtolower(trim($role)) : null;
-    $role = $role?:null;
-    $roleWhere = '';
-
-    $is_super_admin = is_super_admin();
-    $is_admin = is_admin();
-
-    if (!$is_super_admin) {
-        $roleWhere = " AND LOWER(TRIM({$table}.role)) != '".ROLE_SUPER_ADMIN."' ";
-    }
-    if ($role && ($is_super_admin || $role !== ROLE_SUPER_ADMIN)) {
-        $roleWhere = " AND LOWER(TRIM({$table}.role))=".database_quote($role);
-    }
-
+    $limit = $limit < 1 ? MYSQL_MAX_RESULT_LIMIT : $limit;
+    $offset = $offset > 0 ? $offset : 0;
     $data = [
         'total'  => 0,
         'count' => 0,
@@ -1175,6 +1147,8 @@ function search_supervisors_list_by(
         'results' => []
     ];
 
+    $is_super_admin = is_super_admin();
+    $is_admin = is_admin();
     $canViewSupervisors = current_supervisor_can('view_supervisors');
     $canViewTeachers = current_supervisor_can('view_teachers');
     $canViewInvigilators = current_supervisor_can('view_invigilators');
@@ -1186,33 +1160,60 @@ function search_supervisors_list_by(
     ) {
         return $data;
     }
-    $sql = "
-        SELECT count({$table}.id) as total FROM {$table}
-            WHERE 
-                  {$table}.site_id {$siteIdWhere}
-                  {$roleWhere} 
-                AND {$table}.{$type} LIKE {$likeSearch}
-                ORDER BY
-                    IF({$table}.{$type} = {$nameQuery}, 2, IF({$table}.{$type} LIKE {$likeLeft},1,0)) 
-    ";
-    $stmt = database_prepare_execute($sql);
 
+    $name = trim($name);
+    $likeSearch = database_quote_like_all($name);
+    $likeLeft = database_quote_like_left($name);
+    $nameQuery = database_quote($name);
+
+    if (!empty($siteIds)) {
+        $siteIdWhere = sprintf(
+            count($siteIds) === 1 ? '=%d ' : 'IN (%s) ',
+            implode(',', $siteIds)
+        );
+    } else {
+        $siteIdWhere = "IS NOT NULL AND user.site_id > 0 ";
+    }
+    $siteIdWhere = "user.site_id {$siteIdWhere}";
+
+    $role = $role ? strtolower(trim($role)) : null;
+    $role = $role?:null;
+    $roleWhere = '';
+
+    if (!$is_super_admin) {
+        $roleWhere = "AND LOWER(TRIM(user.role)) != '".ROLE_SUPER_ADMIN."' ";
+    }
+    if ($role && ($is_super_admin || $role !== ROLE_SUPER_ADMIN)) {
+        $roleWhere = "AND LOWER(TRIM(user.role))=".database_quote($role);
+    }
+    $sqlLimit = "LIMIT {$limit}";
+    if ($offset > 0) {
+        $sqlLimit .= " OFFSET {$offset}";
+    }
+
+    $sql = "
+SELECT
+    count(user.id) as total
+FROM sto_supervisor as user
+WHERE {$siteIdWhere} {$roleWhere} AND user.{$type} LIKE {$likeSearch}";
+
+    $stmt = database_prepare_execute($sql);
     $res = $stmt ? $stmt->fetchClose(PDO::FETCH_ASSOC) : false;
     $total = $res ? abs($res['total']??0) : 0;
-    $religion_table = get_religion_table_name();
     unset($res);
-    $sql =         "
-SELECT {$table}.*,
-	{$religion_table}.code as religion_code,
-    {$religion_table}.name as religion_name
-    FROM sto_supervisor
-        LEFT JOIN {$religion_table} ON {$religion_table}.code = {$table}.religion
-        WHERE {$table}.site_id {$siteIdWhere} AND {$table}.{$type} LIKE {$likeSearch}
-            {$roleWhere} 
-        ORDER BY 
-             IF({$table}.{$type} = {$nameQuery}, 2, IF({$table}.{$type} LIKE {$likeLeft},1,0))
-                DESC LIMIT {$limit} OFFSET {$offset}
-    ";
+    $sql = "
+SELECT
+    user.*,
+	rel.code as religion_code,
+    rel.name as religion_name
+FROM sto_supervisor as user
+    LEFT JOIN sto_religion as rel
+        ON rel.code = user.religion
+WHERE {$siteIdWhere} AND user.{$type} LIKE {$likeSearch}
+    {$roleWhere}
+    ORDER BY 
+         IF(user.{$type} = {$nameQuery}, 2, IF(user.{$type} LIKE {$likeLeft},1,0)) DESC
+{$sqlLimit}";
 
     $stmt = database_unbuffered_query_execute($sql);
 
@@ -1318,7 +1319,7 @@ function get_supervisor_list_by_name(string $username, int $siteIds = null)
  */
 function search_supervisors_list_by_email(
     string $email,
-    array $siteIds = null,
+    $siteIds = null,
     string $role = null,
     int $limit = MYSQL_DEFAULT_SEARCH_LIMIT,
     int $offset = 0,
@@ -1346,7 +1347,7 @@ function search_supervisors_list_by_email(
  */
 function search_supervisors_list_by_username(
     string $username,
-    array $siteIds = null,
+    $siteIds = null,
     string $role = null,
     int $limit = MYSQL_DEFAULT_SEARCH_LIMIT,
     int $offset = 0,
@@ -1374,7 +1375,7 @@ function search_supervisors_list_by_username(
  */
 function search_supervisors_list_by_name(
     string $name,
-    array $siteIds = null,
+    $siteIds = null,
     string $role = null,
     int $limit = MYSQL_DEFAULT_SEARCH_LIMIT,
     int $offset = 0,

@@ -142,7 +142,6 @@ final class Flash
      */
     public function getData(string $name, string $prefix = null)
     {
-        $table = $this->tableName;
         $prefix = ! $prefix ? $this->getPrefix() : $this->normalizePrefix($prefix);
         if (!isset(self::$previousFlash[$prefix])) {
             self::$previousFlash[$prefix] = [];
@@ -150,7 +149,7 @@ final class Flash
                 ->database
                 ->unbufferedQuery(
                     sprintf(
-                        "SELECT * FROM {$table} WHERE meta_name LIKE %s",
+                        "SELECT * FROM sto_metadata WHERE meta_name LIKE %s",
                         $this->database->quote(sprintf('flash[%s][%%', $this->getPrefix()))
                     )
                 );
@@ -224,9 +223,8 @@ final class Flash
 
     public function __destruct()
     {
-        $table = $this->tableName;
         try {
-            $sql = "DELETE FROM {$table} WHERE (created_at < (NOW() - INTERVAL 30 SECOND))";
+            $sql = "DELETE FROM sto_metadata WHERE (created_at < (NOW() - INTERVAL 30 SECOND))";
             if (!empty($this->ids)) {
                 $id = reset($this->ids);
                 $sql .= count($this->ids) > 1
@@ -251,7 +249,7 @@ final class Flash
                     $stmt = $this
                         ->database
                         ->prepare(
-                            "INSERT INTO {$table} (meta_name, meta_value, created_at) 
+                            "INSERT INTO sto_metadata (meta_name, meta_value, created_at) 
                                 VALUES (:name, :value, now())
                                 ON DUPLICATE
                                     KEY UPDATE meta_value=:value, created_at=now()

@@ -243,13 +243,13 @@ function hook_admin_init_login()
     hook_remove('admin_init', 'hook_admin_init_login');
     $is_exists = has_cookie_succeed();
     if (!$is_exists
-        || query_param(PARAM_LOGIN_QUERY) !== 'success'
-        || !is_numeric(query_param(PARAM_USER_ID_QUERY))
+        || query_param(PARAM_LOGIN) !== 'success'
+        || !is_numeric(query_param(PARAM_USER_ID))
     ) {
         return;
     }
 
-    $user_id = query_param_int(PARAM_USER_ID_QUERY);
+    $user_id = query_param_int(PARAM_USER_ID);
     $current_id = get_current_user_id();
     if ($current_id > 0 && $user_id === $current_id) {
         add_admin_success_message(
