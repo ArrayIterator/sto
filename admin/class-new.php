@@ -31,16 +31,12 @@ $allowed_message = true;
 $is_from_referer_update = false;
 $current_class_result = null;
 $message_status = null;
-
+$flash_name = 'class_edit_status';
 if ($current_class_id > 0) {
     $current_class_result = get_class_by_id($current_class_id);
     $class_site_id = $current_class_result ? $current_class_result[PARAM_SITE_ID] : $class_site_id;
 }
 
-$matchReferer = $referer
-    && (string)(new Uri($referer))
-        ->withQuery('')
-        ->withFragment('') === $current_file_url;
 if ($is_method_get && $action_query === PARAM_EDIT && $has_class_id_query) {
     $current_is_edit = !empty($current_class_result)
         && isset($current_class_result[PARAM_ID])
@@ -76,6 +72,12 @@ if ($is_method_post) {
             ? abs($current_class_id)
             : null;
         if (!$current_is_edit || !is_int($current_class_id)) {
+            $class_id_query && flash_set_error(
+                $flash_name,
+                trans('Error save data!'),
+                'class_update'
+            );
+
             $url = $class_id_query
                 ? add_query_args(
                     [
@@ -99,6 +101,13 @@ if ($is_method_post) {
             ? PARAM_DENIED
             : (!$class_site_id ? PARAM_EMPTY : null);
         if ($response_redirect) {
+            flash_set_error(
+                $flash_name,
+                $response_redirect === PARAM_DENIED
+                    ? sprintf('%s. <strong>%s</strong>', trans('Error save data!'), trans('Access Denied'))
+                    : trans('Error save data!'),
+                'class_update'
+            );
             return redirect(
                 add_query_args(
                     [
@@ -114,7 +123,12 @@ if ($is_method_post) {
 
         $response = update_class_data($current_class_id, $posts_body);
         if (is_true_and_int_one($response)) {
-            create_cookie_succeed();
+            flash_set_succeed(
+                $flash_name,
+                trans_sprintf('Class %s successfully updated!', $posts_body[PARAM_CODE]),
+                'class_update'
+            );
+            // create_cookie_succeed();
             return redirect(
                 add_query_args(
                     [
@@ -127,6 +141,11 @@ if ($is_method_post) {
                 )
             );
         } elseif ($response === false) {
+            flash_set_error(
+                $flash_name,
+                trans('Error save data!'),
+                'class_update'
+            );
             return redirect(
                 add_query_args(
                     [
@@ -176,7 +195,12 @@ if ($is_method_post) {
         } else {
             $response = insert_class_data($posts_body);
             if (is_array($response)) {
-                create_cookie_succeed();
+                flash_set_succeed(
+                    $flash_name,
+                    trans_sprintf('Class %s successfully saved!', $posts_body[PARAM_CODE]),
+                    'class_insert'
+                );
+                // create_cookie_succeed();
                 return redirect(
                     add_query_args(
                         [
@@ -219,56 +243,20 @@ if ($is_method_post) {
         $allowed_message = !empty($message_status);
         $message_status && add_admin_error_message('class_insert', $message_status);
     }
-} elseif (
-    $is_method_get
-    && $matchReferer
-    && has_cookie_succeed()
-    && $allowed_message
-    && $current_is_edit
-    && ($statusSuccess = query_param(PARAM_SUCCESS))
-) {
-    $statusResponse = query_param(PARAM_RESPONSE);
-    $message_status = null;
-    switch ($statusResponse) {
-        case PARAM_SUCCESS:
-        case '1':
-            add_admin_success_message(
-                'class_update',
-                trans_sprintf('Class %s successfully updated!', $posts_body[PARAM_CODE])
-            );
-            break;
-        case PARAM_SAVED:
-            add_admin_success_message(
-                'class_insert',
-                trans_sprintf('Class %s successfully saved!', $posts_body[PARAM_CODE])
-            );
-            break;
-        case PARAM_CODE:
-            $message_status = trans_sprintf(
-                'Class %s is duplicate! Data has been reverted!',
-                trans('code')
-            );
-            break;
-        case PARAM_NAME:
-            $message_status = trans_sprintf(
-                'Class %s is duplicate! Data has been reverted!',
-                trans('name')
-            );
-            break;
-        case PARAM_DENIED:
-            $message_status = sprintf(
-                '%s. <strong>%s</strong>',
-                trans('Error save data!'),
-                trans('Access Denied')
-            );
-            break;
-        default:
-            if ($statusSuccess === PARAM_STRING_FALSE) {
-                $message_status = trans('Error save data!');
-            }
-    }
+}
 
-    $message_status && add_admin_error_message('class_update', $message_status);
+if ($is_method_get
+    && $current_is_edit
+    && is_array(($flash_message = flash_get_status_response($flash_name)))
+    && is_string($flash_message['message'])
+    && is_string($flash_message['type'])
+    && trim($flash_message['message']) !== ''
+) {
+    if ($flash_message['status'] === PARAM_SUCCESS) {
+        add_admin_success_message($flash_message['type'], $flash_message['message']);
+    } else {
+        add_admin_error_message($flash_message['type'], $flash_message['message']);
+    }
 }
 
 get_admin_header_template();

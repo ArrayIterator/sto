@@ -636,7 +636,6 @@
                 if (!$modal_template.length) {
                     return;
                 }
-                e.preventDefault();
                 var $this = $(this),
                     attr = $this.data(),
                     template_id = attr['templateId'],
@@ -650,9 +649,10 @@
                     },
                     params = attr['params'] || {}
                 ;
-                if (!$template || !apis_path || typeof apis_path !== 'string') {
+                if (attr.action === 'edit' || !$template || !apis_path || typeof apis_path !== 'string') {
                     return;
                 }
+                e.preventDefault();
                 if (!apis_path.match(/^(https?:)\/\//)) {
                     apis_path = apis_path.replace(/^[\/]+/gi, '');
                     apis_path = apiUri.replace(/[\/]+$/g, '') + '/' + apis_path;

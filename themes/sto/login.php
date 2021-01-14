@@ -4,7 +4,7 @@ if (!defined('ROOT_DIR')) {
     return;
 }
 
-$is_interim = isset($_REQUEST['interim']);
+$is_interim = has_request_param('interim');
 ?>
 <?php get_header_template(); ?>
     <div class="container">

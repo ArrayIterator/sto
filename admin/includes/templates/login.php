@@ -2,7 +2,7 @@
 if (!defined('ADMIN_LOGIN_PAGE')) {
     return;
 }
-$is_interim = isset($_REQUEST['interim']);
+$is_interim = has_request_param('interim');
 get_admin_header_template();
 ?>
     <div class="row login-wrap-row<?= $is_interim ? ' interim' : ''; ?>">

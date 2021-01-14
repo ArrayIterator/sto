@@ -214,7 +214,7 @@ function get_admin_param_redirect() : array
     }
 
     $params   = query_param();
-    $redirect = $_REQUEST['redirect']??($params['redirect']??null);
+    $redirect = request_param('redirect')??($params['redirect']??null);
     $redirectParams = [];
 
     if (is_string($redirect)) {

@@ -342,7 +342,7 @@ function get_button_submit_login(): string
  */
 function the_admin_login_form()
 {
-    $interim_login = isset($_REQUEST['interim']);
+    $interim_login = has_request_param('interim');
     ?>
     <form<?= get_admin_login_form_attributes(); ?>>
         <?php hook_run('admin_login_form_before'); ?>
@@ -399,7 +399,7 @@ function the_admin_login_form()
  */
 function the_login_form()
 {
-    $interim_login = isset($_REQUEST['interim']);
+    $interim_login = has_request_param('interim');
     ?>
     <form<?= get_login_form_attributes(); ?>>
         <?php hook_run('login_form_before'); ?>

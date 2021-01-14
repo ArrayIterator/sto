@@ -14,7 +14,7 @@ if (http_method() === 'POST') {
     $username = post('username');
     $password = post('password');
     $remember = !!post('remember');
-    $is_interim = isset($_REQUEST['interim']);
+    $is_interim = has_query_param('interim');
 
     create_cookie_succeed();
     if (empty($cookie)) {

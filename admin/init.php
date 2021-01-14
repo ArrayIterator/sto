@@ -43,8 +43,8 @@ if (is_supervisor()) {
 hook_run('admin_init');
 
 if (!is_admin_login_page()) {
-    $is_interim = isset($_REQUEST['interim']);
-    $is_success = query_param(PARAM_LOGIN) === 'success';
+    $is_interim = has_request_param('interim');
+    $is_success = query_param_is(PARAM_LOGIN, 'success');
     $referer = get_referer() ?: '';
     $login_page = explode('?', get_admin_login_url())[0];
     if ($is_interim && $is_success && preg_match('#' . preg_quote($login_page) . '#', get_admin_login_url())) {

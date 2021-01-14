@@ -109,7 +109,7 @@ function create_filter_search_form_select(
                                     data-host="<?php esc_attr_trans_e('All Sites');?>"
                                     data-site-id="&radic;"
                                     data-name="<?php esc_attr_trans_e('All Sites');?>"
-                                    data-template="<span class='site-id-sep'><%= data['site-id'] || '' %></span><span class='site-name-sep'><%= data.name || ''%></span>">
+                                    data-template="<span class='site-id-sep'><i class='icofont-check'></i></span><span class='site-name-sep'><%= data.name || ''%></span>">
                                     [ &radic; ] <?php esc_html_trans_e('All Site'); ?>
                             </option>
                             <?php

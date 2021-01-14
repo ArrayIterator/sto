@@ -102,12 +102,12 @@ get_admin_header_template();
                         <td class="cell-title">
                             <div class="row-title">
                                 <a data-action="<?=
-                                    $can_edit_class ? PARAM_EDIT: PARAM_PREVIEW;
+                                    $can_edit_class ? PARAM_EDIT : PARAM_PREVIEW;
                                 ?>" data-link-id="<?= $row['id'];?>" href="<?= esc_attr(
                                     $can_edit_class
                                         ? add_query_args([PARAM_ACTION => PARAM_EDIT, PARAM_ID => $row['id']], get_admin_url('class-new.php'))
                                         : "#{$identifier}"
-                                );?>"<?php if ($can_edit_class) { ?> data-action="preview" data-title="<?php trans_e('Code');?> <?php esc_attr_e($row['code']);?>" data-modal="true" data-cache="true" data-api="/classes/id/<?= $row['id'];?>" data-template-id="underscore_template_class_preview"<?php } ?>>
+                                );?>"<?php if (!$can_edit_class) { ?> data-action="preview" data-title="<?php trans_e('Code');?> <?php esc_attr_e($row['code']);?>" data-modal="true" data-cache="true" data-api="/classes/id/<?= $row['id'];?>" data-template-id="underscore_template_class_preview"<?php } ?>>
                                     <?= esc_html($row[PARAM_CODE]); ?>
                                 </a>
                             </div>

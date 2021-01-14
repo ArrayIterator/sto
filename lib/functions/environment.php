@@ -8,6 +8,18 @@ use GuzzleHttp\Psr7\UploadedFile;
 /**
  * @return array
  */
+function request_environment() : array
+{
+    static $request;
+    if (!$request) {
+        $request = $_REQUEST;
+    }
+    return $request;
+}
+
+/**
+ * @return array
+ */
 function server_environment(): array
 {
     return server_request()->getServerParams();
@@ -20,8 +32,8 @@ function server_environment(): array
 function get_server_environment(string $name)
 {
     return server_environment()[$name] ?? (
-            server_environment()[strtoupper($name)] ?? null
-        );
+        server_environment()[strtoupper($name)] ?? null
+    );
 }
 
 /**
@@ -119,6 +131,39 @@ function post($key = null, &$found = null)
 }
 
 /**
+ * @param null $key
+ * @param null $found
+ * @return array|mixed|null
+ * @noinspection PhpMissingReturnTypeInspection
+ */
+function post_param($key = null, &$found = null)
+{
+    return post($key, $found);
+}
+
+/**
+ * @param null $key
+ * @param null $found
+ * @return array|mixed|null
+ * @noinspection PhpMissingReturnTypeInspection
+ */
+function request_param($key = null, &$found = null)
+{
+    if ($key === null) {
+        $found = true;
+        return request_environment();
+    }
+
+    $found = false;
+    if (!is_numeric($key) && !is_string($key)) {
+        return null;
+    }
+
+    $found = array_key_exists($key, request_environment());
+    return $found ? request_environment()[$key] : null;
+}
+
+/**
  * @param string|null $key
  * @param $found
  * @return mixed
@@ -139,11 +184,93 @@ function query_param($key = null, &$found = null)
 
 /**
  * @param string $key
+ * @param $value
+ * @param bool $strict
+ * @return bool
+ */
+function query_param_is(string $key, $value, bool $strict = true) : bool
+{
+    $param = query_param($key);
+    return $strict ? $param === $value : $param == $value;
+}
+
+
+/**
+ * @param string $key
+ * @param $value
+ * @param bool $strict
+ * @return bool
+ */
+function request_param_is(string $key, $value, bool $strict = true) : bool
+{
+    $param = request_param($key);
+    return $strict ? $param === $value : $param == $value;
+}
+
+/**
+ * @param string $key
+ * @param $value
+ * @param bool $strict
+ * @return bool
+ */
+function post_param_is(string $key, $value, bool $strict = true) : bool
+{
+    $param = post($key);
+    return $strict ? $param === $value : $param == $value;
+}
+
+/**
+ * @param string $key
+ * @param array $value
+ * @param bool $strict
+ * @return bool
+ */
+function query_param_in(string $key, array $value, bool $strict = false) : bool
+{
+    $param = query_param($key);
+    return in_array($param, $value, $strict);
+}
+
+/**
+ * @param string $key
+ * @param array $value
+ * @param bool $strict
+ * @return bool
+ */
+function post_param_in(string $key, array $value, bool $strict = false) : bool
+{
+    $param = post($key);
+    return in_array($param, $value, $strict);
+}
+
+/**
+ * @param string $key
+ * @param array $value
+ * @param bool $strict
+ * @return bool
+ */
+function request_param_in(string $key, array $value, bool $strict = false) : bool
+{
+    $param = request_param($key);
+    return in_array($param, $value, $strict);
+}
+
+/**
+ * @param string $key
  * @return bool
  */
 function has_query_param(string $key) : bool
 {
     return array_key_exists($key, server_request()->getQueryParams());
+}
+
+/**
+ * @param string $key
+ * @return bool
+ */
+function has_request_param(string $key) : bool
+{
+    return array_key_exists($key, request_environment());
 }
 
 /**
@@ -163,6 +290,15 @@ function has_post_param(string $key) : bool
 function query_param_int(string $key, int $default = 0) : int
 {
     $value = query_param($key, $found);
+    if (!$found) {
+        $value = $default;
+    }
+    return !is_numeric($value) ? $default : (int)$value;
+}
+
+function request_param_int(string $key, int $default = 0) : int
+{
+    $value = request_param($key, $found);
     if (!$found) {
         $value = $default;
     }
@@ -190,6 +326,27 @@ function query_param_string(
     bool $trim = false
 ) : string {
     $value = query_param($key)??$default;
+    if (is_string($value)) {
+        return $trim ? trim($value) : $value;
+    }
+    if (is_numeric($value) || is_object($value) && method_exists($value, '__tostring')) {
+        $value = (string) $value;
+    }
+
+    return !is_string($value) ? $default : ($trim ? trim($value) : $value);
+}
+/**
+ * @param string $key
+ * @param string $default
+ * @param bool $trim
+ * @return string
+ */
+function request_param_string(
+    string $key,
+    string $default = '',
+    bool $trim = false
+) : string {
+    $value = request_param($key)??$default;
     if (is_string($value)) {
         return $trim ? trim($value) : $value;
     }
