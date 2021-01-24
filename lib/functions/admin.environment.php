@@ -287,10 +287,10 @@ function get_super_admin_site_id_param()
     $siteId = query_param(PARAM_SITE_ID);
     if (is_super_admin()) {
         $siteId = is_string($siteId) ? trim($siteId) : $siteId;
-        if (!has_query_param(PARAM_SITE_ID) || !is_numeric($siteId) || abs($siteId) < 1) {
+        if (!has_query_param(PARAM_SITE_ID) || !is_numeric($siteId) || abs_int($siteId) < 1) {
             $siteId = false;
         } else {
-            $siteId = (int) abs(intval($siteId));
+            $siteId = abs_int($siteId);
             $siteId = $siteId < 1 ? get_current_site_id() : $siteId;
         }
     } else {

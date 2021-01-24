@@ -76,7 +76,7 @@ abstract class AbstractOnlineModel extends Model
         );
         $stmt = $this->prepare($sql);
         $stmt->execute();
-        return abs($stmt->fetchAssoc()['o'] ?? 0);
+        return (int) ($stmt->fetchAssoc()['o'] ?? 0);
     }
 
     /**

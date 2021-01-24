@@ -5,6 +5,91 @@ use ArrayIterator\Helper\Random;
 use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\UploadedFile;
 
+
+/**
+ * @param mixed $arg
+ * @return int
+ */
+function abs_int($arg) : int
+{
+    if (is_object($arg)) {
+        if ($arg instanceof Countable) {
+            return count($arg);
+        } else {
+            return 0;
+        }
+    }
+    if (is_array($arg)) {
+        $arg = !empty($arg) ? 1 : 0;
+    }
+    return (int) abs(intval($arg));
+}
+
+/**
+ * Returning abs real value if numerical
+ *
+ * @param $arg
+ * @return null|float|int
+ */
+function abs_r($arg)
+{
+    if ($arg === null || is_bool($arg)) {
+        return null;
+    }
+
+    if (is_string($arg)) {
+        $arg = trim($arg);
+        if ($arg === '' || $arg === '+' || $arg === '-') {
+            return null;
+        }
+        if (preg_match('#^[+\-]?[0-9]*\.[0-9]+$#', $arg)) {
+            $arg = (float) $arg;
+        } elseif (preg_match('#^[+\-]?[0-9]+$#', $arg)) {
+            $arg = (int) ($arg);
+        } else {
+            return null;
+        }
+    } elseif (!is_int($arg) && !is_float($arg)) {
+        return null;
+    }
+
+    return abs($arg);
+}
+
+/**
+ * @param int|string|float $arg
+ * @return float|int
+ */
+function abs_n($arg)
+{
+    // false or null === 0
+    if ($arg === null || $arg === false || $arg === 0) {
+        return 0;
+    }
+
+    // true is like `1`
+    if ($arg === true || $arg === 1) {
+        return 1;
+    }
+    if (is_string($arg)) {
+        $arg = trim($arg);
+        if ($arg === '' || $arg === '+' || $arg === '-') {
+            return 0;
+        }
+        if (preg_match('#^[+\-]?[0-9]*\.[0-9]+#', $arg)) {
+            $arg = (float) $arg;
+        } elseif (preg_match('#^[+\-]?[0-9]+$#', $arg)) {
+            $arg = (int) ($arg);
+        } else {
+            return 0;
+        }
+    } elseif (!is_int($arg) && !is_float($arg)) {
+        return 0;
+    }
+
+    return abs($arg);
+}
+
 /**
  * @return array
  */
@@ -539,10 +624,11 @@ function cookie_lifetime(): int
     if ($cLifetime === null) {
         $lifetime = defined('COOKIE_LIFETIME') ? COOKIE_LIFETIME : $cookieLifetime;
         $lifetime = is_int($lifetime) || is_numeric($lifetime)
-            ? abs(intval($lifetime))
+            ? abs_int($lifetime)
             : $cookieLifetime;
         $cLifetime = $lifetime;
     }
+
     $lifetime = (int)hook_apply('cookie_lifetime', $cLifetime);
     if ($lifetime < 360) {
         $lifetime = $cookieLifetime;

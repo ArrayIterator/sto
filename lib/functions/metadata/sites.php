@@ -28,8 +28,8 @@ function get_current_site_id(): int
     }
 
     $current_site = get_current_site_meta();
-    $id = $current_site ? $current_site['id'] : 0;
-    if (!is_numeric($id) || !is_int(abs($id))) {
+    $id = abs_r($current_site ? ($current_site['id']??0) : 0);
+    if (!is_int($id)) {
         return 0;
     }
 

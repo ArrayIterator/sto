@@ -87,7 +87,7 @@ function get_classes_data_filters(array $data) : array
             continue;
         }
         if (isset($item['creator_site_id']) && is_numeric($item['creator_site_id'])) {
-            $item['creator_site_id'] = abs($item['creator_site_id']);
+            $item['creator_site_id'] = abs_int($item['creator_site_id']);
         }
     }
 
@@ -540,7 +540,7 @@ WHERE {$siteIdWhere} AND class.{$type} LIKE {$likeSearch}";
     $stmt = database_prepare_execute($sql);
 
     $res = $stmt ? $stmt->fetchClose(PDO::FETCH_ASSOC) : false;
-    $total = $res ? abs($res['total']??0) : 0;
+    $total = $res ? abs_int($res['total']??0) : 0;
     unset($res);
     $sql = "
 SELECT class.*,
@@ -655,9 +655,9 @@ function update_class_data(int $classId, array $classes)
     if (is_admin()
         && isset($classes['user_id'])
         && is_numeric($classes['user_id'])
-        && is_int(abs($classes['user_id']))
+        && is_int(abs_r($classes['user_id']))
     ) {
-        $uid = get_supervisor_by_id(abs($classes['user_id']));
+        $uid = get_supervisor_by_id(abs_r($classes['user_id']));
         $user_id = $uid ? $uid->getId() : $user_id;
         if (!is_super_admin() && $uid) {
             $site_id = $uid->getSiteId();
@@ -693,8 +693,7 @@ function update_class_data(int $classId, array $classes)
 
     // ONLY ALLOWED SUPER ADMIN TO CHANGE SITE_ID
     if (isset($posts['site_id'])
-        && is_numeric($posts['site_id'])
-        && is_int(abs($posts['site_id']))
+        && is_int(abs_r($posts['site_id']))
         && is_super_admin()
     ) {
         $classes['site_id'] = (int) $posts['site_id'];
@@ -797,10 +796,9 @@ function insert_class_data(array $classes)
     $site_id = get_current_site_id();
     if (is_super_admin()
         && isset($classes['site_id'])
-        && is_numeric($classes['site_id'])
-        && is_int(abs($classes['site_id']))
+        && is_int(($cid = abs_r($classes['site_id'])))
     ) {
-        $classes['site_id'] = abs($classes['site_id']);
+        $classes['site_id'] = $cid;
         if (($exists = get_site_by_id($classes['site_id']))) {
             $site_id = $exists->getId();
         }
@@ -822,10 +820,9 @@ function insert_class_data(array $classes)
     $user_id = get_current_user_id();
     if (is_super_admin()
         && isset($classes['user_id'])
-        && is_numeric($classes['user_id'])
-        && is_int(abs($classes['user_id']))
+        && is_int(($cid = abs_r($classes['user_id'])))
     ) {
-        $uid = get_supervisor_by_id(abs($classes['user_id']));
+        $uid = get_supervisor_by_id($cid);
         $user_id = $uid ? $uid->getId() : $user_id;
     }
     $classesStatus = filter_classes_status($classes['status']??null);

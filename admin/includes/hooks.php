@@ -125,7 +125,7 @@ function hook_admin_last_footer()
 function hook_admin_js_header()
 {
     $tz   = timezone()->getDateTime('UTC');
-    $time = (int) ceil(abs($tz->getTimestamp().$tz->format('.u'))*1000);
+    $time = (int) ceil((float) abs_n($tz->getTimestamp().$tz->format('.u'))*1000);
     $ping_url = json_ns(get_api_url(StatusController::PING_PATH));
     $api_url = json_ns(get_api_url());
     $login_url = json_ns(get_admin_login_url());

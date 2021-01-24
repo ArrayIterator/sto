@@ -14,8 +14,12 @@ function hook_grant_current_user_can_edit_class(bool $result, $args = null) : bo
     if (is_admin_and_active()) {
         return true;
     }
+    if ($args === null) {
+        return false;
+    }
 
-    if (!$result || !is_numeric($args) || is_int(abs($args))) {
+    $args_n = abs_r($args);
+    if (!$result || ! is_int($args_n)) {
         return false;
     }
 
@@ -23,8 +27,7 @@ function hook_grant_current_user_can_edit_class(bool $result, $args = null) : bo
         return false;
     }
 
-    $args = abs($args);
-    $class = get_class_by_id($args);
+    $class = get_class_by_id($args_n);
     if (!$class || $class['created_by'] !== get_current_user_id()) {
         return false;
     }

@@ -84,7 +84,7 @@ function get_status_header_list(): array
  */
 function get_status_header(int $code): string
 {
-    $code = abs(intval($code));
+    $code = abs_int($code);
     return get_status_header_list()[$code] ?? '';
 }
 

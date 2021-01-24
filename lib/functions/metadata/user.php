@@ -1199,7 +1199,7 @@ WHERE {$siteIdWhere} {$roleWhere} AND user.{$type} LIKE {$likeSearch}";
 
     $stmt = database_prepare_execute($sql);
     $res = $stmt ? $stmt->fetchClose(PDO::FETCH_ASSOC) : false;
-    $total = $res ? abs($res['total']??0) : 0;
+    $total = abs_int($res['total']??0);
     unset($res);
     $sql = "
 SELECT

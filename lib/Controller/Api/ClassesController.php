@@ -183,8 +183,7 @@ class ClassesController extends BaseController
         if (isset($params['id'])) {
             $method = 'get_classes_by_id';
             $current = 'id';
-            $param = $params['id']??null;
-            $param = is_numeric($param) ? abs($param) : $param;
+            $param = abs_r($params['id']??null);
             if (!is_int($param)) {
                 route_not_found();
             }
@@ -255,10 +254,8 @@ class ClassesController extends BaseController
             'result' => []
         ];
 
-        $id = $params['id']??null;
         $action = $params['action']??null;
-        $id = is_numeric($id) ? abs($id) : $id;
-
+        $id = abs_r($params['id']??null);
         $is_update = $action === 'edit';
         $original = is_int($id) && $id > 0 ? get_classes_by_id($id) : null;
         if (empty($original)) {
@@ -405,7 +402,7 @@ class ClassesController extends BaseController
         $offset = query_param_int(PARAM_OFFSET);
         $limit = query_param(PARAM_LIMIT);
         $originalLimit = $limit;
-        $limit = !is_numeric($limit) ? MYSQL_DEFAULT_SEARCH_LIMIT : abs(intval($limit));
+        $limit = !is_numeric($limit) ? MYSQL_DEFAULT_SEARCH_LIMIT : abs_int($limit);
         $limit = $limit <= 1 ? 1 : (
             $limit > MYSQL_MAX_SEARCH_LIMIT
                 ? MYSQL_MAX_SEARCH_LIMIT

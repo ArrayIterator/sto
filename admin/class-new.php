@@ -67,10 +67,8 @@ if ($is_method_post) {
     $current_is_edit = ($posts_body[PARAM_ACTION] ?? null) === PARAM_EDIT;
     if ($current_is_edit) {
         $current_class_id = $posts_body[PARAM_ID] ?? null;
-        $current_is_edit = is_numeric($current_class_id) && $current_class_id > 0;
-        $current_class_id = is_numeric($current_class_id)
-            ? abs($current_class_id)
-            : null;
+        $current_class_id = abs_r($current_class_id);
+        $current_is_edit = $current_class_id && $current_class_id > 0;
         if (!$current_is_edit || !is_int($current_class_id)) {
             $class_id_query && flash_set_error(
                 $flash_name,
